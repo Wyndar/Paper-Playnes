@@ -1,38 +1,41 @@
 using UnityEngine;
-public enum BoxLocation { ForwardLeft, Forward, ForwardRight, Left, Centre, Right };
 public class Spawner : MonoBehaviour
 {
     public GameObject spawnBox;
     public BoxLocation boxLocation;
     public float spawnRange;
-    public int boxCount;
-    void Start() => Respawn();
-    public void Respawn()
+    public int spawnBoxCount;
+    public Renderer spawnRenderer;
+    public Vector3 boxLocationVector;
+
+    void Start()
     {
-        if(transform.childCount>0) 
-            Despawn();
-        while (boxCount > 0)
-        {
-            GameObject go = Instantiate(spawnBox, GetRandomPositionWithinBounds(gameObject), transform.rotation);
-            go.transform.SetParent(transform);
-            boxCount--;
-        }
+        spawnRenderer = GetComponent<Renderer>();
+        InstantiateBoxes();
+        RearrangeBoxes();
     }
-    public Vector3 GetRandomPositionWithinBounds(GameObject obj)
+
+    private void InstantiateBoxes()
     {
-        if (obj.TryGetComponent<Renderer>(out var renderer))
-        {
-            Bounds bounds = renderer.bounds;
-            float x = Random.Range(bounds.min.x, bounds.max.x);
-            float y = Random.Range(bounds.min.y, bounds.max.y);
-            float z = Random.Range(bounds.min.z, bounds.max.z);
-            return new Vector3(x, y, z);
-        }
-        return transform.position;
+        for (int i = 0; i < spawnBoxCount; i++)
+            Instantiate(spawnBox).transform.SetParent(transform);
     }
-    public void Despawn()
+
+    public void RearrangeBoxes()
     {
-        for (int i = transform.childCount - 1; i >= 0; i--)
-            Destroy(transform.GetChild(i).gameObject);
+        for (int i = 0; i < transform.childCount; i++)
+            transform.GetChild(i).SetPositionAndRotation(GetRandomPositionWithinBounds(), transform.rotation);
+    }
+
+    public Vector3 GetRandomPositionWithinBounds()
+    {
+        Bounds bounds = spawnRenderer.bounds;
+        Vector3 boxSize = spawnBox.GetComponent<Renderer>().bounds.size;
+
+        float x = Random.Range(bounds.min.x + boxSize.x / 2, bounds.max.x - boxSize.x / 2);
+        float y = Random.Range(bounds.min.y + boxSize.y / 2, bounds.max.y - boxSize.y / 2);
+        float z = Random.Range(bounds.min.z + boxSize.z / 2, bounds.max.z - boxSize.z / 2);
+
+        return new Vector3(x, y, z);
     }
 }

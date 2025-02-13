@@ -4,16 +4,15 @@ public class PlayerController : MonoBehaviour
 {
     public PaperPlaynesManager playnesManager;
     public InputManager inputManager;
-    public TagHandle spawnerTag;
-    public Rigidbody rb;
+    private const string spawnerTag = "Spawner";
+    private Rigidbody rb;
     public int speed;
     public float rotationSpeed;
     public float maxRotationAngle;
-    private bool allowMove;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public bool allowMove;
+    public void Start() => rb = GetComponent<Rigidbody>();
     public void OnEnable()
     {
-        rb = GetComponent<Rigidbody>();
         inputManager.OnStartTouch += TouchStart;
         inputManager.OnEndTouch += TouchEnd;
     }
@@ -25,7 +24,7 @@ public class PlayerController : MonoBehaviour
     private void TouchStart(Vector2 position, float time) => allowMove = true;
     private void TouchEnd(Vector2 position, float time) => allowMove = false;
 
-    void FixedUpdate()
+    public void FixedUpdate()
     {
         float currentY = rb.rotation.eulerAngles.y;
         float currentZ = rb.rotation.eulerAngles.z;
@@ -44,13 +43,17 @@ public class PlayerController : MonoBehaviour
     private float GetTargetEulerAngle(float originalRotation, int direction) =>
         Mathf.Clamp(originalRotation + (rotationSpeed * direction * Time.fixedDeltaTime), -maxRotationAngle, maxRotationAngle);
     private float GetDefaultEulerAngle(float originalRotation) => Mathf.MoveTowards(originalRotation, 0, rotationSpeed * Time.fixedDeltaTime);
-    private void OnCollisionEnter(Collision collision)
+
+    public void OnTriggerEnter(Collider collider)
     {
-        if (collision.gameObject.CompareTag(spawnerTag))
+        if (collider.gameObject.CompareTag(spawnerTag))
         {
-            Spawner spawner = gameObject.GetComponent<Spawner>();
-            if (spawner.boxLocation != BoxLocation.Centre)
-                playnesManager.ChangeBoxLocations(spawner);
+            Spawner spawner = collider.gameObject.GetComponent<Spawner>();
+            if (spawner.boxLocation == BoxLocation.MiddleCentre)
+                return;
+            transform.SetParent(spawner.transform);
+            playnesManager.ChangeBoxLocations(spawner);
+            transform.SetParent(null);
         }
     }
 }

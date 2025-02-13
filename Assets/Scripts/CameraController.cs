@@ -2,22 +2,26 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public PlayerController playerController;
-    private const float maxSpeed = 50f;
-    public Vector3 offset;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    public void Start()
-    {
-        offset = transform.position - playerController.transform.position;
-    }
+    //public PlayerController playerController;
+    //private const float maxSpeed = 50f;
+    //public Vector3 offset;
+    //public float smoothTime = 0.3f;
 
-    // Update is called once per frame
-    public void Update()
-    {
-        //float speed = Mathf.Clamp(Vector3.Distance(transform.position, playerController.transform.position) * 2, minSpeed, maxSpeed);
-        //if (Vector3.Distance(transform.position, playerController.transform.position) > offset.magnitude)
-        //{
-            transform.position = Vector3.MoveTowards(transform.position, playerController.transform.position + offset, maxSpeed * Time.deltaTime);
-        //}
-    }
+    //private Vector3 velocity = Vector3.zero;
+
+    //public void Start()
+    //{
+    //    offset = transform.position - playerController.transform.position;
+    //    playerController.OnPlayerTeleported += OnPlayerTeleported;
+    //}
+
+    //public void OnDestroy() => playerController.OnPlayerTeleported -= OnPlayerTeleported;
+
+    //public void Update()
+    //{
+    //    Vector3 targetPosition = playerController.transform.position + offset;
+    //    transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothTime);
+    //}
+
+    //private void OnPlayerTeleported() => transform.position = playerController.transform.position + offset;
 }

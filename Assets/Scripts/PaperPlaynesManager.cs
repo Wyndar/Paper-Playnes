@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,78 +7,49 @@ public class PaperPlaynesManager : MonoBehaviour
 {
     public Spawner[] spawners;
     public Dictionary<BoxLocation, Vector3> spawnerLocations = new();
-
-    public void Start()
+    private bool shouldRearrange;
+    public void Awake()
     {
         foreach (Spawner spawner in spawners)
+        {
             spawnerLocations.Add(spawner.boxLocation, spawner.transform.position);
+            if (BoxLocationMappings.GetBoxLocationVector().TryGetValue(spawner.boxLocation, out Vector3 box))
+                spawner.boxLocationVector = box;
+        }
     }
 
-    public void ChangeBoxLocations(Spawner spawner)
+    public void ChangeBoxLocations(Spawner enteredSpawner)
     {
-        var mappings = GetLocationMappings(spawner.boxLocation);
-
-        if (mappings == null)
-            return;
-
-        HandleRespawn(spawner.boxLocation, new[] { BoxLocation.Forward, BoxLocation.ForwardLeft,
-            BoxLocation.ForwardRight }, new[] { BoxLocation.Left, BoxLocation.Right, BoxLocation.Centre });
-        HandleRespawn(spawner.boxLocation, new[] { BoxLocation.Left, BoxLocation.ForwardLeft },
-            new[] { BoxLocation.Right, BoxLocation.ForwardRight });
-        HandleRespawn(spawner.boxLocation, new[] { BoxLocation.Right, BoxLocation.ForwardRight },
-            new[] { BoxLocation.Left, BoxLocation.ForwardLeft });
-
-        spawners.Where(s => mappings.TryGetValue(s.boxLocation, out _))
-            .ToList().ForEach(s =>
-            {
-                if (mappings.TryGetValue(s.boxLocation, out BoxLocation newLocation))
-                {
-                    s.boxLocation = newLocation;
-                    if (spawnerLocations.TryGetValue(newLocation, out Vector3 newPosition))
-                        s.transform.position = newPosition;
-                }
-            });
+        Vector3 vectorDifference = enteredSpawner.boxLocationVector - new Vector3(1, 1, 0);
+        foreach (Spawner spawner in spawners)
+        {
+            spawner.boxLocationVector -= vectorDifference;
+            spawner.boxLocationVector = AdjustVector(spawner.boxLocationVector);
+            spawner.boxLocation = BoxLocationMappings.GetBoxLocationVector().GetKeyByValue(spawner.boxLocationVector);
+            spawner.gameObject.name = spawner.boxLocation.ToString();
+            if (spawnerLocations.TryGetValue(spawner.boxLocation, out Vector3 newPosition))
+                spawner.transform.position = newPosition;
+            if(shouldRearrange)
+                spawner.RearrangeBoxes();
+        }
     }
-
-    public void HandleRespawn(BoxLocation spawnerLocation, BoxLocation[] triggerLocations, BoxLocation[] targetLocations)
+    private Vector3 AdjustVector(Vector3 vector)
     {
-        if (triggerLocations.Contains(spawnerLocation))
-            foreach (Spawner s in spawners.Where(s => targetLocations.Contains(s.boxLocation)))
-                s.Respawn();
+        if (vector.x < 0)
+        {
+            vector.x = 2;
+            shouldRearrange = true;
+        }
+        if (vector.y < 0)
+        {
+            vector.y = 2;
+            shouldRearrange = true;
+        }
+        if (vector.z < 0)
+        {
+            vector.z = 1;
+            shouldRearrange = true;
+        }
+        return new(vector.x,vector.y,vector.z);
     }
-
-    private Dictionary<BoxLocation, BoxLocation> GetLocationMappings(BoxLocation boxLocation) => boxLocation switch
-    {
-        BoxLocation.Forward => new Dictionary<BoxLocation, BoxLocation>
-            {
-                { BoxLocation.Left, BoxLocation.ForwardLeft }, { BoxLocation.Right, BoxLocation.ForwardRight },
-                { BoxLocation.Centre, BoxLocation.Forward }, { BoxLocation.ForwardLeft, BoxLocation.Left },
-                { BoxLocation.ForwardRight, BoxLocation.Right }, { BoxLocation.Forward, BoxLocation.Centre }
-            },
-        BoxLocation.Left => new Dictionary<BoxLocation, BoxLocation>
-            {
-                { BoxLocation.Forward, BoxLocation.ForwardRight }, { BoxLocation.Centre, BoxLocation.Right },
-                { BoxLocation.ForwardRight, BoxLocation.ForwardLeft }, { BoxLocation.Right, BoxLocation.Left },
-                { BoxLocation.ForwardLeft, BoxLocation.Forward }, { BoxLocation.Left, BoxLocation.Centre }
-            },
-        BoxLocation.ForwardRight => new Dictionary<BoxLocation, BoxLocation>
-            {
-                { BoxLocation.Forward, BoxLocation.Left }, { BoxLocation.Centre, BoxLocation.ForwardLeft },
-                { BoxLocation.ForwardLeft, BoxLocation.Right }, { BoxLocation.Left, BoxLocation.ForwardRight },
-                { BoxLocation.Right, BoxLocation.Centre }, { BoxLocation.ForwardRight, BoxLocation.Forward }
-            },
-        BoxLocation.ForwardLeft => new Dictionary<BoxLocation, BoxLocation>
-            {
-                { BoxLocation.Forward, BoxLocation.Right }, { BoxLocation.Centre, BoxLocation.ForwardRight },
-                { BoxLocation.ForwardRight, BoxLocation.Left }, { BoxLocation.Right, BoxLocation.ForwardLeft },
-                { BoxLocation.Left, BoxLocation.Centre }, { BoxLocation.ForwardLeft, BoxLocation.Forward }
-            },
-        BoxLocation.Right => new Dictionary<BoxLocation, BoxLocation>
-            {
-                { BoxLocation.Forward, BoxLocation.ForwardLeft }, { BoxLocation.Centre, BoxLocation.Left },
-                { BoxLocation.ForwardLeft, BoxLocation.ForwardRight }, { BoxLocation.Left, BoxLocation.Right },
-                { BoxLocation.ForwardRight, BoxLocation.Forward }, { BoxLocation.Right, BoxLocation.Centre }
-            },
-        _ => null
-    };
 }

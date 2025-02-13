@@ -1,0 +1,21 @@
+public enum BoxLocation
+{
+    UpperForwardLeft,
+    UpperForward,
+    UpperForwardRight,
+    UpperLeft,
+    UpperCentre,
+    UpperRight,
+    MiddleForwardLeft,
+    MiddleForward,
+    MiddleForwardRight,
+    MiddleLeft,
+    MiddleCentre,
+    MiddleRight,
+    LowerForwardLeft,
+    LowerForward,
+    LowerForwardRight,
+    LowerLeft,
+    LowerCentre,
+    LowerRight
+}
