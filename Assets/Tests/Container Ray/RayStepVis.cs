@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Visualisation;
 
 [ExecuteInEditMode]
@@ -37,24 +35,24 @@ public class RayStepVis : MonoBehaviour {
         }
         var col = Color.red;
         RayBox (container.position, container.localScale, eye.position, eye.forward);
-        if (dstInsideBox == 0) {
+        if (dstInsideBox == 0)
+        {
             col = Color.grey;
             dstToBox = 999;
         }
-
         Debug.DrawRay (eye.position, eye.forward * dstToBox, col);
         Debug.DrawRay (eye.position + eye.forward * dstToBox, eye.forward * dstInsideBox, Color.white);
-        if (dstInsideBox == 0) {
+        if (dstInsideBox == 0)
             dstToBox = 0;
-        } else {
+        else 
+        {
             Vis.DrawSphere (eye.position + eye.forward * dstToBox, .06f, col, Style.Unlit);
             Vis.DrawSphere (eye.position + eye.forward * (dstToBox + dstInsideBox), .06f, Color.white, Style.Unlit);
-            if (showSamplePoints) {
+            if (showSamplePoints)
+            {
                 float step = dstInsideBox/numSamples;
                 for (int i = 0; i < numSamples; i++)
-                {
                     Vis.DrawSphere (eye.position + eye.forward * (dstToBox + step * i), .06f, sampleCol, Style.Unlit);
-                }
             }
         }
     }
