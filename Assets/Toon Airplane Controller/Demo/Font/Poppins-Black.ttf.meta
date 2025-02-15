@@ -1,0 +1,28 @@
+fileFormatVersion: 2
+guid: 3923c3fa51168fa4599f7935bc3aabd9
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - Poppins
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 307732
+  packageName: Toon Airplane Controller | System & Framework
+  packageVersion: 1.0
+  assetPath: Assets/GolemKin/Toon Airplane Controller/Demo/Font/Poppins-Black.ttf
+  uploadId: 724749
