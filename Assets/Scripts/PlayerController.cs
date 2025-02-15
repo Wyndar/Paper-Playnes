@@ -4,7 +4,6 @@ public class PlayerController : MonoBehaviour
 {
     public PaperPlaynesManager playnesManager;
     public InputManager inputManager;
-    private const string spawnerTag = "Spawner";
     private Rigidbody rb;
     public int speed;
     public float rotationSpeed;
@@ -44,16 +43,4 @@ public class PlayerController : MonoBehaviour
         Mathf.Clamp(originalRotation + (rotationSpeed * direction * Time.fixedDeltaTime), -maxRotationAngle, maxRotationAngle);
     private float GetDefaultEulerAngle(float originalRotation) => Mathf.MoveTowards(originalRotation, 0, rotationSpeed * Time.fixedDeltaTime);
 
-    public void OnTriggerEnter(Collider collider)
-    {
-        if (collider.gameObject.CompareTag(spawnerTag))
-        {
-            Spawner spawner = collider.gameObject.GetComponent<Spawner>();
-            if (spawner.boxLocation == BoxLocation.MiddleCentre)
-                return;
-            transform.SetParent(spawner.transform);
-            playnesManager.ChangeBoxLocations(spawner);
-            transform.SetParent(null);
-        }
-    }
 }
