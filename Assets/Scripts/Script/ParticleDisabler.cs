@@ -39,7 +39,7 @@ namespace GolemKin.ToonAirplaneController
             yield return new WaitForSeconds(deactivateTime);
 
             // Disable the GameObject
-            gameObject.SetActive(false);
+            Destroy(gameObject);
         }
 
         #endregion
