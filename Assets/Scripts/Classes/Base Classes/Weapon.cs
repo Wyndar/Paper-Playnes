@@ -9,7 +9,9 @@ public class Weapon : MonoBehaviour
     public int weaponWeight;
     public float fireRate;
     public float reloadRate;
-    
+    public float range;
+    public int damage;
+
     [Header("Paired Weapon")]
     public bool isPairedWeapon;
     public bool isLeftWeapon;
@@ -39,25 +41,38 @@ public class Weapon : MonoBehaviour
         CapMagazine();
         timeSinceLastShot = fireRate;
         timeSinceReloadStarted = 0;
-        if(isPairedWeapon)
+        if (isPairedWeapon)
             VerifyPair();
     }
-    public void Fire()
+    public void Fire(Vector3 targetPosition)
     {
         if (cooldownRoutine != null || reloadRoutine != null)
             return;
-        if (isPairedWeapon && firedLastShot)
+        if (firedLastShot && isPairedWeapon)
         {
             firedLastShot = false;
-            pairedWeapon.Fire();
+            pairedWeapon.Fire(targetPosition);
             return;
         }
-        Instantiate(projectilePrefab, spawnTransform.position, spawnTransform.rotation)
-            .GetComponent<Projectile>().spawnerWeapon = this;
+        //we need to work on projectiles later
+        //GameObject proj = Instantiate(projectilePrefab, spawnTransform.position, spawnTransform.rotation);
+        //Projectile projectile = proj.GetComponent<Projectile>();
+        //projectile.Initialize(targetPosition);
+        // Perform a raycast instead of instantiating a projectile
+        Vector3 shootDirection = (targetPosition - spawnTransform.position).normalized;
+
+        if (Physics.Raycast(spawnTransform.position, shootDirection, out RaycastHit hit, 1000f))
+        {
+            if (hit.collider.TryGetComponent<HealthComponent>(out var health))
+                health.TakeDamage(damage);
+            if (VFXObject != null)
+                Instantiate(VFXObject, hit.point, Quaternion.LookRotation(hit.normal));
+        }
         Instantiate(VFXObject, spawnTransform.position, spawnTransform.rotation);
         magazineAmmoCount--;
         timeSinceLastShot = 0;
         firedLastShot = true;
+
         if (magazineAmmoCount <= 0)
         {
             Reload();
@@ -65,7 +80,6 @@ public class Weapon : MonoBehaviour
         }
         cooldownRoutine ??= StartCoroutine(Cooldown());
     }
-
     private void Reload()
     {
         magazineHoldCount--;
@@ -77,7 +91,7 @@ public class Weapon : MonoBehaviour
     {
         while (timeSinceLastShot < fireRate)
         {
-            timeSinceLastShot += Time.time;
+            timeSinceLastShot += Time.deltaTime;
             yield return null;
         }
         if (timeSinceLastShot >= fireRate)
@@ -91,7 +105,7 @@ public class Weapon : MonoBehaviour
     {
         while (timeSinceReloadStarted < reloadRate)
         {
-            timeSinceReloadStarted += Time.time;
+            timeSinceReloadStarted += Time.deltaTime;
             yield return null;
         }
         if (timeSinceReloadStarted >= reloadRate)

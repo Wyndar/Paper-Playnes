@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -14,12 +15,30 @@ public class PlayerController : MonoBehaviour
     [Header("Movement Settings")]
     [SerializeField] private float speed = 20f;
     [SerializeField] private float rotationSpeed = 100f;
+    [SerializeField] private float maxTiltAngle = 45f;
+    [SerializeField] private float turnAcceleration = 30f;
+    [SerializeField] private float pitchAcceleration = 20f;
+    [SerializeField] private float turnDecayRate = 2f;
+    [SerializeField] private float pitchDecayRate = 2f;
     [SerializeField] private bool isInverted = false;
     [SerializeField] private AutoLevelMode autoLevelMode = AutoLevelMode.Off;
     [SerializeField] private float autoLevelSpeed = 2f;
     [SerializeField] private float brakeMultiplier = 0.5f;
     [SerializeField] private float barrelRollSpeed = 360f;
     [SerializeField] private float quickTurnMultiplier = 1.5f;
+
+    [Header("Crosshair Settings")]
+    [SerializeField] private RectTransform crosshairUI;
+    [SerializeField] private HealthComponent crosshairTarget;
+    [SerializeField] private Slider crosshairTargetHPBar;
+    [SerializeField] private float crosshairRadius = 50f;
+    [SerializeField] private float crosshairSpeed = 500f;
+    [SerializeField] private float assistRadius = 1.5f; 
+    [SerializeField] private float magnetStrength = 8f; 
+    [SerializeField] private float maxAssistRange = 1000f; 
+
+    [SerializeField] private Color crosshairColor;
+    [SerializeField] private Color crosshairOnTargetColor;
 
     [Header("Boost Settings")]
     [SerializeField] private float boostMultiplier = 2f;
@@ -40,12 +59,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform rightPrimaryWeaponObject;
     [SerializeField] private Transform leftSecondaryWeaponObject;
     [SerializeField] private Transform rightSecondaryWeaponObject;
-    [SerializeField] private Transform undersideWeaponObject; 
+    [SerializeField] private Transform undersideWeaponObject;
     [SerializeField] private Transform cockpitWeaponObject;
 
     [Header("Equipped Weapon Settings")]
     [SerializeField] private Weapon primaryWeapon;
     [SerializeField] private List<Weapon> secondaryWeapons;
+    public TMP_Text primaryWeaponAmmoCountText;
+    public TMP_Text primaryWeaponMaxAmmoCountText;
 
     [Header("Wing Trails")]
     [SerializeField] private TrailRenderer leftWingTrail;
@@ -56,9 +77,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip rollSound;
 
     private float boostTimer;
+    private float accumulatedYaw = 0f;
+    private float accumulatedPitch = 0f;
+    private Vector2 crosshairPosition = Vector2.zero;
     public bool isBoosting;
+    private bool isTurning;
     private Coroutine moveRoutine;
     private Coroutine shootRoutine;
+    private Coroutine crosshairRoutine;
+    private const int MAX_TARGETS = 10; 
+    private RaycastHit[] assistHits = new RaycastHit[MAX_TARGETS];
 
     private void Start()
     {
@@ -69,8 +97,8 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
-        inputManager.OnStartMove += StartMove;
-        inputManager.OnEndMove += StopMove;
+        inputManager.OnStartMove += StartCrosshairMovement;
+        inputManager.OnEndMove += StopCrosshairMovement;
         inputManager.OnBoost += StartBoost;
         inputManager.OnStartPrimaryWeapon += StartShooting;
         inputManager.OnEndPrimaryWeapon += StopShooting;
@@ -95,6 +123,74 @@ public class PlayerController : MonoBehaviour
             AutoLevel();
         HandleWingTrails();
     }
+    private void StartCrosshairMovement() => crosshairRoutine ??= StartCoroutine(HandleCrosshairMovement());
+
+    private void StopCrosshairMovement()
+    {
+        if (crosshairRoutine != null)
+            StopCoroutine(crosshairRoutine);
+        crosshairRoutine = null;
+        isTurning = false;
+        StartCoroutine(DecayRotation());
+    }
+
+    private IEnumerator HandleCrosshairMovement()
+    {
+        while (true)
+        {
+            Vector2 inputVector = inputManager.CurrentMoveVector;
+
+            if (inputVector.magnitude > 0)
+            {
+                isTurning = true;
+                Vector2 newCrosshairPosition = crosshairPosition + (crosshairSpeed * Time.deltaTime * inputVector);
+                Vector2 adjustedPosition = ApplyCrosshairMagnetism(newCrosshairPosition);
+
+                bool atLimitX = Mathf.Abs(adjustedPosition.x) >= crosshairRadius;
+                bool atLimitY = Mathf.Abs(adjustedPosition.y) >= crosshairRadius;
+
+                if (!atLimitX)
+                    crosshairPosition.x = adjustedPosition.x;
+                if (!atLimitY)
+                    crosshairPosition.y = adjustedPosition.y;
+                if (atLimitX || atLimitY)
+                {
+                    accumulatedYaw += inputVector.x * turnAcceleration * Time.deltaTime;
+
+                    float pitchInput = isInverted ? -inputVector.y : inputVector.y;
+                    accumulatedPitch -= pitchInput * pitchAcceleration * Time.deltaTime;
+                }
+            }
+            else
+                isTurning = false;
+            GetCrosshairWorldPosition();
+            crosshairUI.anchoredPosition = crosshairPosition;
+
+            RotatePlayer();
+            yield return null;
+        }
+    }
+
+
+    private IEnumerator DecayRotation()
+    {
+        while (!isTurning && (Mathf.Abs(accumulatedYaw) > 0.1f || Mathf.Abs(accumulatedPitch) > 0.1f))
+        {
+            accumulatedYaw = Mathf.Lerp(accumulatedYaw, 0, Time.deltaTime * turnDecayRate);
+            accumulatedPitch = Mathf.Lerp(accumulatedPitch, 0, Time.deltaTime * pitchDecayRate);
+            yield return null;
+        }
+        accumulatedYaw = 0f;
+        accumulatedPitch = 0f;
+    }
+    private void RotatePlayer()
+    {
+        float pitchInput = isInverted ? -accumulatedPitch : accumulatedPitch;
+        Quaternion yawRotation = Quaternion.AngleAxis(accumulatedYaw * rotationSpeed * Time.deltaTime, transform.up);
+        Quaternion pitchRotation = Quaternion.AngleAxis(pitchInput * rotationSpeed * Time.deltaTime, transform.right);
+        transform.rotation = yawRotation * pitchRotation * transform.rotation;
+    }
+
     private void StartMove() => moveRoutine ??= StartCoroutine(Move());
 
     private void StopMove()
@@ -115,123 +211,88 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
     }
-    private void StartShooting()=>shootRoutine??=StartCoroutine(ShootPrimary());
+    private void StartShooting() => shootRoutine ??= StartCoroutine(ShootPrimary());
     private void StopShooting()
     {
-       if(shootRoutine != null)
+        if (shootRoutine != null)
             StopCoroutine(shootRoutine);
-       shootRoutine = null;
+        shootRoutine = null;
     }
 
     private IEnumerator ShootPrimary()
     {
         while (true)
         {
-            primaryWeapon.Fire();
-            yield return new WaitForSeconds (primaryWeapon.fireRate);
+            Vector3 target = GetCrosshairWorldPosition();
+            primaryWeapon.Fire(target);
+            yield return new WaitForSeconds(primaryWeapon.fireRate);
         }
     }
+    private Vector3 GetCrosshairWorldPosition()
+    {
+        Vector3 screenPosition = crosshairUI.position;
+        Camera cam = Camera.main;
+        Ray ray = cam.ScreenPointToRay(screenPosition);
 
-    //private void HandleMissileSystem()
-    //{
-    //    // Lock on to a target if no target is locked
-    //    if (currentTarget == null)
-    //    {
-    //        LockOnTarget();
-    //    }
+        if (Physics.Raycast(ray, out RaycastHit hit, 1000f))
+        {
+            crosshairTarget = hit.collider.GetComponent<HealthComponent>();
+            UpdateCrosshairColor(crosshairTarget != null); 
+            return hit.point; 
+        }
+        UpdateCrosshairColor(false);
+        return transform.position + transform.forward * 50f;
+    }
+    
+    private void UpdateCrosshairColor(bool isTargetingEnemy)
+    {
+        if (crosshairUI.TryGetComponent(out Image crosshairImage))
+        {
+            Color targetColor = isTargetingEnemy ? crosshairOnTargetColor : crosshairColor;
+            crosshairImage.color = Color.Lerp(crosshairImage.color, targetColor, Time.deltaTime * 10f);
+        }
+    }
+    
+    private Vector2 ApplyCrosshairMagnetism(Vector2 currentPosition)
+    {
+        Camera cam = Camera.main;
+        Ray ray = cam.ScreenPointToRay(currentPosition);
 
-    //    // Fire missile if target is locked and cooldown is complete
-    //    if (Input.GetKeyDown(fireMissileKey) && missileCooldownTimer <= 0)
-    //    {
-    //        FireMissile();
-    //        missileCooldownTimer = missileCooldown;
-    //    }
+        int numHits = Physics.SphereCastNonAlloc(ray, assistRadius, assistHits, maxAssistRange);
 
-    //    // Reduce cooldown timer
-    //    if (missileCooldownTimer > 0)
-    //    {
-    //        missileCooldownTimer -= Time.deltaTime;
-    //    }
-    //}
+        Transform bestTarget = null;
+        float closestAngle = float.MaxValue;
+        Vector2 bestScreenPosition = currentPosition;
 
-    //private void LockOnTarget()
-    //{
+        for (int i = 0; i < numHits; i++)
+        {
+            RaycastHit hit = assistHits[i];
+            if (!hit.collider.TryGetComponent(out HealthComponent _)) continue;
 
-    //    if (Physics.OverlapSphere(missileSpawnPoint.transform.position, lockOnRange, targetLayer).Length > 0)
-    //    {
-    //        Transform nearestTarget = null;
-    //        float shortestDistance = float.MaxValue;
+            Vector3 worldPos = hit.collider.bounds.center;
+            Vector2 screenPos = cam.WorldToScreenPoint(worldPos);
 
-    //        foreach (Collider target in Physics.OverlapSphere(missileSpawnPoint.transform.position, lockOnRange, targetLayer))
-    //        {
-    //            if (!target.CompareTag(targetTag)) continue;
+            float angle = Vector3.Angle(ray.direction, (worldPos - ray.origin).normalized);
 
-    //            Vector3 directionToTarget = (target.transform.position - missileSpawnPoint.position).normalized;
-    //            float angleToTarget = Vector3.Angle(transform.forward, directionToTarget);
+            if (angle < closestAngle)
+            {
+                closestAngle = angle;
+                bestTarget = hit.transform;
+                bestScreenPosition = screenPos;
+            }
+        }
 
-    //            // Check if the target is within the 40-degree cone
-    //            if (angleToTarget > 20f) continue; // 20 degrees on either side of forward
+        if (bestTarget != null)
+        {
+            UpdateCrosshairColor(true);
+            return Vector2.Lerp(currentPosition, bestScreenPosition, Time.deltaTime * magnetStrength);
+        }
 
-    //            float distance = Vector3.Distance(missileSpawnPoint.position, target.transform.position);
-    //            if (distance < shortestDistance)
-    //            {
-    //                shortestDistance = distance;
-    //                nearestTarget = target.transform;
-    //            }
-    //        }
-
-    //        currentTarget = nearestTarget;
-    //    }
-    //    else
-    //    {
-    //        currentTarget = null;
-    //    }
-    //}
-
-
-    //private void OnDrawGizmos()
-    //{
-    //    if (missileSpawnPoint == null) return;
-
-    //    // Draw the search radius
-    //    Gizmos.color = new Color(1, 0, 0, 0.3f); // Semi-transparent red
-    //    Gizmos.DrawSphere(missileSpawnPoint.position, lockOnRange);
-
-    //    // Draw the forward arc for valid targets
-    //    Vector3 forward = transform.forward * lockOnRange;
-    //    Vector3 leftBoundary = Quaternion.Euler(0, -45, 0) * forward; // Adjust angle as needed
-    //    Vector3 rightBoundary = Quaternion.Euler(0, 45, 0) * forward;
-
-    //    Gizmos.color = Color.yellow;
-    //    Gizmos.DrawRay(missileSpawnPoint.position, leftBoundary);
-    //    Gizmos.DrawRay(missileSpawnPoint.position, rightBoundary);
-    //}
+        UpdateCrosshairColor(false);
+        return currentPosition;
+    }
 
 
-
-    //private void FireMissile()
-    //{
-    //    // Instantiate a missile
-    //    GameObject missile = Instantiate(missilePrefab, missileSpawnPoint.position, missileSpawnPoint.rotation);
-    //    //Missile missileScript = missile.GetComponent<Missile>();
-
-    //    // Instantiate the missile VFX prefab at the missile spawn point
-    //    GameObject missileVFX = Instantiate(missleVFXPrefab, missileSpawnPoint.position + missileSpawnPoint.forward * 2, missileSpawnPoint.rotation);
-
-    //    if (missileScript != null)
-    //    {
-    //        if (currentTarget != null)
-    //        {
-    //            // Set target if available
-    //            missileScript.SetTarget(currentTarget);
-    //        }
-    //        else
-    //        {
-    //            // Fire forward if no target is locked
-    //            missileScript.SetForward();
-    //        }
-    //    }
-    //}
     private IEnumerator HandleBoost()
     {
         if (!isBoosting)
@@ -241,7 +302,7 @@ public class PlayerController : MonoBehaviour
             boostVFX.SetActive(true);
         }
         while (isBoosting)
-        {   
+        {
             boostTimer -= Time.deltaTime;
             if (boostTimer <= 0)
             {
@@ -251,28 +312,6 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
     }
-
-    //private void HandleAirBrake()
-    //{
-    //    if (Input.GetKey(airBrakeKey))
-    //    {
-    //        // Gradually reduce speed when braking
-    //        speed = Mathf.Lerp(speed, speed * brakeMultiplier, Time.deltaTime * 2f);
-    //    }
-    //    else
-    //    {
-    //        speed = Mathf.Lerp(speed, 20f, Time.deltaTime);
-    //    }
-    //}
-
-    //private void HandleBarrelRoll()
-    //{
-    //    if (Input.GetKeyDown(barrelRollKey))
-    //    {
-    //        GetComponent<AudioSource>().PlayOneShot(rollSound);
-    //        StartCoroutine(PerformBarrelRoll());
-    //    }
-    //}
 
     private IEnumerator PerformBarrelRoll()
     {
@@ -285,16 +324,6 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
     }
-
-    //private void HandleQuickTurn()
-    //{
-    //    if (Input.GetKey(quickTurnKey))
-    //    {
-    //        float yaw = Input.GetAxis("Horizontal") * quickTurnMultiplier * rotationSpeed * Time.deltaTime;
-    //        transform.Rotate(0, yaw, 0);
-    //    }
-    //}
-
     private void HandleWingTrails()
     {
         if (isBoosting)
@@ -303,7 +332,7 @@ public class PlayerController : MonoBehaviour
             rightWingTrail.emitting = true;
             return;
         }
-        float roll = Mathf.Abs(Input.GetAxis("Horizontal") * 30f);
+        float roll = Mathf.Abs(inputManager.CurrentMoveVector.x * 30f);
         bool shouldActivate = roll > trailActivationThreshold;
 
         leftWingTrail.emitting = shouldActivate;

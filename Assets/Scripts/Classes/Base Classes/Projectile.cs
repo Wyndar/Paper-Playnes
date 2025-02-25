@@ -1,34 +1,30 @@
 using UnityEngine;
 
-[RequireComponent(typeof(DestructibleComponent))]
-[RequireComponent (typeof(GameObject))]
-public class Projectile : DamageDealer
+[RequireComponent(typeof(Rigidbody))]
+public class Projectile : DamageDealerComponent
 {
-    public GameObject spawnProjectile;
     public float travelSpeed;
-    public float splashRadius;
-    public float splashDamage;
-    public float maxLifetime;
-    public float currentLifetime;
-    public int ammoWeight;
-    public DestructibleComponent destructibleComponent;
-    public Rigidbody rb;
-    public Weapon spawnerWeapon;
-    public void OnEnable()
+    public float maxLifetime = 10f;
+    private float currentLifetime;
+    private Rigidbody rb;
+    private Vector3 direction;
+
+    public void Initialize(Vector3 shootDirection)
     {
         currentLifetime = 0f;
-        destructibleComponent = GetComponent<DestructibleComponent>();
         rb = GetComponent<Rigidbody>();
-        rb.detectCollisions = false;
+        direction = shootDirection;
+        rb.linearVelocity = direction * travelSpeed;
+        Debug.Log(shootDirection);
     }
-    public void Update()
+
+    private void Update()
     {
         currentLifetime += Time.deltaTime;
-        rb.linearVelocity = spawnerWeapon.transform.up * travelSpeed;
-        if (currentLifetime > 0.5f)
-            rb.detectCollisions = true;
-        //trigger splash dmg here before destroying;
+
         if (currentLifetime > maxLifetime)
+        {
             Destroy(gameObject);
+        }
     }
 }

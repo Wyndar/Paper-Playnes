@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem;
-
 
 public class InputManager : MonoBehaviour
 {
@@ -12,10 +10,22 @@ public class InputManager : MonoBehaviour
     public event PressEvent OnEndPrimaryWeapon;
     public event PressEvent OnReload;
     public event PressEvent OnBoost;
+    public event PressEvent OnTouch;
 
     private PlayerInputList playerInputs;
+    public static InputManager Instance { get; private set; }
 
-    private void Awake() => playerInputs = new PlayerInputList();
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+            return;
+        }
+        Instance = this;
+        playerInputs = new PlayerInputList();
+    }
 
     private void OnEnable() => playerInputs.Enable();
 
@@ -29,6 +39,7 @@ public class InputManager : MonoBehaviour
         playerInputs.Player.FirePrimary.canceled += context => EndedPrimaryWeapon();
         playerInputs.Player.Reload.started += context => TriggerReload();
         playerInputs.Player.Boost.started += context => TriggerBoost();
+        playerInputs.Player.Tap.started += context => TouchedScreen();
     }
 
     private void StartedMoveVectorInput() => OnStartMove?.Invoke();
@@ -39,7 +50,12 @@ public class InputManager : MonoBehaviour
     private void EndedPrimaryWeapon() => OnEndPrimaryWeapon?.Invoke();
     private void TriggerReload() => OnReload?.Invoke();
     private void TriggerBoost() => OnBoost?.Invoke();
+
+    private void TouchedScreen() => OnTouch?.Invoke();
+
+    public Vector2 GetCurrentTouchPosition => playerInputs.Player.Position.ReadValue<Vector2>();
     public Vector2 CurrentMoveVector => playerInputs.Player.Movement.ReadValue<Vector2>();  
+
 }
 
 

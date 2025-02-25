@@ -4,59 +4,40 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     [Header("Target Settings")]
-    [SerializeField]
-    private Transform target; // The airplane to follow
+    [SerializeField] private Transform player;
+    [SerializeField] private Vector3 offset = new Vector3(0, 2f, -8f);
 
-    [Header("Camera Offset")]
-    [SerializeField]
-    private Vector3 offset = new Vector3(0, 5, -10); // Default offset from the airplane
+    [Header("Camera Speed Settings")]
+    [SerializeField] private float followSpeed = 5f;
+    [SerializeField] private float catchUpMultiplier = 1.5f;
 
-    [SerializeField] private float followSpeed = 5f; // Speed at which the camera follows the airplane
-
-    [Header("Dynamic FOV")]
-    [SerializeField]
-    private float baseFOV = 60f;
-
-    [SerializeField] private float boostFOV = 75f;
-    [SerializeField] private float fovTransitionSpeed = 2f;
+    [Header("Screen Positioning")]
+    [SerializeField] private float verticalScreenOffset = 0.3f;
 
     private Camera mainCamera;
-    private bool isBoosting;
+    private Vector3 targetPosition;
 
-    private void Start()
-    {
-        mainCamera = GetComponent<Camera>();
-        if (mainCamera == null)
-        {
-            Debug.LogError("No Camera component found on this GameObject!");
-        }
-    }
+    private void Start() => mainCamera = GetComponent<Camera>();
 
     private void LateUpdate()
     {
-        if (target == null) return;
+        if (!player) return;
 
-        FollowTarget();
-        AdjustFOV();
+        AdjustCameraPosition();
+        AdjustCameraRotation();
     }
 
-    private void FollowTarget()
+    private void AdjustCameraPosition()
     {
-        // Smoothly move the camera to follow the target
-        Vector3 desiredPosition = target.position + target.TransformDirection(offset);
-        transform.position = Vector3.Lerp(transform.position, desiredPosition, followSpeed * Time.deltaTime);
-
-        // Smoothly rotate the camera to look at the target
-        Quaternion desiredRotation = Quaternion.LookRotation(target.position - transform.position);
-        transform.rotation = Quaternion.Slerp(transform.rotation, desiredRotation, followSpeed * Time.deltaTime);
+        Vector3 desiredPosition = player.position + (player.forward * offset.z) + (Vector3.up * offset.y);
+        float playerSpeed = player.GetComponent<Rigidbody>().linearVelocity.magnitude;
+        float dynamicSpeed = followSpeed + (playerSpeed * catchUpMultiplier);
+        transform.position = Vector3.Lerp(transform.position, desiredPosition, dynamicSpeed * Time.deltaTime);
     }
 
-    private void AdjustFOV()
+    private void AdjustCameraRotation()
     {
-        if (mainCamera == null) return;
-
-        // Adjust FOV dynamically based on the airplane's boost state
-        float targetFOV = target.GetComponent<PlayerController>() ? boostFOV : baseFOV;
-        mainCamera.fieldOfView = Mathf.Lerp(mainCamera.fieldOfView, targetFOV, fovTransitionSpeed * Time.deltaTime);
+        Quaternion targetRotation = Quaternion.LookRotation(player.forward, Vector3.up);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * followSpeed);
     }
 }

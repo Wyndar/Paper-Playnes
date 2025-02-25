@@ -4,7 +4,7 @@ public class DestructibleComponent : MonoBehaviour
 {
     public GameObject destructionVFX;
     public AudioClip destructionSFX;
-    public void OnDestroy()
+    public void Destroy()
     {
         if (destructionVFX == null)
             return;
@@ -12,5 +12,6 @@ public class DestructibleComponent : MonoBehaviour
         if (destructionSFX == null)
             return;
         destructionVFX.GetComponent<AudioSource>().clip = destructionSFX;
+        Destroy(gameObject);
     }
 }

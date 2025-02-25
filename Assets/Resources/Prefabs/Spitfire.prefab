@@ -129,7 +129,8 @@ MonoBehaviour:
   VFXObject: {fileID: 0}
   weaponWeight: 50
   fireRate: 0.5
-  reloadRate: 2
+  reloadRate: 1
+  range: 500
   isPairedWeapon: 0
   isLeftWeapon: 0
   firedLastShot: 0

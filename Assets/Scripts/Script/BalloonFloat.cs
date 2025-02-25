@@ -32,7 +32,7 @@ namespace GolemKin.ToonAirplaneController
         private void Awake()
         {
             // Initialize Rigidbody
-            rb = GetComponent<Rigidbody>();
+            rb = GetComponentInChildren<Rigidbody>();
             if (rb == null)
             {
                 Debug.LogError("Rigidbody is missing on the balloon object. Adding one now.");
@@ -72,7 +72,7 @@ namespace GolemKin.ToonAirplaneController
             }
 
             // Apply slight rotation for dynamic movement
-            transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime);
+            transform.Rotate(rotationSpeed * Time.deltaTime * Vector3.up);
         }
 
         #endregion
