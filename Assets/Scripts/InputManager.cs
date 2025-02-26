@@ -20,7 +20,7 @@ public class InputManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(this);
+            Destroy(gameObject);
             return;
         }
         Instance = this;
@@ -29,7 +29,7 @@ public class InputManager : MonoBehaviour
 
     private void OnEnable() => playerInputs.Enable();
 
-    private void OnDisable() => playerInputs.Disable();
+    private void OnDisable() => playerInputs?.Disable();
 
     private void Start()
     {

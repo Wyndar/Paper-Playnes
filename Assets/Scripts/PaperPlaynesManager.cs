@@ -4,6 +4,7 @@ public class PaperPlaynesManager : MonoBehaviour
 {
 
     public GameObject spawnBox;
+    public GameObject birds;
     public int spawnBoxCount;
     public Renderer spawnRenderer;
 
@@ -16,7 +17,12 @@ public class PaperPlaynesManager : MonoBehaviour
     private void InstantiateBoxes()
     {
         for (int i = 0; i < spawnBoxCount; i++)
+        {
             Instantiate(spawnBox).transform.SetParent(transform);
+            GameObject bird = Instantiate(birds);
+            bird.transform.SetParent(transform);
+            bird.GetComponent<BirdAI>().flightArea = spawnRenderer;
+        }
     }
 
     public void RearrangeBoxes()

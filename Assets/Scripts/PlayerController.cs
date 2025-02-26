@@ -1,16 +1,17 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     public enum AutoLevelMode { Off, On }
-    public InputManager inputManager;
     private HealthComponent healthComponent;
     private HealthBar healthBar;
     private DestructibleComponent destructibleComponent;
+    private CameraController playerCamera;
 
     [Header("Movement Settings")]
     [SerializeField] private float speed = 20f;
@@ -97,18 +98,18 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
-        inputManager.OnStartMove += StartCrosshairMovement;
-        inputManager.OnEndMove += StopCrosshairMovement;
-        inputManager.OnBoost += StartBoost;
-        inputManager.OnStartPrimaryWeapon += StartShooting;
-        inputManager.OnEndPrimaryWeapon += StopShooting;
+        InputManager.Instance.OnStartMove += StartCrosshairMovement;
+        InputManager.Instance.OnEndMove += StopCrosshairMovement;
+        InputManager.Instance.OnBoost += StartBoost;
+        InputManager.Instance.OnStartPrimaryWeapon += StartShooting;
+        InputManager.Instance.OnEndPrimaryWeapon += StopShooting;
     }
     private void OnDisable()
     {
-        inputManager.OnStartMove -= StartMove;
-        inputManager.OnEndMove -= StopMove;
-        inputManager.OnStartPrimaryWeapon -= StartShooting;
-        inputManager.OnEndPrimaryWeapon -= StopShooting;
+        InputManager.Instance.OnStartMove -= StartMove;
+        InputManager.Instance.OnEndMove -= StopMove;
+        InputManager.Instance.OnStartPrimaryWeapon -= StartShooting;
+        InputManager.Instance.OnEndPrimaryWeapon -= StopShooting;
     }
 
     private void Update()
@@ -138,7 +139,7 @@ public class PlayerController : MonoBehaviour
     {
         while (true)
         {
-            Vector2 inputVector = inputManager.CurrentMoveVector;
+            Vector2 inputVector = InputManager.Instance.CurrentMoveVector;
 
             if (inputVector.magnitude > 0)
             {
@@ -204,7 +205,7 @@ public class PlayerController : MonoBehaviour
     {
         while (true)
         {
-            Vector2 inputVector = inputManager.CurrentMoveVector.normalized;
+            Vector2 inputVector = InputManager.Instance.CurrentMoveVector.normalized;
             float pitch = inputVector.y * (isInverted ? -1 : 1) * rotationSpeed * Time.deltaTime;
             float yaw = inputVector.x * rotationSpeed * Time.deltaTime;
             transform.Rotate(pitch, yaw, 0);
@@ -332,7 +333,7 @@ public class PlayerController : MonoBehaviour
             rightWingTrail.emitting = true;
             return;
         }
-        float roll = Mathf.Abs(inputManager.CurrentMoveVector.x * 30f);
+        float roll = Mathf.Abs(InputManager.Instance.CurrentMoveVector.x * 30f);
         bool shouldActivate = roll > trailActivationThreshold;
 
         leftWingTrail.emitting = shouldActivate;
@@ -347,4 +348,29 @@ public class PlayerController : MonoBehaviour
     }
 
     public void ToggleInversion() => isInverted = !isInverted;
+
+
+    public override void OnNetworkSpawn()
+    {
+        if (!IsOwner) return; 
+        FindLocalCamera();
+        FindCrosshairUI();
+    }
+
+    private void FindLocalCamera()
+    {
+        playerCamera = Camera.main.GetComponent<CameraController>();
+        if (playerCamera != null)
+        {
+            Debug.Log("Local Camera Found: " + playerCamera.gameObject.name);
+            playerCamera.player = transform;
+            playerCamera.enabled = true;
+            playerCamera.TeleportCameraBehindPlayer();
+        }
+        else
+        {
+            Debug.LogError("No Main Camera found for Player " + OwnerClientId);
+        }
+    }
+    private void FindCrosshairUI() => crosshairUI = GameObject.Find("Crosshair").GetComponent<RectTransform>();
 }

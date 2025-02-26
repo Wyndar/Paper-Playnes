@@ -1,0 +1,55 @@
+using UnityEngine;
+using Unity.Netcode;
+
+public class SpawnManager : NetworkBehaviour
+{
+    public static SpawnManager Instance { get; private set; }
+    public Renderer redTeamSpawnArea; 
+    public Renderer blueTeamSpawnArea; 
+    public GameObject playerNetworkPrefab; 
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
+
+    public Vector3 GetRandomSpawnPoint(Team team)
+    {
+        Renderer spawnArea = (team == Team.RedTeam) ? redTeamSpawnArea : blueTeamSpawnArea;
+        Bounds bounds = spawnArea.bounds;
+
+        return new Vector3(
+            Random.Range(bounds.min.x, bounds.max.x),
+            Random.Range(bounds.min.y, bounds.max.y),
+            Random.Range(bounds.min.z, bounds.max.z)
+        );
+    }
+
+    public void SpawnPlayerObject(ulong clientId)
+    {
+        if (!IsServer) return; 
+
+        Team team = TeamManager.Instance.GetTeam(clientId);
+        if (team == Team.None) return; 
+
+        Vector3 spawnPosition = GetRandomSpawnPoint(team);
+        GameObject playerObject = Instantiate(playerNetworkPrefab, spawnPosition, Quaternion.identity);
+        
+        if (playerObject.TryGetComponent(out NetworkObject networkObject))
+        {
+            networkObject.SpawnWithOwnership(clientId);
+            Debug.Log($"Spawned {team} player-controlled object for Client {clientId} at {spawnPosition}");
+        }
+        else
+            Debug.LogError("Player prefab does not have a NetworkObject component!");
+
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestSpawnServerRpc(ulong clientId) => SpawnPlayerObject(clientId);
+}

@@ -4,8 +4,8 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     [Header("Target Settings")]
-    [SerializeField] private Transform player;
-    [SerializeField] private Vector3 offset = new Vector3(0, 2f, -8f);
+    public Transform player;
+    [SerializeField] private Vector3 offset = new(0, 2f, -8f);
 
     [Header("Camera Speed Settings")]
     [SerializeField] private float followSpeed = 5f;
@@ -13,11 +13,6 @@ public class CameraController : MonoBehaviour
 
     [Header("Screen Positioning")]
     [SerializeField] private float verticalScreenOffset = 0.3f;
-
-    private Camera mainCamera;
-    private Vector3 targetPosition;
-
-    private void Start() => mainCamera = GetComponent<Camera>();
 
     private void LateUpdate()
     {
@@ -39,5 +34,13 @@ public class CameraController : MonoBehaviour
     {
         Quaternion targetRotation = Quaternion.LookRotation(player.forward, Vector3.up);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * followSpeed);
+    }
+    public void TeleportCameraBehindPlayer()
+    {
+        Vector3 behindPosition = player.position + (player.forward * offset.z) + (player.up * offset.y);
+        transform.position = behindPosition;
+        transform.LookAt(player.position + Vector3.up * 1.5f);
+
+        Debug.Log("Camera teleported behind the player.");
     }
 }
