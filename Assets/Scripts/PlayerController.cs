@@ -31,7 +31,6 @@ public class PlayerController : NetworkBehaviour
     [Header("Crosshair Settings")]
     [SerializeField] private RectTransform crosshairUI;
     [SerializeField] private HealthComponent crosshairTarget;
-    [SerializeField] private Slider crosshairTargetHPBar;
     [SerializeField] private float crosshairRadius = 50f;
     [SerializeField] private float crosshairSpeed = 500f;
     [SerializeField] private float assistRadius = 1.5f; 
@@ -94,9 +93,11 @@ public class PlayerController : NetworkBehaviour
         healthBar = GetComponent<HealthBar>();
         healthComponent = GetComponent<HealthComponent>();
         destructibleComponent = GetComponent<DestructibleComponent>();
+        if (IsOwner)
+            GameObject.Find("Local Game Manager").GetComponent<UIManager>().playerHealth = healthComponent;
     }
 
-    private void OnEnable()
+    private void InitializeEvents()
     {
         InputManager.Instance.OnStartMove += StartCrosshairMovement;
         InputManager.Instance.OnEndMove += StopCrosshairMovement;
@@ -275,12 +276,11 @@ public class PlayerController : NetworkBehaviour
 
             float angle = Vector3.Angle(ray.direction, (worldPos - ray.origin).normalized);
 
-            if (angle < closestAngle)
-            {
-                closestAngle = angle;
-                bestTarget = hit.transform;
-                bestScreenPosition = screenPos;
-            }
+            if (angle >= closestAngle)
+                continue;
+            closestAngle = angle;
+            bestTarget = hit.transform;
+            bestScreenPosition = screenPos;
         }
 
         if (bestTarget != null)
@@ -352,9 +352,15 @@ public class PlayerController : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        if (!IsOwner) return; 
+        if (!IsOwner)
+        {
+            enabled = false;
+            StopAllCoroutines();
+            return;
+        }
         FindLocalCamera();
-        FindCrosshairUI();
+        crosshairUI = GameObject.Find("Crosshair").GetComponent<RectTransform>();
+        InitializeEvents();
     }
 
     private void FindLocalCamera()
@@ -372,5 +378,4 @@ public class PlayerController : NetworkBehaviour
             Debug.LogError("No Main Camera found for Player " + OwnerClientId);
         }
     }
-    private void FindCrosshairUI() => crosshairUI = GameObject.Find("Crosshair").GetComponent<RectTransform>();
 }
