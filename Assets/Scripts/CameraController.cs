@@ -14,13 +14,13 @@ public class CameraController : MonoBehaviour
     [Header("Screen Positioning")]
     [SerializeField] private float verticalScreenOffset = 0.3f;
 
-    private void LateUpdate()
-    {
-        if (!player) return;
+    //private void LateUpdate()
+    //{
+    //    if (!player) return;
 
-        AdjustCameraPosition();
-        AdjustCameraRotation();
-    }
+    //    AdjustCameraPosition();
+    //    AdjustCameraRotation();
+    //}
 
     private void AdjustCameraPosition()
     {
@@ -37,10 +37,10 @@ public class CameraController : MonoBehaviour
     }
     public void TeleportCameraBehindPlayer()
     {
-        Vector3 behindPosition = player.position + (player.forward * offset.z) + (player.up * offset.y);
-        transform.position = behindPosition;
-        transform.LookAt(player.position + Vector3.up * 1.5f);
-
+        transform.position = player.position + (player.forward * offset.z) + (player.up * offset.y);
+        transform.LookAt(player.position + (Vector3.up * 1.5f));
+        //comment this if using update follow
+        transform.SetParent(player);
         Debug.Log("Camera teleported behind the player.");
     }
 }
