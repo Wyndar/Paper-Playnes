@@ -5235,7 +5235,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2106399269
+  GlobalObjectIdHash: 2381539424
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 4
@@ -5261,7 +5261,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  inputManager: {fileID: 0}
   speed: 20
   rotationSpeed: 5
   maxTiltAngle: 15
@@ -5277,7 +5276,6 @@ MonoBehaviour:
   quickTurnMultiplier: 1.5
   crosshairUI: {fileID: 0}
   crosshairTarget: {fileID: 0}
-  crosshairTargetHPBar: {fileID: 0}
   crosshairRadius: 20
   crosshairSpeed: 50
   assistRadius: 1.5
@@ -6156,6 +6154,10 @@ PrefabInstance:
       value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
+      propertyPath: damage
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
       propertyPath: fireRate
       value: 0.5
       objectReference: {fileID: 0}
@@ -6349,6 +6351,10 @@ PrefabInstance:
     - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
       propertyPath: range
       value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
+      propertyPath: damage
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
       propertyPath: VFXObject

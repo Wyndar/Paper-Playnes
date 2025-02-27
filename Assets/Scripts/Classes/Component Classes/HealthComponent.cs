@@ -27,7 +27,6 @@ public class HealthComponent : MonoBehaviour
         currentHP -= amount;
         currentHP = Mathf.Clamp(currentHP, 0, maxHP);
         OnHealthChanged?.Invoke(currentHP, maxHP);
-
         if (currentHP <= 0)
             Die();
     }
