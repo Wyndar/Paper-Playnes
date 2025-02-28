@@ -73,8 +73,9 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private TrailRenderer rightWingTrail;
     [SerializeField] private float trailActivationThreshold = 15f;
 
-    [Header("Audio Clip")]
+    [Header("Audio Settings")]
     [SerializeField] private AudioClip rollSound;
+    [SerializeField] private AudioSource warningSpeakers;
 
     private float boostTimer;
     private float accumulatedYaw = 0f;
@@ -102,11 +103,25 @@ public class PlayerController : NetworkBehaviour
         SpawnManager.Instance.RegisterPlayer(this);
         FindLocalCamera();
         crosshairUI = GameObject.Find("Crosshair").GetComponent<RectTransform>();
+        InitializeLocalGameManager();
+        InitializeEvents();
+    }
+
+    private void InitializeLocalGameManager()
+    {
         GameObject LGM = GameObject.Find("Local Game Manager");
         LGM.GetComponent<UIManager>().playerHealth = healthComponent;
-        LGM.GetComponent<RadarSystem>().player = transform;
-        LGM.GetComponent<RadarSystem>().enabled = true;
-        InitializeEvents();
+
+        RadarSystem radarSystem = LGM.GetComponent<RadarSystem>();
+        radarSystem.player = transform;
+        radarSystem.enabled = true;
+        
+        AltimeterSystem altimeterSystem = LGM.GetComponent<AltimeterSystem>();
+        altimeterSystem.player = transform;
+        altimeterSystem.warningSound = warningSpeakers;
+        altimeterSystem.maxAltitude = maxAltitude;
+        altimeterSystem.minAltitude = minAltitude;
+        altimeterSystem.enabled = true;
     }
 
     private void InitializeEvents()
