@@ -33,9 +33,9 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private HealthComponent crosshairTarget;
     [SerializeField] private float crosshairRadius = 50f;
     [SerializeField] private float crosshairSpeed = 500f;
-    [SerializeField] private float assistRadius = 1.5f; 
-    [SerializeField] private float magnetStrength = 8f; 
-    [SerializeField] private float maxAssistRange = 1000f; 
+    [SerializeField] private float assistRadius = 1.5f;
+    [SerializeField] private float magnetStrength = 8f;
+    [SerializeField] private float maxAssistRange = 1000f;
 
     [SerializeField] private Color crosshairColor;
     [SerializeField] private Color crosshairOnTargetColor;
@@ -85,16 +85,28 @@ public class PlayerController : NetworkBehaviour
     private Coroutine moveRoutine;
     private Coroutine shootRoutine;
     private Coroutine crosshairRoutine;
-    private const int MAX_TARGETS = 10; 
+    private const int MAX_TARGETS = 10;
     private RaycastHit[] assistHits = new RaycastHit[MAX_TARGETS];
 
-    private void Start()
+    public override void OnNetworkSpawn()
     {
+        if (!IsOwner)
+        {
+            enabled = false;
+            StopAllCoroutines();
+            return;
+        }
         healthBar = GetComponent<HealthBar>();
         healthComponent = GetComponent<HealthComponent>();
         destructibleComponent = GetComponent<DestructibleComponent>();
-        if (IsOwner)
-            GameObject.Find("Local Game Manager").GetComponent<UIManager>().playerHealth = healthComponent;
+        SpawnManager.Instance.RegisterPlayer(this);
+        FindLocalCamera();
+        crosshairUI = GameObject.Find("Crosshair").GetComponent<RectTransform>();
+        GameObject LGM = GameObject.Find("Local Game Manager");
+        LGM.GetComponent<UIManager>().playerHealth = healthComponent;
+        LGM.GetComponent<RadarSystem>().player = transform;
+        LGM.GetComponent<RadarSystem>().enabled = true;
+        InitializeEvents();
     }
 
     private void InitializeEvents()
@@ -125,6 +137,7 @@ public class PlayerController : NetworkBehaviour
             AutoLevel();
         HandleWingTrails();
     }
+
     private void StartCrosshairMovement() => crosshairRoutine ??= StartCoroutine(HandleCrosshairMovement());
 
     private void StopCrosshairMovement()
@@ -158,7 +171,6 @@ public class PlayerController : NetworkBehaviour
                 if (atLimitX || atLimitY)
                 {
                     accumulatedYaw += inputVector.x * turnAcceleration * Time.deltaTime;
-
                     float pitchInput = isInverted ? -inputVector.y : inputVector.y;
                     accumulatedPitch -= pitchInput * pitchAcceleration * Time.deltaTime;
                 }
@@ -173,7 +185,6 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-
     private IEnumerator DecayRotation()
     {
         while (!isTurning && (Mathf.Abs(accumulatedYaw) > 0.1f || Mathf.Abs(accumulatedPitch) > 0.1f))
@@ -185,6 +196,7 @@ public class PlayerController : NetworkBehaviour
         accumulatedYaw = 0f;
         accumulatedPitch = 0f;
     }
+
     private void RotatePlayer()
     {
         float pitchInput = isInverted ? -accumulatedPitch : accumulatedPitch;
@@ -239,13 +251,13 @@ public class PlayerController : NetworkBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, 1000f))
         {
             crosshairTarget = hit.collider.GetComponent<HealthComponent>();
-            UpdateCrosshairColor(crosshairTarget != null); 
-            return hit.point; 
+            UpdateCrosshairColor(crosshairTarget != null);
+            return hit.point;
         }
         UpdateCrosshairColor(false);
         return transform.position + transform.forward * 50f;
     }
-    
+
     private void UpdateCrosshairColor(bool isTargetingEnemy)
     {
         if (crosshairUI.TryGetComponent(out Image crosshairImage))
@@ -254,7 +266,7 @@ public class PlayerController : NetworkBehaviour
             crosshairImage.color = Color.Lerp(crosshairImage.color, targetColor, Time.deltaTime * 10f);
         }
     }
-    
+
     private Vector2 ApplyCrosshairMagnetism(Vector2 currentPosition)
     {
         Camera cam = Camera.main;
@@ -292,7 +304,6 @@ public class PlayerController : NetworkBehaviour
         UpdateCrosshairColor(false);
         return currentPosition;
     }
-
 
     private IEnumerator HandleBoost()
     {
@@ -349,20 +360,6 @@ public class PlayerController : NetworkBehaviour
 
     public void ToggleInversion() => isInverted = !isInverted;
 
-
-    public override void OnNetworkSpawn()
-    {
-        if (!IsOwner)
-        {
-            enabled = false;
-            StopAllCoroutines();
-            return;
-        }
-        FindLocalCamera();
-        crosshairUI = GameObject.Find("Crosshair").GetComponent<RectTransform>();
-        InitializeEvents();
-    }
-
     private void FindLocalCamera()
     {
         playerCamera = Camera.main.GetComponent<CameraController>();
@@ -377,5 +374,10 @@ public class PlayerController : NetworkBehaviour
         {
             Debug.LogError("No Main Camera found for Player " + OwnerClientId);
         }
+    }
+    public override void OnNetworkDespawn()
+    {
+        if (SpawnManager.Instance != null)
+            SpawnManager.Instance.UnregisterPlayer(this);
     }
 }

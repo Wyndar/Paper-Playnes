@@ -1,13 +1,15 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections.Generic;
 
 public class SpawnManager : NetworkBehaviour
 {
     public static SpawnManager Instance { get; private set; }
     public Renderer redTeamSpawnArea; 
     public Renderer blueTeamSpawnArea; 
-    public GameObject playerNetworkPrefab; 
+    public GameObject playerNetworkPrefab;
 
+    public List<PlayerController> activePlayers = new();
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -17,7 +19,17 @@ public class SpawnManager : NetworkBehaviour
         }
         Instance = this;
     }
+    public void RegisterPlayer(PlayerController player)
+    {
+        if (!activePlayers.Contains(player))
+            activePlayers.Add(player);
+    }
 
+    public void UnregisterPlayer(PlayerController player)
+    {
+        if (activePlayers.Contains(player))
+            activePlayers.Remove(player);
+    }
     public Vector3 GetRandomSpawnPoint(Team team)
     {
         Renderer spawnArea = (team == Team.RedTeam) ? redTeamSpawnArea : blueTeamSpawnArea;
