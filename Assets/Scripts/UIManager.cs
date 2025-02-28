@@ -1,185 +1,90 @@
-using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using System.Collections;
-using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
     public Camera playerCamera;
-    public GameObject healthBarPrefab;
-    public Transform healthBarContainer;
-    public float detectionRadius;
+    public GameObject markerPrefab;
+    public Transform markerContainer;
+    public float detectionRadius = 200f;
     public HealthComponent playerHealth;
 
-    private List<GameObject> healthBarPool = new();
-    private Dictionary<HealthComponent, GameObject> activeHealthBars = new();
-    private Dictionary<HealthComponent, Slider> healthBarSliders = new();
+    private Dictionary<HealthComponent, HUDMarker> activeMarkers = new();
+    private List<HUDMarker> markerPool = new();
+    private Collider[] detectedColliders = new Collider[20];
 
-    private const int POOL_SIZE = 7;
-    private const int MAX_ENEMIES = 20;
-    private Collider[] detectedColliders = new Collider[MAX_ENEMIES];
+    private void Start() => InitializeMarkerPool();
 
-    private void Start() => InitializeHealthBarPool();
+    private void Update() => UpdateTargetMarkers();
 
-    private void Update() => UpdateHealthBars();
-
-    private void InitializeHealthBarPool()
+    private void InitializeMarkerPool()
     {
-        for (int i = 0; i < POOL_SIZE; i++)
+        for (int i = 0; i < 10; i++)
         {
-            GameObject healthBar = Instantiate(healthBarPrefab, healthBarContainer);
-            healthBar.SetActive(false);
-            healthBarPool.Add(healthBar);
+            GameObject marker = Instantiate(markerPrefab, markerContainer);
+            marker.SetActive(false);
+            HUDMarker hudMarker = marker.GetComponent<HUDMarker>();
+            markerPool.Add(hudMarker);
         }
     }
 
-    private GameObject GetPooledHealthBar()
+    private HUDMarker GetPooledMarker()
     {
-        var availableHealthBar = healthBarPool.FirstOrDefault(hb => !hb.activeSelf);
-        if (availableHealthBar != null)
+        var availableMarker = markerPool.FirstOrDefault(m => !m.gameObject.activeSelf);
+        if (availableMarker != null)
         {
-            availableHealthBar.SetActive(true);
-            return availableHealthBar;
+            availableMarker.gameObject.SetActive(true);
+            return availableMarker;
         }
 
-        var newHealthBar = Instantiate(healthBarPrefab, healthBarContainer);
-        healthBarPool.Add(newHealthBar);
-        return newHealthBar;
+        GameObject newMarker = Instantiate(markerPrefab, markerContainer);
+        HUDMarker newHudMarker = newMarker.GetComponent<HUDMarker>();
+        markerPool.Add(newHudMarker);
+        return newHudMarker;
     }
 
-    private void UpdateHealthBars()
+    private void UpdateTargetMarkers()
     {
-        List<HealthComponent> visibleEnemies = GetEnemiesInView();
+        List<HealthComponent> detectedTargets = GetAllTargetsInRange();
 
-        foreach (var enemy in visibleEnemies)
+        foreach (var target in detectedTargets)
         {
-            if (!activeHealthBars.ContainsKey(enemy))
-            {
-                GameObject healthBar = GetPooledHealthBar();
-                activeHealthBars[enemy] = healthBar;
-
-                if (healthBar.TryGetComponent(out Slider slider))
-                {
-                    healthBarSliders[enemy] = slider;
-                    slider.maxValue = enemy.maxHP;
-                    slider.value = enemy.currentHP;
-
-                    enemy.OnHealthChanged += UpdateHealthBar;
-                    enemy.OnDeath += HandleEnemyDeath;
-                }
-            }
-            activeHealthBars[enemy].SetActive(true);
-            UpdateHealthBarPosition(enemy);
-        }
-
-        List<HealthComponent> toRemove = new();
-        foreach (var kvp in activeHealthBars)
-        {
-            if (visibleEnemies.Contains(kvp.Key))
+            if (target == playerHealth)
                 continue;
-            StartCoroutine(FadeOutAndDisable(kvp.Value));
-            toRemove.Add(kvp.Key);
+            if (!activeMarkers.ContainsKey(target))
+            {
+                HUDMarker marker = GetPooledMarker();
+                marker.Initialize(target.gameObject, this);
+                activeMarkers[target] = marker;
+            }
+
+            activeMarkers[target].UpdateMarker(playerCamera);
         }
-        foreach (var enemy in toRemove)
-            RemoveHealthBar(enemy);
+
+        List<HealthComponent> toRemove = activeMarkers.Keys.Where(target => !detectedTargets.Contains(target)).ToList();
+        foreach (var target in toRemove)
+            RemoveMarker(target);
     }
 
-    private List<HealthComponent> GetEnemiesInView()
+    private List<HealthComponent> GetAllTargetsInRange()
     {
-        List<HealthComponent> enemiesInView = new();
+        List<HealthComponent> targets = new();
         int numColliders = Physics.OverlapSphereNonAlloc(playerCamera.transform.position, detectionRadius, detectedColliders);
 
         for (int i = 0; i < numColliders; i++)
-        {
-            var health = detectedColliders[i].GetComponent<HealthComponent>();
-            if (health != playerHealth && health != null && IsInFront(health.transform))
-                enemiesInView.Add(health);
-        }
-        return enemiesInView;
+            if (detectedColliders[i].TryGetComponent(out HealthComponent health))
+                targets.Add(health);
+        return targets;
     }
 
-    private bool IsInFront(Transform target)
+    private void RemoveMarker(HealthComponent target)
     {
-        Vector3 toTarget = (target.position - playerCamera.transform.position).normalized;
-        return Vector3.Dot(playerCamera.transform.forward, toTarget) > 0.5f;
-    }
-
-    private void UpdateHealthBarPosition(HealthComponent enemy)
-    {
-        if (!activeHealthBars.TryGetValue(enemy, out var healthBar))
+        if (!activeMarkers.ContainsKey(target))
             return;
 
-        RectTransform rectTransform = healthBar.GetComponent<RectTransform>();
-
-        Vector3 screenPos = playerCamera.WorldToScreenPoint(enemy.transform.position + Vector3.up * 2f);
-
-        if (screenPos.z < 0)
-        {
-            StartCoroutine(FadeOutAndDisable(healthBar));
-            return;
-        }
-
-        healthBar.SetActive(true);
-        if (healthBar.TryGetComponent(out CanvasGroup canvasGroup))
-            canvasGroup.alpha = 1;
-
-        rectTransform.position = screenPos;
-
-        float distance = Vector3.Distance(playerCamera.transform.position, enemy.transform.position);
-        float scaleFactor = Mathf.Clamp(1 / distance, 0.5f, 1.5f);
-        rectTransform.localScale = Vector3.one * scaleFactor;
-    }
-
-    private void UpdateHealthBar(int currentHP, int maxHP)
-    {
-        var enemy = healthBarSliders.FirstOrDefault(x => x.Value.maxValue == maxHP).Key;
-        if (enemy == null) return;
-
-        if (healthBarSliders.TryGetValue(enemy, out var slider))
-            slider.value = currentHP;
-    }
-
-    private void HandleEnemyDeath(bool isDead)
-    {
-        if (!isDead) return;
-
-        var enemy = activeHealthBars.Keys.FirstOrDefault(e => e.IsDead);
-        if (enemy != null)
-            RemoveHealthBar(enemy);
-    }
-
-    private void RemoveHealthBar(HealthComponent enemy)
-    {
-        if (!activeHealthBars.ContainsKey(enemy))
-            return;
-
-        GameObject healthBar = activeHealthBars[enemy];
-
-        if (healthBarSliders.ContainsKey(enemy))
-        {
-            enemy.OnHealthChanged -= UpdateHealthBar;
-            enemy.OnDeath -= HandleEnemyDeath;
-            healthBarSliders.Remove(enemy);
-        }
-
-        StartCoroutine(FadeOutAndDisable(healthBar));
-
-        activeHealthBars.Remove(enemy);
-    }
-
-    private IEnumerator FadeOutAndDisable(GameObject healthBar)
-    {
-        if (!healthBar.TryGetComponent(out CanvasGroup canvasGroup))
-            canvasGroup = healthBar.AddComponent<CanvasGroup>();
-
-        float fadeTime = 0.5f;
-        while (canvasGroup.alpha > 0)
-        {
-            canvasGroup.alpha -= Time.deltaTime / fadeTime;
-            yield return null;
-        }
-
-        healthBar.SetActive(false);
+        HUDMarker marker = activeMarkers[target];
+        marker.Cleanup();
+        activeMarkers.Remove(target);
     }
 }

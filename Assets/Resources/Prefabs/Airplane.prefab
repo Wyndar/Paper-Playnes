@@ -5286,7 +5286,7 @@ MonoBehaviour:
   boostMultiplier: 2
   boostDuration: 2
   boostVFX: {fileID: 269295487771220670}
-  maxAltitude: 300
+  maxAltitude: 500
   minAltitude: 10
   maxWeight: 0
   currentWeight: 0

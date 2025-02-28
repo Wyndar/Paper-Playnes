@@ -110,7 +110,9 @@ public class PlayerController : NetworkBehaviour
     private void InitializeLocalGameManager()
     {
         GameObject LGM = GameObject.Find("Local Game Manager");
-        LGM.GetComponent<UIManager>().playerHealth = healthComponent;
+        UIManager manager = LGM.GetComponent<UIManager>();
+        manager.playerHealth = healthComponent;
+        manager.enabled = true;
 
         RadarSystem radarSystem = LGM.GetComponent<RadarSystem>();
         radarSystem.player = transform;
