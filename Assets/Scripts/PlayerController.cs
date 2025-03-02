@@ -16,7 +16,7 @@ public class PlayerController : NetworkBehaviour
     [Header("Movement Settings")]
     [SerializeField] private float speed = 20f;
     [SerializeField] private float rotationSpeed = 100f;
-    [SerializeField] private float maxTiltAngle = 45f;
+    //[SerializeField] private float maxTiltAngle = 45f;
     [SerializeField] private float turnAcceleration = 30f;
     [SerializeField] private float pitchAcceleration = 20f;
     [SerializeField] private float turnDecayRate = 2f;
@@ -24,9 +24,9 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private bool isInverted = false;
     [SerializeField] private AutoLevelMode autoLevelMode = AutoLevelMode.Off;
     [SerializeField] private float autoLevelSpeed = 2f;
-    [SerializeField] private float brakeMultiplier = 0.5f;
+    //[SerializeField] private float brakeMultiplier = 0.5f;
     [SerializeField] private float barrelRollSpeed = 360f;
-    [SerializeField] private float quickTurnMultiplier = 1.5f;
+    //[SerializeField] private float quickTurnMultiplier = 1.5f;
 
     [Header("Crosshair Settings")]
     [SerializeField] private RectTransform crosshairUI;

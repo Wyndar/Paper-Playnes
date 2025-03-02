@@ -22,7 +22,7 @@ public class RadarSystem : MonoBehaviour
     public Color playerHighlightColor = Color.white;
     [SerializeField] private float minFadeDistance = 100f;
     [SerializeField] private float maxFadeDistance = 500f;
-    [SerializeField] private float flashSpeed = 2f;
+    //[SerializeField] private float flashSpeed = 2f;
     [SerializeField] private float edgeBuffer = 5f;
 
     [Header("Direction Markers")]

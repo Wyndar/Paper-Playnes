@@ -11,8 +11,8 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float followSpeed = 5f;
     [SerializeField] private float catchUpMultiplier = 1.5f;
 
-    [Header("Screen Positioning")]
-    [SerializeField] private float verticalScreenOffset = 0.3f;
+    //[Header("Screen Positioning")]
+    //[SerializeField] private float verticalScreenOffset = 0.3f;
 
     //private void LateUpdate()
     //{
