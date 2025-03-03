@@ -5263,7 +5263,6 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   speed: 20
   rotationSpeed: 5
-  maxTiltAngle: 15
   turnAcceleration: 2
   pitchAcceleration: 2
   turnDecayRate: 2
@@ -5271,9 +5270,7 @@ MonoBehaviour:
   isInverted: 1
   autoLevelMode: 0
   autoLevelSpeed: 10
-  brakeMultiplier: 0.5
   barrelRollSpeed: 360
-  quickTurnMultiplier: 1.5
   crosshairUI: {fileID: 0}
   crosshairTarget: {fileID: 0}
   crosshairRadius: 20
@@ -5286,7 +5283,7 @@ MonoBehaviour:
   boostMultiplier: 2
   boostDuration: 2
   boostVFX: {fileID: 269295487771220670}
-  maxAltitude: 500
+  maxAltitude: 600
   minAltitude: 10
   maxWeight: 0
   currentWeight: 0

@@ -16,10 +16,11 @@ public class RadarSystem : MonoBehaviour
     public GameObject blueTeamBlipPrefab;
     public GameObject redArrowBlipPrefab;
     public GameObject blueArrowBlipPrefab;
+    public GameObject hpBlipPrefab;
+    public GameObject pickupBlipPrefab;
     public Transform blipContainer;
     public RectTransform playerBlip;
     public RectTransform fovConeUI;
-    public Color playerHighlightColor = Color.white;
     [SerializeField] private float minFadeDistance = 100f;
     [SerializeField] private float maxFadeDistance = 500f;
     //[SerializeField] private float flashSpeed = 2f;
@@ -33,22 +34,32 @@ public class RadarSystem : MonoBehaviour
     private List<GameObject> blueTeamBlips = new();
     private List<GameObject> redTeamArrows = new();
     private List<GameObject> blueTeamArrows = new();
+    private List<GameObject> hpBlips = new();
+    private List<GameObject> pickupBlips = new();
+   
     private int activeRedBlips = 0;
     private int activeBlueBlips = 0;
     private int activeRedArrows = 0;
     private int activeBlueArrows = 0;
+    private int activePickupBlips = 0;
+    private int activeHPBlips = 0;
 
+    private UIManager uiManager;
     private void Start()
     {
-        int initialPoolSize = 20;
-        for (int i = 0; i < initialPoolSize; i++)
+        for (int i = 0; i < 5; i++)
         {
             redTeamBlips.Add(CreateBlip(redTeamBlipPrefab));
             blueTeamBlips.Add(CreateBlip(blueTeamBlipPrefab));
             redTeamArrows.Add(CreateBlip(redArrowBlipPrefab));
             blueTeamArrows.Add(CreateBlip(blueArrowBlipPrefab));
         }
-
+        for (int i = 0; i < 50; i++)
+        {
+            hpBlips.Add(CreateBlip(hpBlipPrefab));
+            pickupBlips.Add(CreateBlip(pickupBlipPrefab));
+        }
+        uiManager = GetComponent<UIManager>();
         InitializeLocalPlayerBlip();
     }
 
@@ -56,6 +67,10 @@ public class RadarSystem : MonoBehaviour
     {
         UpdateRadar();
         UpdateDirectionMarkers();
+        if (uiManager == null)
+            return; 
+        UpdateHPBlips(uiManager);
+        UpdatePickupBlips(uiManager);
     }
 
     private void InitializeLocalPlayerBlip()
@@ -64,20 +79,22 @@ public class RadarSystem : MonoBehaviour
             return;
 
         isRedPlayer = TeamManager.Instance.GetTeam(localPlayer.OwnerClientId) == Team.RedTeam;
-        GameObject blip = GetOrCreateBlip(isRedPlayer);
+        GameObject blip = isRedPlayer ? Instantiate(redTeamBlipPrefab, radarPanel.transform) : Instantiate(blueTeamBlipPrefab, radarPanel.transform);
         playerBlip = blip.GetComponent<RectTransform>();
 
         playerBlip.gameObject.SetActive(true);
+        playerBlip.transform.SetParent(radarPanel.transform);
         playerBlip.anchoredPosition = Vector2.zero;
         playerBlip.localRotation = Quaternion.identity;
+        
     }
 
     private void UpdateRadar()
     {
         if (SpawnManager.Instance == null) return;
 
-        activeRedBlips = isRedPlayer ? 1 : 0;
-        activeBlueBlips = isRedPlayer ? 0 : 1;
+        activeRedBlips = 0;
+        activeBlueBlips = 0;
         activeRedArrows = 0;
         activeBlueArrows = 0;
 
@@ -94,7 +111,7 @@ public class RadarSystem : MonoBehaviour
 
             bool isRedTeam = TeamManager.Instance.GetTeam(otherPlayer.OwnerClientId) == Team.RedTeam;
             Vector2 radarPos = GetBlipPosition(relativePosition, out bool isOffScreen);
-            float fadeAmount = CalculateBlipFade(relativePosition, distance);
+            float fadeAmount = CalculateBlipFade(distance);
 
             if (isOffScreen)
                 HandleDirectionalArrow(radarPos, isRedTeam, playerYaw);
@@ -130,33 +147,28 @@ public class RadarSystem : MonoBehaviour
     }
     private Vector2 RotateBlipPosition(Vector2 position, float playerYaw)
     {
-        float angle = -playerYaw * Mathf.Deg2Rad;
+        float angle = playerYaw * Mathf.Deg2Rad;
         float cos = Mathf.Cos(angle);
         float sin = Mathf.Sin(angle);
 
-        return new Vector2(
-            cos * position.x - sin * position.y,
-            sin * position.x + cos * position.y
-        );
+        return new Vector2(cos * position.x - sin * position.y, sin * position.x + cos * position.y);
     }
     private void UpdateDirectionMarkers()
     {
         if (!directionMarkerContainer) return;
 
         float playerYaw = player.eulerAngles.y;
-        directionMarkerContainer.localRotation = Quaternion.Euler(0, 0, -playerYaw);
+        directionMarkerContainer.localRotation = Quaternion.Euler(0, 0, playerYaw);
+        blipContainer.localRotation = Quaternion.Euler(0, 0, playerYaw);
     }
 
-    private Vector2 GetBlipPosition(Vector3 relativePosition, out bool isOffScreen)
+    private Vector2 GetBlipPosition(Vector3 relativePos, out bool isOffScreen)
     {
-        Vector2 radarPos = new(
-            (relativePosition.x / radarRange) * radarSize,
-            (relativePosition.z / radarRange) * radarSize
-        );
+        Vector2 radarPos = new Vector2(relativePos.x, relativePos.z) / radarRange * radarSize;
 
         isOffScreen = radarPos.magnitude > radarSize * 0.9f;
-        if (isOffScreen)
-            radarPos = radarPos.normalized * ((radarSize * 0.9f) - edgeBuffer);
+        //if (isOffScreen)
+        //    radarPos = radarPos.normalized * ((radarSize * 0.9f) - edgeBuffer);
         return radarPos;
     }
 
@@ -171,7 +183,14 @@ public class RadarSystem : MonoBehaviour
         pool.Add(newBlip);
         return newBlip;
     }
+    private GameObject GetOrCreateBlip(List<GameObject> pool, GameObject prefab, int count)
+    {
+        if(count<pool.Count) return pool[count];
 
+        GameObject newBlip = Instantiate(prefab, blipContainer);
+        pool.Add(newBlip);
+        return newBlip;
+    }
     private GameObject GetOrCreateArrowBlip(bool isRedTeam)
     {
         List<GameObject> pool = isRedTeam ? redTeamArrows : blueTeamArrows;
@@ -191,10 +210,7 @@ public class RadarSystem : MonoBehaviour
         return blip;
     }
 
-    private float CalculateBlipFade(Vector3 relativePosition, float distance)
-    {
-        return Mathf.InverseLerp(maxFadeDistance, minFadeDistance, distance);
-    }
+    private float CalculateBlipFade(float distance) => Mathf.InverseLerp(maxFadeDistance, minFadeDistance, distance);
 
     private void DeactivateUnusedBlips()
     {
@@ -209,4 +225,39 @@ public class RadarSystem : MonoBehaviour
         for (int i = activeCount; i < pool.Count; i++)
             if (pool[i].activeSelf) pool[i].SetActive(false);
     }
+    private void UpdateHPBlips(UIManager uiManager)
+    {
+        activeHPBlips = 0;
+
+        foreach (Collider col in uiManager.detectedColliders)
+        {
+            if (col == null || !col.TryGetComponent(out HealthComponent _) || col.TryGetComponent(out PlayerController _)) continue;
+            Vector3 relativePosition = col.transform.position - player.position;
+            if (relativePosition.magnitude > radarRange) continue;
+            GameObject blip = GetOrCreateBlip(hpBlips, hpBlipPrefab, activeHPBlips);
+            blip.GetComponent<RectTransform>().anchoredPosition = GetBlipPosition(relativePosition, out _);
+            blip.SetActive(true);
+            activeHPBlips++;
+        }
+        DeactivateBlipPool(hpBlips, activeHPBlips);
+    }
+
+    private void UpdatePickupBlips(UIManager uiManager)
+    {
+        activePickupBlips = 0;
+
+        foreach (Collider col in uiManager.detectedColliders)
+        {
+            if (col == null || !col.TryGetComponent(out PickUp pickup) || !pickup.isActive) continue;
+            Vector3 relativePosition = col.transform.position - player.position;
+            if (relativePosition.magnitude > radarRange) continue;
+            GameObject blip = GetOrCreateBlip(pickupBlips, pickupBlipPrefab, activePickupBlips);
+            blip.GetComponent<RectTransform>().anchoredPosition = GetBlipPosition(relativePosition, out _);
+            blip.SetActive(true);
+            activePickupBlips++;
+        }
+
+        DeactivateBlipPool(pickupBlips, activePickupBlips);
+    }
+
 }

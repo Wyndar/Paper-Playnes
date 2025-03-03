@@ -12,7 +12,7 @@ public class UIManager : MonoBehaviour
 
     private Dictionary<HealthComponent, HUDMarker> activeMarkers = new();
     private List<HUDMarker> markerPool = new();
-    private Collider[] detectedColliders = new Collider[20];
+    public Collider[] detectedColliders = new Collider[100];
 
     private void Start() => InitializeMarkerPool();
 
@@ -84,7 +84,7 @@ public class UIManager : MonoBehaviour
             return;
 
         HUDMarker marker = activeMarkers[target];
-        marker.Cleanup();
+        marker.Cleanup(false);
         activeMarkers.Remove(target);
     }
 }

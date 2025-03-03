@@ -44,6 +44,7 @@ public class HUDMarker : MonoBehaviour
             return;
         UpdateHP(targetHealth.currentHP, targetHealth.maxHP);
         targetHealth.OnHealthChanged += UpdateHP;
+        targetHealth.OnDeath += Cleanup;
     }
 
     public void UpdateMarker(Camera playerCamera)
@@ -111,11 +112,13 @@ public class HUDMarker : MonoBehaviour
     }
 
 
-    public void Cleanup()
+    public void Cleanup(bool isDead)
     {
         if (targetHealth != null)
+        {
             targetHealth.OnHealthChanged -= UpdateHP;
-
+            targetHealth.OnDeath -= Cleanup;
+        }
         targetObject = null;
         targetHealth = null;
         targetRigidbody = null;

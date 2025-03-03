@@ -11,8 +11,6 @@ namespace GolemKin.ToonAirplaneController
         #region Fields
         
         public float deactivateTime = 1f;
-        
-        private new GameObject particleSystem;
 
         #endregion
 
