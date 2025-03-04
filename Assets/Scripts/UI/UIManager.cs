@@ -1,18 +1,22 @@
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
     public Camera playerCamera;
-    public GameObject markerPrefab;
+    public GameObject destructibleMarkerPrefab;
     public Transform markerContainer;
     public float detectionRadius = 200f;
     public HealthComponent playerHealth;
+    public TMP_Text primaryWeaponAmmoCountText;
+    public TMP_Text primaryWeaponMaxAmmoCountText;
 
-    private Dictionary<HealthComponent, HUDMarker> activeMarkers = new();
-    private List<HUDMarker> markerPool = new();
-    public Collider[] detectedColliders = new Collider[100];
+    private Dictionary<HealthComponent, HUDMarker> activedestructibleMarkers = new();
+    private List<HUDMarker> destructibleMarkerPool = new();
+
+    [HideInInspector] public Collider[] detectedColliders = new Collider[100];
 
     private void Start() => InitializeMarkerPool();
 
@@ -22,25 +26,25 @@ public class UIManager : MonoBehaviour
     {
         for (int i = 0; i < 10; i++)
         {
-            GameObject marker = Instantiate(markerPrefab, markerContainer);
+            GameObject marker = Instantiate(destructibleMarkerPrefab, markerContainer);
             marker.SetActive(false);
             HUDMarker hudMarker = marker.GetComponent<HUDMarker>();
-            markerPool.Add(hudMarker);
+            destructibleMarkerPool.Add(hudMarker);
         }
     }
 
     private HUDMarker GetPooledMarker()
     {
-        var availableMarker = markerPool.FirstOrDefault(m => !m.gameObject.activeSelf);
+        var availableMarker = destructibleMarkerPool.FirstOrDefault(m => !m.gameObject.activeSelf);
         if (availableMarker != null)
         {
             availableMarker.gameObject.SetActive(true);
             return availableMarker;
         }
 
-        GameObject newMarker = Instantiate(markerPrefab, markerContainer);
+        GameObject newMarker = Instantiate(destructibleMarkerPrefab, markerContainer);
         HUDMarker newHudMarker = newMarker.GetComponent<HUDMarker>();
-        markerPool.Add(newHudMarker);
+        destructibleMarkerPool.Add(newHudMarker);
         return newHudMarker;
     }
 
@@ -52,17 +56,17 @@ public class UIManager : MonoBehaviour
         {
             if (target == playerHealth)
                 continue;
-            if (!activeMarkers.ContainsKey(target))
+            if (!activedestructibleMarkers.ContainsKey(target))
             {
                 HUDMarker marker = GetPooledMarker();
                 marker.Initialize(target.gameObject, this);
-                activeMarkers[target] = marker;
+                activedestructibleMarkers[target] = marker;
             }
 
-            activeMarkers[target].UpdateMarker(playerCamera);
+            activedestructibleMarkers[target].UpdateMarker(playerCamera);
         }
 
-        List<HealthComponent> toRemove = activeMarkers.Keys.Where(target => !detectedTargets.Contains(target)).ToList();
+        List<HealthComponent> toRemove = activedestructibleMarkers.Keys.Where(target => !detectedTargets.Contains(target)).ToList();
         foreach (var target in toRemove)
             RemoveMarker(target);
     }
@@ -80,11 +84,11 @@ public class UIManager : MonoBehaviour
 
     private void RemoveMarker(HealthComponent target)
     {
-        if (!activeMarkers.ContainsKey(target))
+        if (!activedestructibleMarkers.ContainsKey(target))
             return;
 
-        HUDMarker marker = activeMarkers[target];
+        HUDMarker marker = activedestructibleMarkers[target];
         marker.Cleanup(false);
-        activeMarkers.Remove(target);
+        activedestructibleMarkers.Remove(target);
     }
 }

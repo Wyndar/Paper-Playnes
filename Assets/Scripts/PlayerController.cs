@@ -65,8 +65,6 @@ public class PlayerController : NetworkBehaviour
     [Header("Equipped Weapon Settings")]
     [SerializeField] private Weapon primaryWeapon;
     [SerializeField] private List<Weapon> secondaryWeapons;
-    public TMP_Text primaryWeaponAmmoCountText;
-    public TMP_Text primaryWeaponMaxAmmoCountText;
 
     [Header("Wing Trails")]
     [SerializeField] private TrailRenderer leftWingTrail;

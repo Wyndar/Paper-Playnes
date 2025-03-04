@@ -8,8 +8,10 @@ public class AltimeterSystem : MonoBehaviour
     public Transform player;
     public Slider altitudeSlider;
     public TMP_Text altitudeText;
-    [Header("For reference, set by player")]
+
+    [Tooltip("For reference only, Set this at PlayerController")]
     public float minAltitude = 0f;
+    [Tooltip("For reference only, Set this at PlayerController")]
     public float maxAltitude = 500f;
 
     [Header("Warning System")]
