@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 5170196503594172241}
   - component: {fileID: 1750187369206127436}
   - component: {fileID: 7619173855010495697}
+  - component: {fileID: 2451699441020469448}
+  - component: {fileID: 9196810821895804511}
   m_Layer: 6
   m_Name: Pick Up
   m_TagString: Untagged
@@ -123,3 +125,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pickupName: 
   isActive: 1
+--- !u!54 &2451699441020469448
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4808188809214049078}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &9196810821895804511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4808188809214049078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 598de849054966e4d8a97c4ee2d9bd1a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableRotation: 1
+  rotationSpeed: 30
+  enablePulse: 1
+  pulseSpeed: 1
+  pulseIntensity: 0.2
+  pulsePauseDuration: 0.3
+  enableFloat: 1
+  floatSpeed: 1
+  floatHeight: 0.5

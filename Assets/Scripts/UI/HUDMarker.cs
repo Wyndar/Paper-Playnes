@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class HUDMarker : MonoBehaviour
 {
+    public enum HUDMarkerType { Undefined, Damageable, PickUp }
+    public HUDMarkerType markerType = HUDMarkerType.Undefined;
     public GameObject targetObject;
     public TMP_Text nameText;
     public TMP_Text distanceText;
@@ -23,6 +25,8 @@ public class HUDMarker : MonoBehaviour
     private void Awake()
     {
         markerTransform = GetComponent<RectTransform>();
+        if (markerType != HUDMarkerType.Damageable)
+            return;
         fillImages = new Image[hpSliders.Length];
         backgroundImages = new Image[hpSliders.Length];
         for (int i = 0; i < hpSliders.Length; i++)
@@ -36,11 +40,9 @@ public class HUDMarker : MonoBehaviour
     {
         this.manager = manager;
         targetObject = target;
-        targetHealth = target.GetComponent<HealthComponent>();
         targetRigidbody = target.GetComponent<Rigidbody>();
-
         nameText.text = target.name;
-        if (targetHealth == null)
+        if (!target.TryGetComponent(out HealthComponent targetHealth))
             return;
         UpdateHP(targetHealth.currentHP, targetHealth.maxHP);
         targetHealth.OnHealthChanged += UpdateHP;

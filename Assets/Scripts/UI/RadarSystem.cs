@@ -113,7 +113,6 @@ public class RadarSystem : MonoBehaviour
 
             Vector3 relativePosition = otherPlayer.transform.position - player.position;
             float distance = relativePosition.magnitude;
-            if (distance > radarRange) continue;
 
             bool isRedTeam = TeamManager.Instance.GetTeam(otherPlayer.OwnerClientId) == Team.RedTeam;
             Vector2 radarPos = GetBlipPosition(relativePosition, out bool isOffScreen);

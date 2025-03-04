@@ -7,6 +7,7 @@ public class UIManager : MonoBehaviour
 {
     public Camera playerCamera;
     public GameObject damageableMarkerPrefab;
+    public GameObject pickUpMarkerPrefab;
     public Transform markerContainer;
     public float detectionRadius = 200f;
     public HealthComponent playerHealth;
@@ -16,6 +17,10 @@ public class UIManager : MonoBehaviour
 #pragma warning disable IDE0044
     private Dictionary<HealthComponent, HUDMarker> activeDamageableMarkers = new();
     private List<HUDMarker> damageableMarkerPool = new();
+    private List<HealthComponent> damageableTargets = new();
+    private Dictionary<PickUp, HUDMarker> activePickUpMarkers = new();
+    private List<HUDMarker> pickUpMarkerPool = new();
+    private List<PickUp> pickUpTargets = new();
 #pragma warning restore IDE0044
 
     [HideInInspector] public Collider[] detectedColliders = new Collider[100];
@@ -28,79 +33,89 @@ public class UIManager : MonoBehaviour
     {
         for (int i = 0; i < 10; i++)
         {
-            GameObject marker = Instantiate(damageableMarkerPrefab, markerContainer);
-            marker.SetActive(false);
-            HUDMarker hudMarker = marker.GetComponent<HUDMarker>();
-            damageableMarkerPool.Add(hudMarker);
+            CreateNewMarker(damageableMarkerPool, damageableMarkerPrefab);
+            CreateNewMarker(pickUpMarkerPool, pickUpMarkerPrefab);
         }
     }
-
-    private HUDMarker GetPooledMarker()
+    private HUDMarker GetPooledMarker(List<HUDMarker> markerPool, GameObject markerPrefab)
     {
-        var availableMarker = damageableMarkerPool.FirstOrDefault(m => !m.gameObject.activeSelf);
+        var availableMarker = markerPool.FirstOrDefault(m => !m.gameObject.activeSelf);
         if (availableMarker != null)
         {
             availableMarker.gameObject.SetActive(true);
             return availableMarker;
         }
 
-        GameObject newMarker = Instantiate(damageableMarkerPrefab, markerContainer);
+       return CreateNewMarker(markerPool, markerPrefab);
+    }
+    private HUDMarker CreateNewMarker(List<HUDMarker> markerPool, GameObject markerPrefab)
+    {
+        GameObject newMarker = Instantiate(markerPrefab, markerContainer);
         HUDMarker newHudMarker = newMarker.GetComponent<HUDMarker>();
-        damageableMarkerPool.Add(newHudMarker);
+        markerPool.Add(newHudMarker);
         return newHudMarker;
     }
-
     private void UpdateTargetMarkers()
     {
-        List<HealthComponent> detectedTargets = GetAllTargetsInRange();
+        GetAllTargetsInRange();
 
-        foreach (var target in detectedTargets)
+        UpdateMarkers(damageableTargets, activeDamageableMarkers,damageableMarkerPool,damageableMarkerPrefab);
+        UpdateMarkers(pickUpTargets, activePickUpMarkers, pickUpMarkerPool, pickUpMarkerPrefab);
+    }
+
+    private void UpdateMarkers<T>(List<T> targets, Dictionary<T, HUDMarker> activeMarkers, List<HUDMarker> markerPool, GameObject markerPrefab) where T : MonoBehaviour
+    {
+        foreach (var target in targets)
         {
-            if (target == playerHealth)
+            if (target is HealthComponent healthTarget && healthTarget == playerHealth)
                 continue;
-            if (!activeDamageableMarkers.ContainsKey(target))
+
+            if (!activeMarkers.ContainsKey(target))
             {
-                HUDMarker marker = GetPooledMarker();
+                HUDMarker marker = GetPooledMarker(markerPool, markerPrefab);
+                marker.gameObject.SetActive(true);
                 marker.Initialize(target.gameObject, this);
-                activeDamageableMarkers[target] = marker;
+                activeMarkers[target] = marker;
             }
 
-            activeDamageableMarkers[target].UpdateMarker(playerCamera);
+            activeMarkers[target].UpdateMarker(playerCamera);
         }
 
-        List<HealthComponent> toRemove = activeDamageableMarkers.Keys
-            .Where(target => !detectedTargets.Contains(target) || IsOutOfView(target))
+        List<T> toRemove = activeMarkers.Keys
+            .Where(target => !targets.Contains(target) || IsOutOfView(target.transform))
             .ToList();
 
         foreach (var target in toRemove)
-            RemoveMarker(target);
+            RemoveItem(activeMarkers, target);
     }
 
-    private bool IsOutOfView(HealthComponent target)
+
+    private bool IsOutOfView(Transform target)
     {
-        Vector3 viewportPos = playerCamera.WorldToViewportPoint(target.transform.position);
+        Vector3 viewportPos = playerCamera.WorldToViewportPoint(target.position);
         return viewportPos.z < 0 || viewportPos.x < 0 || viewportPos.x > 1 || viewportPos.y < 0 || viewportPos.y > 1;
     }
 
 
-    private List<HealthComponent> GetAllTargetsInRange()
+    private void GetAllTargetsInRange()
     {
-        List<HealthComponent> targets = new();
+        damageableTargets.Clear();
+        pickUpTargets.Clear();
         int numColliders = Physics.OverlapSphereNonAlloc(playerCamera.transform.position, detectionRadius, detectedColliders);
 
         for (int i = 0; i < numColliders; i++)
             if (detectedColliders[i].TryGetComponent(out HealthComponent health))
-                targets.Add(health);
-        return targets;
+                damageableTargets.Add(health);
+            else if (detectedColliders[i].TryGetComponent(out PickUp pickUp))
+                pickUpTargets.Add(pickUp);
     }
 
-    private void RemoveMarker(HealthComponent target)
+    private void RemoveItem<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey target) where TValue : HUDMarker
     {
-        if (!activeDamageableMarkers.ContainsKey(target))
+        if (!dictionary.ContainsKey(target))
             return;
 
-        HUDMarker marker = activeDamageableMarkers[target];
-        marker.Cleanup(false);
-        activeDamageableMarkers.Remove(target);
+        dictionary[target].Cleanup(false);
+        dictionary.Remove(target);
     }
 }

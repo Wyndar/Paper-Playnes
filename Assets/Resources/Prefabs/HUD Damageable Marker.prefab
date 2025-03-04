@@ -11,12 +11,12 @@ GameObject:
   - component: {fileID: 7406553697834229689}
   - component: {fileID: 3204228812344097243}
   m_Layer: 5
-  m_Name: HUD Marker
+  m_Name: HUD Damageable Marker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &7406553697834229689
 RectTransform:
   m_ObjectHideFlags: 0
@@ -52,6 +52,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abf1f027d06c0c648b9dd3d454f952cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  markerType: 1
   targetObject: {fileID: 0}
   nameText: {fileID: 8360935625706686620}
   distanceText: {fileID: 6803478944101265533}
