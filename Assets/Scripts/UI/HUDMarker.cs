@@ -78,7 +78,6 @@ public class HUDMarker : MonoBehaviour
         sliderContainer.localScale = Vector3.one * scaleFactor;
     }
 
-
     private void AnimateMarker()
     {
         if (sliderContainer == null) return;

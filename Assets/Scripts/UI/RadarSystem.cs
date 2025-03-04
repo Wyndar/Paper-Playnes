@@ -30,14 +30,14 @@ public class RadarSystem : MonoBehaviour
     public RectTransform directionMarkerContainer;
 
     private bool isRedPlayer = false;
-    #pragma warning disable IDE0044
+#pragma warning disable IDE0044
     private List<GameObject> redTeamBlips = new();
     private List<GameObject> blueTeamBlips = new();
     private List<GameObject> redTeamArrows = new();
     private List<GameObject> blueTeamArrows = new();
     private List<GameObject> hpBlips = new();
     private List<GameObject> pickupBlips = new();
-    #pragma warning restore IDE0044
+#pragma warning restore IDE0044
 
     private int activeRedBlips = 0;
     private int activeBlueBlips = 0;

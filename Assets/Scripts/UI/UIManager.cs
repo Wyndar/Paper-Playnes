@@ -6,15 +6,17 @@ using TMPro;
 public class UIManager : MonoBehaviour
 {
     public Camera playerCamera;
-    public GameObject destructibleMarkerPrefab;
+    public GameObject damageableMarkerPrefab;
     public Transform markerContainer;
     public float detectionRadius = 200f;
     public HealthComponent playerHealth;
     public TMP_Text primaryWeaponAmmoCountText;
     public TMP_Text primaryWeaponMaxAmmoCountText;
 
-    private Dictionary<HealthComponent, HUDMarker> activedestructibleMarkers = new();
-    private List<HUDMarker> destructibleMarkerPool = new();
+#pragma warning disable IDE0044
+    private Dictionary<HealthComponent, HUDMarker> activeDamageableMarkers = new();
+    private List<HUDMarker> damageableMarkerPool = new();
+#pragma warning restore IDE0044
 
     [HideInInspector] public Collider[] detectedColliders = new Collider[100];
 
@@ -26,25 +28,25 @@ public class UIManager : MonoBehaviour
     {
         for (int i = 0; i < 10; i++)
         {
-            GameObject marker = Instantiate(destructibleMarkerPrefab, markerContainer);
+            GameObject marker = Instantiate(damageableMarkerPrefab, markerContainer);
             marker.SetActive(false);
             HUDMarker hudMarker = marker.GetComponent<HUDMarker>();
-            destructibleMarkerPool.Add(hudMarker);
+            damageableMarkerPool.Add(hudMarker);
         }
     }
 
     private HUDMarker GetPooledMarker()
     {
-        var availableMarker = destructibleMarkerPool.FirstOrDefault(m => !m.gameObject.activeSelf);
+        var availableMarker = damageableMarkerPool.FirstOrDefault(m => !m.gameObject.activeSelf);
         if (availableMarker != null)
         {
             availableMarker.gameObject.SetActive(true);
             return availableMarker;
         }
 
-        GameObject newMarker = Instantiate(destructibleMarkerPrefab, markerContainer);
+        GameObject newMarker = Instantiate(damageableMarkerPrefab, markerContainer);
         HUDMarker newHudMarker = newMarker.GetComponent<HUDMarker>();
-        destructibleMarkerPool.Add(newHudMarker);
+        damageableMarkerPool.Add(newHudMarker);
         return newHudMarker;
     }
 
@@ -56,20 +58,30 @@ public class UIManager : MonoBehaviour
         {
             if (target == playerHealth)
                 continue;
-            if (!activedestructibleMarkers.ContainsKey(target))
+            if (!activeDamageableMarkers.ContainsKey(target))
             {
                 HUDMarker marker = GetPooledMarker();
                 marker.Initialize(target.gameObject, this);
-                activedestructibleMarkers[target] = marker;
+                activeDamageableMarkers[target] = marker;
             }
 
-            activedestructibleMarkers[target].UpdateMarker(playerCamera);
+            activeDamageableMarkers[target].UpdateMarker(playerCamera);
         }
 
-        List<HealthComponent> toRemove = activedestructibleMarkers.Keys.Where(target => !detectedTargets.Contains(target)).ToList();
+        List<HealthComponent> toRemove = activeDamageableMarkers.Keys
+            .Where(target => !detectedTargets.Contains(target) || IsOutOfView(target))
+            .ToList();
+
         foreach (var target in toRemove)
             RemoveMarker(target);
     }
+
+    private bool IsOutOfView(HealthComponent target)
+    {
+        Vector3 viewportPos = playerCamera.WorldToViewportPoint(target.transform.position);
+        return viewportPos.z < 0 || viewportPos.x < 0 || viewportPos.x > 1 || viewportPos.y < 0 || viewportPos.y > 1;
+    }
+
 
     private List<HealthComponent> GetAllTargetsInRange()
     {
@@ -84,11 +96,11 @@ public class UIManager : MonoBehaviour
 
     private void RemoveMarker(HealthComponent target)
     {
-        if (!activedestructibleMarkers.ContainsKey(target))
+        if (!activeDamageableMarkers.ContainsKey(target))
             return;
 
-        HUDMarker marker = activedestructibleMarkers[target];
+        HUDMarker marker = activeDamageableMarkers[target];
         marker.Cleanup(false);
-        activedestructibleMarkers.Remove(target);
+        activeDamageableMarkers.Remove(target);
     }
 }
