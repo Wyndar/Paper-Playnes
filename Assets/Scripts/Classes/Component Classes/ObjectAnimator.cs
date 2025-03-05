@@ -1,5 +1,4 @@
 using UnityEngine;
-
 public class ObjectAnimator : MonoBehaviour
 {
     [Header("Rotation Settings")]

@@ -4,11 +4,11 @@ using UnityEngine.UI;
 
 public class RadarTest: MonoBehaviour
 {
-    public RectTransform radarUI;  // Assign a UI panel as radar background
-    public Transform player;       // Assign the player object
+    public RectTransform radarUI; 
+    public Transform player;      
     public float radarRange = 50f;
     public float radarSize = 100f;
-    public GameObject blipPrefab;  // Assign a small UI element for blips
+    public GameObject blipPrefab; 
     public Transform blipContainer;
 
     private List<GameObject> activeBlips = new();
