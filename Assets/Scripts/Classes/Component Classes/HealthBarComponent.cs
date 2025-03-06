@@ -4,20 +4,17 @@ using UnityEngine.UI;
 [RequireComponent(typeof(HealthComponent))]
 public class HealthBar : MonoBehaviour
 {
-    public Slider healthSlider;
+    private Slider healthSlider;
     private HealthComponent health;
 
-    public void Start()
+    public void InitializeHealthBar(Slider slider)
     {
-        health = GetComponent<HealthComponent>();      
-        if (healthSlider != null)
-        {
-            health.OnHealthChanged += UpdateHealthBar;
-            healthSlider.maxValue = health.maxHP;
-            healthSlider.value = health.maxHP;
-        }
+        health = GetComponent<HealthComponent>();
+        healthSlider = slider;
+        health.OnHealthChanged += UpdateHealthBar;
+        healthSlider.maxValue = health.MaxHP;
+        healthSlider.value = health.MaxHP;
     }
-
     public void UpdateHealthBar(int currentHP, int maxHP) => healthSlider.value = currentHP;
 }
 

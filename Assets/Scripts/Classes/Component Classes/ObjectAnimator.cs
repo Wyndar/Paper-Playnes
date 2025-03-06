@@ -1,4 +1,5 @@
 using UnityEngine;
+[ExecuteAlways]
 public class ObjectAnimator : MonoBehaviour
 {
     [Header("Rotation Settings")]
@@ -51,25 +52,21 @@ public class ObjectAnimator : MonoBehaviour
             return;
         }
 
-        // Time-based progression from 0 to 1 (smooth pulse cycle)
         pulseTimer += Time.deltaTime * pulseSpeed;
         float progress = isExpanding ? pulseTimer : 1 - pulseTimer;
 
-        // Use an easing function to accelerate and decelerate growth
         float easedProgress = Mathf.SmoothStep(0, 1, progress);
         float scaleMultiplier = 1f + easedProgress * pulseIntensity;
 
         transform.localScale = originalScale * scaleMultiplier;
 
-        // Check if the phase is complete
         if (pulseTimer >= 1f)
         {
             pulseTimer = 0f;
-            isExpanding = !isExpanding; // Switch between expanding & shrinking
-            pauseTimer = pulsePauseDuration; // Brief pause
+            isExpanding = !isExpanding;
+            pauseTimer = pulsePauseDuration; 
         }
     }
-
 
     private void FloatObject()
     {

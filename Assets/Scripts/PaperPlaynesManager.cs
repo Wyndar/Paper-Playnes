@@ -6,6 +6,7 @@ public class PaperPlaynesManager : MonoBehaviour
     public GameObject destBox;
     public GameObject puBox;
     public GameObject birds;
+    public GameObject mines;
     public int spawnBoxCount;
     public Renderer spawnRenderer;
 
@@ -20,6 +21,7 @@ public class PaperPlaynesManager : MonoBehaviour
         for (int i = 0; i < spawnBoxCount; i++)
         {
             Instantiate(puBox).transform.SetParent(transform);
+            Instantiate(mines).transform.SetParent(transform);
             Instantiate(destBox).transform.SetParent(transform);
             GameObject bird = Instantiate(birds);
             bird.transform.SetParent(transform);

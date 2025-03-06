@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class UIManager : MonoBehaviour
     public Transform markerContainer;
     public float detectionRadius = 200f;
     public HealthComponent playerHealth;
+    public Slider playerHealthBar;
     public TMP_Text primaryWeaponAmmoCountText;
     public TMP_Text primaryWeaponMaxAmmoCountText;
 

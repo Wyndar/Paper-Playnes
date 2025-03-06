@@ -7,7 +7,6 @@ using Unity.Services.CloudSave;
 using Unity.Services.Multiplayer;
 using Unity.Services.Authentication;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class MultiplayerManager : MonoBehaviour
 {
@@ -31,6 +30,7 @@ public class MultiplayerManager : MonoBehaviour
     }
     async void Start()
     {
+        LobbyUIManager.Instance.ShowLoading("Retrieving Player Data");
         await UnityServices.InitializeAsync();
         if (!AuthenticationService.Instance.IsSignedIn)
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
@@ -40,6 +40,7 @@ public class MultiplayerManager : MonoBehaviour
         ProfileManager.Instance.Initialize();
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+        LobbyUIManager.Instance.HideLoading();
     }
     public static async Task SetPlayerInfo(string name, int level)
     {
@@ -111,6 +112,7 @@ public class MultiplayerManager : MonoBehaviour
             currentSession = await MultiplayerService.Instance.CreateSessionAsync(sessionOptions);
             Debug.Log($"Game session created! Session ID: {currentSession.Id}");
             NetworkManager.Singleton.StartHost();
+            SceneLoadingManager.Instance.InitializeSceneLoader();
         }
         catch (Exception e)
         {
@@ -125,6 +127,7 @@ public class MultiplayerManager : MonoBehaviour
             await MultiplayerService.Instance.JoinSessionByIdAsync(sessionId);
             Debug.Log($"Joined game session: {sessionId}");
             NetworkManager.Singleton.StartClient();
+            SceneLoadingManager.Instance.InitializeSceneLoader();
         }
         catch (Exception e)
         {
@@ -175,7 +178,7 @@ public class MultiplayerManager : MonoBehaviour
         if (NetworkManager.Singleton.IsServer)
         {
             Debug.Log("Starting game session, changing scene...");
-            NetworkManager.Singleton.SceneManager.LoadScene("Game", LoadSceneMode.Single);
+            SceneLoadingManager.Instance.LoadScene(LoadingMode.Network, "Game");
         }
     }
     public void StartGameSession()

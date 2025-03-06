@@ -125,6 +125,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   destructionVFX: {fileID: 130346, guid: 061d98fffe21ebe44907c94636b572f2, type: 3}
   destructionSFX: {fileID: 8300000, guid: 4b8e51dd99d3ccd46b9f3a988f79c296, type: 3}
+  shouldRespawn: 0
+  isDelayedRespawn: 0
+  respawnLoadScreen: {fileID: 0}
 --- !u!114 &7645564889722665742
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -137,8 +140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef92060797c173045bf41bbdd7e78f44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHP: 100
-  currentHP: 0
+  destructible: {fileID: 11400000, guid: 1d147fba6237304429f3bd26635b4fcf, type: 2}
   destructibleComponent: {fileID: 0}
 --- !u!114 &4730976131055133425
 MonoBehaviour:
@@ -152,4 +154,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47aaa2156ce106049b83a0664a9dd909, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthSlider: {fileID: 0}

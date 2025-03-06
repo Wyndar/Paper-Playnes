@@ -111,6 +111,7 @@ public class PlayerController : NetworkBehaviour
         UIManager manager = LGM.GetComponent<UIManager>();
         manager.playerHealth = healthComponent;
         manager.enabled = true;
+        healthBar.InitializeHealthBar(manager.playerHealthBar);
 
         RadarSystem radarSystem = LGM.GetComponent<RadarSystem>();
         radarSystem.player = transform;

@@ -5296,8 +5296,6 @@ MonoBehaviour:
   cockpitWeaponObject: {fileID: 0}
   primaryWeapon: {fileID: 7890972265110820531}
   secondaryWeapons: []
-  primaryWeaponAmmoCountText: {fileID: 0}
-  primaryWeaponMaxAmmoCountText: {fileID: 0}
   leftWingTrail: {fileID: 1953311085676840271}
   rightWingTrail: {fileID: 8104407416313711274}
   trailActivationThreshold: 15
@@ -5461,8 +5459,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef92060797c173045bf41bbdd7e78f44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHP: 100
-  currentHP: 0
+  destructible: {fileID: 11400000, guid: c662e6e89f43d8d418ee2e4f77a54abe, type: 2}
   destructibleComponent: {fileID: 0}
 --- !u!114 &7090727553298456833
 MonoBehaviour:
@@ -5476,7 +5473,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47aaa2156ce106049b83a0664a9dd909, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthSlider: {fileID: 0}
 --- !u!114 &1741764769842695537
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5491,6 +5487,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   destructionVFX: {fileID: 0}
   destructionSFX: {fileID: 0}
+  shouldRespawn: 0
+  isDelayedRespawn: 0
+  respawnLoadScreen: {fileID: 0}
 --- !u!1 &3615927806441666436
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-
+[ExecuteAlways]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(LineRenderer))]
 public class ContactField : MonoBehaviour

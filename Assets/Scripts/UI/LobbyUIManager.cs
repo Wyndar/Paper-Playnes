@@ -19,8 +19,10 @@ public class LobbyUIManager : MonoBehaviour
     public GameObject loadingPanel, roomPanel, messagePanel;
     public TMP_Text loadingText, messageText, roomHeaderText;
 
+#pragma warning disable IDE0044
     private List<SessionPrefab> sessionPool = new();
     private List<PlayerEntryPrefab> playerEntries = new();
+#pragma warning restore IDE0044
     private SessionPrefab selectedSession;
 
     public static LobbyUIManager Instance { get; private set; }
@@ -234,13 +236,13 @@ public class LobbyUIManager : MonoBehaviour
         }
     }
 
-    private void ShowLoading(string message)
+    public void ShowLoading(string message)
     {
         loadingText.text = message;
         loadingPanel.SetActive(true);
     }
 
-    private void HideLoading() => loadingPanel.SetActive(false);
+    public void HideLoading() => loadingPanel.SetActive(false);
 
     private void ShowMessage(string message, bool isError)
     {

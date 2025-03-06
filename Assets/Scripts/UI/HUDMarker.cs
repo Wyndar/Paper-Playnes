@@ -44,7 +44,7 @@ public class HUDMarker : MonoBehaviour
         nameText.text = target.name;
         if (!target.TryGetComponent(out HealthComponent targetHealth))
             return;
-        UpdateHP(targetHealth.currentHP, targetHealth.maxHP);
+        UpdateHP(targetHealth.CurrentHP, targetHealth.MaxHP);
         targetHealth.OnHealthChanged += UpdateHP;
         targetHealth.OnDeath += Cleanup;
     }
