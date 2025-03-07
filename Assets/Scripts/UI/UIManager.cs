@@ -1,12 +1,15 @@
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections;
 using TMPro;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    public GameEvent respawnEvent;
     public Camera playerCamera;
+    public GameObject respawningPanel;
     public GameObject damageableMarkerPrefab;
     public GameObject pickUpMarkerPrefab;
     public Transform markerContainer;
@@ -27,8 +30,30 @@ public class UIManager : MonoBehaviour
 
     [HideInInspector] public Collider[] detectedColliders = new Collider[100];
 
-    private void Start() => InitializeMarkerPool();
+    private void Start()
+    {
+        InitializeMarkerPool();
+        respawnEvent.OnEventRaised += EnableRespawnPanel;
+    }
+    private void OnDisable() => respawnEvent.OnEventRaised -= EnableRespawnPanel;
+    private void EnableRespawnPanel(GameObject go)
+    {
+        respawningPanel.SetActive(true);
+        go.SetActive(false);
+        StartCoroutine(RespawnCoroutine(5f, go));
+    }
 
+    private IEnumerator RespawnCoroutine(float respawnTime, GameObject go)
+    {
+        while (respawnTime > 0)
+        {
+            respawnTime -= Time.deltaTime;
+            yield return null;
+        }
+        go.SetActive(true);
+        respawningPanel.SetActive(false);
+        yield break;
+    }
     private void Update() => UpdateTargetMarkers();
 
     private void InitializeMarkerPool()
@@ -91,13 +116,11 @@ public class UIManager : MonoBehaviour
             RemoveItem(activeMarkers, target);
     }
 
-
     private bool IsOutOfView(Transform target)
     {
         Vector3 viewportPos = playerCamera.WorldToViewportPoint(target.position);
         return viewportPos.z < 0 || viewportPos.x < 0 || viewportPos.x > 1 || viewportPos.y < 0 || viewportPos.y > 1;
     }
-
 
     private void GetAllTargetsInRange()
     {

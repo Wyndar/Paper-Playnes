@@ -45,7 +45,7 @@ public class TeamManager : NetworkBehaviour
         return (teamACount <= teamBCount) ? Team.RedTeam : Team.BlueTeam;
     }
 
-    public Team GetTeam(ulong clientId) => playerTeams.TryGetValue(clientId, out Team team) ? team : Team.None;
+    public Team GetTeam(ulong clientId) => playerTeams.TryGetValue(clientId, out Team team) ? team : Team.Undefined;
 
     [ServerRpc(RequireOwnership = false)]
     public void RequestTeamAssignmentServerRpc(ulong clientId) => AssignTeam(clientId);
@@ -58,11 +58,4 @@ public class TeamManager : NetworkBehaviour
             SpawnManager.Instance.RequestSpawnServerRpc(clientId);
         }
     }
-}
-
-public enum Team
-{
-    None, 
-    RedTeam,
-    BlueTeam 
 }

@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 2270639690140490270}
   - component: {fileID: 5388091343929109753}
   - component: {fileID: 2611036081592321800}
-  - component: {fileID: 248729934199728573}
   - component: {fileID: 7645564889722665742}
   - component: {fileID: 4730976131055133425}
   m_Layer: 6
@@ -111,23 +110,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &248729934199728573
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6408517157656192997}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e5a8c9216932354186bb7aecaaeef6f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  destructionVFX: {fileID: 130346, guid: 061d98fffe21ebe44907c94636b572f2, type: 3}
-  destructionSFX: {fileID: 8300000, guid: 4b8e51dd99d3ccd46b9f3a988f79c296, type: 3}
-  shouldRespawn: 0
-  isDelayedRespawn: 0
-  respawnLoadScreen: {fileID: 0}
 --- !u!114 &7645564889722665742
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -141,7 +123,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destructible: {fileID: 11400000, guid: 1d147fba6237304429f3bd26635b4fcf, type: 2}
-  destructibleComponent: {fileID: 0}
 --- !u!114 &4730976131055133425
 MonoBehaviour:
   m_ObjectHideFlags: 0

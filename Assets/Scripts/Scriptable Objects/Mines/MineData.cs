@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NewMineType", menuName = "Mines/Mine Type")]
+[CreateAssetMenu(fileName = "NewMineType", menuName = "Scriptable/Mine Type")]
 public class MineData : ScriptableObject
 {
     public string mineName;

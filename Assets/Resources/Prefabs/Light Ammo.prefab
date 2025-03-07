@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 790379585323121606}
   - component: {fileID: 8618224039960804199}
   - component: {fileID: 6172982470992621089}
-  - component: {fileID: 6606647036790934824}
   - component: {fileID: 7369621497632755021}
   m_Layer: 0
   m_Name: Light Ammo
@@ -128,20 +127,6 @@ MonoBehaviour:
   damageAmount: 20
   travelSpeed: 1
   maxLifetime: 10
---- !u!114 &6606647036790934824
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8905281686287481193}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e5a8c9216932354186bb7aecaaeef6f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  destructionVFX: {fileID: 0}
-  destructionSFX: {fileID: 0}
 --- !u!54 &7369621497632755021
 Rigidbody:
   m_ObjectHideFlags: 0

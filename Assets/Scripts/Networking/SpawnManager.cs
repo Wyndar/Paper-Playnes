@@ -47,7 +47,7 @@ public class SpawnManager : NetworkBehaviour
         if (!IsServer) return; 
 
         Team team = TeamManager.Instance.GetTeam(clientId);
-        if (team == Team.None) return; 
+        if (team == Team.Undefined) return; 
 
         Vector3 spawnPosition = GetRandomSpawnPoint(team);
         GameObject playerObject = Instantiate(playerNetworkPrefab, spawnPosition, Quaternion.identity);

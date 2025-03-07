@@ -1,7 +1,6 @@
 using UnityEngine;
 using System;
 
-[RequireComponent(typeof(DestructibleComponent))]
 public class HealthComponent : MonoBehaviour
 {
     public int MaxHP { get; private set; }
@@ -11,17 +10,15 @@ public class HealthComponent : MonoBehaviour
     public Destructible destructible;
     public event Action<int, int> OnHealthChanged;
     public event Action<bool> OnDeath;
-    public DestructibleComponent destructibleComponent;
 
     private void Start() => InitializeHealth();
 
     public void InitializeHealth()
     {
-        MaxHP = destructible.maxHealth;
+        MaxHP = destructible.maxHP;
         CurrentHP = MaxHP;
         IsDead = false;
         OnHealthChanged?.Invoke(CurrentHP, MaxHP);
-        destructibleComponent = GetComponent<DestructibleComponent>();
     }
 
     public void TakeDamage(int amount)
@@ -58,7 +55,7 @@ public class HealthComponent : MonoBehaviour
         if (IsDead) return;
         IsDead = true;
         OnDeath?.Invoke(IsDead);
-        destructibleComponent.Destroy();
+        destructible.Die(gameObject);
     }
 }
 

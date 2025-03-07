@@ -7,7 +7,7 @@ public class DamageDealerComponent : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         Debug.Log(collision.gameObject.name);
-        if (collision.gameObject.TryGetComponent<HealthComponent>(out var health))
+        if (collision.gameObject.TryGetComponent(out HealthComponent health))
             health.TakeDamage(damageAmount);
         Debug.Log(gameObject.transform.position);
     }

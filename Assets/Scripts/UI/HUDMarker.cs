@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class HUDMarker : MonoBehaviour
 {
-    public enum HUDMarkerType { Undefined, Damageable, PickUp }
+
     public HUDMarkerType markerType = HUDMarkerType.Undefined;
     public GameObject targetObject;
     public TMP_Text nameText;

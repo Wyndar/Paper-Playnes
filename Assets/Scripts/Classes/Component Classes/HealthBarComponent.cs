@@ -12,8 +12,7 @@ public class HealthBar : MonoBehaviour
         health = GetComponent<HealthComponent>();
         healthSlider = slider;
         health.OnHealthChanged += UpdateHealthBar;
-        healthSlider.maxValue = health.MaxHP;
-        healthSlider.value = health.MaxHP;
+        UpdateHealthBar(health.CurrentHP, health.MaxHP);
     }
     public void UpdateHealthBar(int currentHP, int maxHP)
     {

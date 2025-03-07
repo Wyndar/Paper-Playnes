@@ -312,7 +312,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.services.levelplay": {
-      "version": "8.6.0",
+      "version": "8.7.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {

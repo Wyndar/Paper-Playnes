@@ -6,7 +6,6 @@ public class SceneTransitionManager : NetworkBehaviour
 {
     public static SceneTransitionManager Instance { get; private set; }
     private int clientsLoaded = 0;
-    private int totalClients;
 
     private void Awake()
     {
@@ -16,12 +15,6 @@ public class SceneTransitionManager : NetworkBehaviour
             return;
         }
         Instance = this;
-    }
-
-    private void Start()
-    {
-        if (IsServer)
-            totalClients = NetworkManager.Singleton.ConnectedClientsList.Count;
     }
 
     public override void OnNetworkSpawn()
@@ -44,9 +37,9 @@ public class SceneTransitionManager : NetworkBehaviour
     public void ClientLoadedScene(ulong clientId)
     {
         clientsLoaded++;
-        Debug.Log($"Client {clientId} loaded. {clientsLoaded}/{totalClients} clients ready.");
+        Debug.Log($"Client {clientId} loaded. {clientsLoaded}/{NetworkManager.Singleton.ConnectedClientsList.Count} clients ready.");
 
-        if (clientsLoaded == totalClients)
+        if (clientsLoaded == NetworkManager.Singleton.ConnectedClientsList.Count)
             Debug.Log("All clients have loaded the scene.");
     }
 

@@ -116,7 +116,7 @@ public class RadarSystem : MonoBehaviour
 
             bool isRedTeam = TeamManager.Instance.GetTeam(otherPlayer.OwnerClientId) == Team.RedTeam;
             Vector2 radarPos = GetBlipPosition(relativePosition, out bool isOffScreen);
-            float fadeAmount = CalculateBlipFade(distance);
+            float fadeAmount = Mathf.InverseLerp(maxFadeDistance, minFadeDistance, distance);
 
             if (isOffScreen)
                 HandleDirectionalArrow(radarPos, isRedTeam, playerYaw);
@@ -205,8 +205,6 @@ public class RadarSystem : MonoBehaviour
         blip.SetActive(false);
         return blip;
     }
-
-    private float CalculateBlipFade(float distance) => Mathf.InverseLerp(maxFadeDistance, minFadeDistance, distance);
 
     private void DeactivateUnusedBlips()
     {

@@ -8,9 +8,9 @@ using UnityEngine.UI;
 public class PlayerController : NetworkBehaviour
 {
     public enum AutoLevelMode { Off, On }
+    public GameEvent respawnEvent;
     private HealthComponent healthComponent;
     private HealthBar healthBar;
-    private DestructibleComponent destructibleComponent;
     private CameraController playerCamera;
 
     [Header("Movement Settings")]
@@ -97,7 +97,6 @@ public class PlayerController : NetworkBehaviour
         }
         healthBar = GetComponent<HealthBar>();
         healthComponent = GetComponent<HealthComponent>();
-        destructibleComponent = GetComponent<DestructibleComponent>();
         SpawnManager.Instance.RegisterPlayer(this);
         FindLocalCamera();
         crosshairUI = GameObject.Find("Crosshair").GetComponent<RectTransform>();
@@ -132,6 +131,16 @@ public class PlayerController : NetworkBehaviour
         InputManager.Instance.OnBoost += StartBoost;
         InputManager.Instance.OnStartPrimaryWeapon += StartShooting;
         InputManager.Instance.OnEndPrimaryWeapon += StopShooting;
+        respawnEvent.OnEventRaised += Respawn;
+    }
+    private void OnEnable()
+    {
+        InputManager.Instance.OnStartMove += StartCrosshairMovement;
+        InputManager.Instance.OnEndMove += StopCrosshairMovement;
+        InputManager.Instance.OnBoost += StartBoost;
+        InputManager.Instance.OnStartPrimaryWeapon += StartShooting;
+        InputManager.Instance.OnEndPrimaryWeapon += StopShooting;
+        respawnEvent.OnEventRaised += Respawn;
     }
     private void OnDisable()
     {
@@ -139,6 +148,8 @@ public class PlayerController : NetworkBehaviour
         InputManager.Instance.OnEndMove -= StopMove;
         InputManager.Instance.OnStartPrimaryWeapon -= StartShooting;
         InputManager.Instance.OnEndPrimaryWeapon -= StopShooting;
+        respawnEvent.OnEventRaised -= Respawn;
+        StopAllCoroutines();
     }
 
     private void Update()
@@ -162,7 +173,8 @@ public class PlayerController : NetworkBehaviour
             StopCoroutine(crosshairRoutine);
         crosshairRoutine = null;
         isTurning = false;
-        StartCoroutine(DecayRotation());
+        if (isActiveAndEnabled)
+            StartCoroutine(DecayRotation());
     }
 
     private IEnumerator HandleCrosshairMovement()
@@ -387,9 +399,14 @@ public class PlayerController : NetworkBehaviour
             playerCamera.TeleportCameraBehindPlayer();
         }
         else
-        {
             Debug.LogError("No Main Camera found for Player " + OwnerClientId);
-        }
+    }
+    public void Respawn(GameObject gameObject)
+    {
+        Team currentTeam = TeamManager.Instance.GetTeam(OwnerClientId);
+        Vector3 newSpawnPosition = SpawnManager.Instance.GetRandomSpawnPoint(currentTeam);
+        transform.SetPositionAndRotation(newSpawnPosition, Quaternion.identity);
+        healthComponent.InitializeHealth();
     }
     public override void OnNetworkDespawn()
     {

@@ -5189,7 +5189,6 @@ GameObject:
   - component: {fileID: 4771522328612152090}
   - component: {fileID: 3792938024661045079}
   - component: {fileID: 7090727553298456833}
-  - component: {fileID: 1741764769842695537}
   m_Layer: 0
   m_Name: Airplane
   m_TagString: Untagged
@@ -5261,6 +5260,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  respawnEvent: {fileID: 11400000, guid: f83c521e605d15a4c972fd502a7af6b7, type: 2}
   speed: 20
   rotationSpeed: 5
   turnAcceleration: 2
@@ -5460,7 +5460,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destructible: {fileID: 11400000, guid: c662e6e89f43d8d418ee2e4f77a54abe, type: 2}
-  destructibleComponent: {fileID: 0}
 --- !u!114 &7090727553298456833
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5473,23 +5472,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47aaa2156ce106049b83a0664a9dd909, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1741764769842695537
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3480717988084276266}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e5a8c9216932354186bb7aecaaeef6f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  destructionVFX: {fileID: 0}
-  destructionSFX: {fileID: 0}
-  shouldRespawn: 0
-  isDelayedRespawn: 0
-  respawnLoadScreen: {fileID: 0}
 --- !u!1 &3615927806441666436
 GameObject:
   m_ObjectHideFlags: 0

@@ -147,4 +147,4 @@ public class SceneLoadingManager : MonoBehaviour
         }
     }
 }
-public enum LoadingMode { Local, Network }
+
