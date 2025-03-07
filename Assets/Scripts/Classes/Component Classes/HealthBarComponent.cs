@@ -15,6 +15,10 @@ public class HealthBar : MonoBehaviour
         healthSlider.maxValue = health.MaxHP;
         healthSlider.value = health.MaxHP;
     }
-    public void UpdateHealthBar(int currentHP, int maxHP) => healthSlider.value = currentHP;
+    public void UpdateHealthBar(int currentHP, int maxHP)
+    {
+        healthSlider.maxValue = maxHP;
+        healthSlider.value = currentHP;
+    }
 }
 

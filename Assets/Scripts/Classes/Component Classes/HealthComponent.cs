@@ -13,12 +13,14 @@ public class HealthComponent : MonoBehaviour
     public event Action<bool> OnDeath;
     public DestructibleComponent destructibleComponent;
 
-    public void Start()
+    private void Start() => InitializeHealth();
+
+    public void InitializeHealth()
     {
         MaxHP = destructible.maxHealth;
         CurrentHP = MaxHP;
         IsDead = false;
-        OnHealthChanged?.Invoke(CurrentHP, MaxHP); 
+        OnHealthChanged?.Invoke(CurrentHP, MaxHP);
         destructibleComponent = GetComponent<DestructibleComponent>();
     }
 
