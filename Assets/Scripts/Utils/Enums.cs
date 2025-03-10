@@ -15,3 +15,10 @@ public enum Team
     RedTeam,
     BlueTeam
 }
+public enum PickUpType
+{
+    Undefined,
+    Ammo,
+    HP,
+    Overshield
+}

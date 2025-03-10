@@ -7,17 +7,26 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    [Header("Game Events")]
     public GameEvent respawnEvent;
-    public Camera playerCamera;
-    public GameObject respawningPanel;
+    public GameEvent playerAmmoUpdateEvent;
+
+    [Header("Prefabs")]
     public GameObject damageableMarkerPrefab;
     public GameObject pickUpMarkerPrefab;
-    public Transform markerContainer;
-    public float detectionRadius = 200f;
+
+    [Header("Player Data")]
+    public Camera playerCamera;
     public HealthComponent playerHealth;
     public Slider playerHealthBar;
+
+    [Header("Ammunition UI")]
     public TMP_Text primaryWeaponAmmoCountText;
     public TMP_Text primaryWeaponMaxAmmoCountText;
+
+    public GameObject respawningPanel;
+    public Transform markerContainer;
+    public float detectionRadius = 200f;
 
 #pragma warning disable IDE0044
     private Dictionary<HealthComponent, HUDMarker> activeDamageableMarkers = new();
@@ -33,14 +42,26 @@ public class UIManager : MonoBehaviour
     private void Start()
     {
         InitializeMarkerPool();
-        respawnEvent.OnEventRaised += EnableRespawnPanel;
+        respawnEvent.OnGameObjectEventRaised += EnableRespawnPanel;
+        playerAmmoUpdateEvent.OnUpdateStatEventRaised += UpdateMagText;
     }
-    private void OnDisable() => respawnEvent.OnEventRaised -= EnableRespawnPanel;
+    private void OnDisable()
+    {
+        respawnEvent.OnGameObjectEventRaised -= EnableRespawnPanel;
+        playerAmmoUpdateEvent.OnUpdateStatEventRaised -= UpdateMagText;
+    }
+
     private void EnableRespawnPanel(GameObject go)
     {
         respawningPanel.SetActive(true);
         go.SetActive(false);
         StartCoroutine(RespawnCoroutine(5f, go));
+    }
+
+    private void UpdateMagText(int currentMagCount, int maxMagCount)
+    {
+        primaryWeaponAmmoCountText.text = currentMagCount.ToString();
+        primaryWeaponMaxAmmoCountText.text = maxMagCount.ToString();
     }
 
     private IEnumerator RespawnCoroutine(float respawnTime, GameObject go)

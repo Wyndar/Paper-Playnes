@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PickUp : MonoBehaviour
 {
-    public string pickupName;
+    public PickUpType pickupType;
     public bool isActive = true;
 
     private void OnTriggerEnter(Collider other)
@@ -13,7 +13,7 @@ public class PickUp : MonoBehaviour
 
     private void Collect(PlayerController player)
     {
-        Debug.Log($"{player.name} collected {pickupName}");
+        Debug.Log($"{player.name} collected {pickupType}");
         isActive = false;
         gameObject.SetActive(false);
     }

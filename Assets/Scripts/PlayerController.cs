@@ -131,7 +131,7 @@ public class PlayerController : NetworkBehaviour
         InputManager.Instance.OnBoost += StartBoost;
         InputManager.Instance.OnStartPrimaryWeapon += StartShooting;
         InputManager.Instance.OnEndPrimaryWeapon += StopShooting;
-        respawnEvent.OnEventRaised += Respawn;
+        respawnEvent.OnGameObjectEventRaised += Respawn;
     }
     private void OnEnable()
     {
@@ -140,7 +140,7 @@ public class PlayerController : NetworkBehaviour
         InputManager.Instance.OnBoost += StartBoost;
         InputManager.Instance.OnStartPrimaryWeapon += StartShooting;
         InputManager.Instance.OnEndPrimaryWeapon += StopShooting;
-        respawnEvent.OnEventRaised += Respawn;
+        respawnEvent.OnGameObjectEventRaised += Respawn;
     }
     private void OnDisable()
     {
@@ -148,7 +148,7 @@ public class PlayerController : NetworkBehaviour
         InputManager.Instance.OnEndMove -= StopMove;
         InputManager.Instance.OnStartPrimaryWeapon -= StartShooting;
         InputManager.Instance.OnEndPrimaryWeapon -= StopShooting;
-        respawnEvent.OnEventRaised -= Respawn;
+        respawnEvent.OnGameObjectEventRaised -= Respawn;
         StopAllCoroutines();
     }
 

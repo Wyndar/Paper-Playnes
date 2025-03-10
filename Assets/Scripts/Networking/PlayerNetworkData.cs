@@ -1,6 +1,6 @@
-using System.Diagnostics;
 using Unity.Collections;
 using Unity.Netcode;
+using UnityEngine;
 
 public class PlayerNetworkData : NetworkBehaviour
 {
@@ -28,7 +28,7 @@ public class PlayerNetworkData : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     public void UpdatePlayerListRpc()
     {
-        Debug.WriteLine(NetworkManager.Singleton.LocalClientId);
+        Debug.Log(NetworkManager.Singleton.LocalClientId);
         LobbyUIManager.Instance.UpdatePlayerList();
     }
 }

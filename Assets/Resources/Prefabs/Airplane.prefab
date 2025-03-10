@@ -6175,14 +6175,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 5805359484032528701}
     m_Modifications:
     - target: {fileID: 4058565287750214523, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.10000004
-      objectReference: {fileID: 0}
-    - target: {fileID: 4058565287750214523, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.10000004
-      objectReference: {fileID: 0}
-    - target: {fileID: 4058565287750214523, guid: dbcf46f064378be4eb023833409f763f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -6227,139 +6219,17 @@ PrefabInstance:
       value: Spitfire
       objectReference: {fileID: 0}
     - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: range
-      value: 500
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: damage
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: fireRate
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: overHeat
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: VFXObject
-      value: 
-      objectReference: {fileID: 5829954932819675323, guid: ec61ebf726bcb6d4087db0bbe61839a6, type: 3}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: projectile
-      value: 
-      objectReference: {fileID: 8905281686287481193, guid: e051363dd3a37a24fac40c823afd0261, type: 3}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: isLeftWeapon
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
       propertyPath: pairedWeapon
       value: 
       objectReference: {fileID: 4442466428645707847}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: weaponObject
-      value: 
-      objectReference: {fileID: 2039959483301452725}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: weaponWeight
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: overHeatCount
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: useLeftWeapon
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: isPairedWeapon
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: spawnTransform
-      value: 
-      objectReference: {fileID: 6244944546010247357}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: projectilePrefab
-      value: 
-      objectReference: {fileID: 8905281686287481193, guid: e051363dd3a37a24fac40c823afd0261, type: 3}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: magazineAmmoCount
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: magazineHoldCount
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: overHeatDecayRate
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: weaponObjectCount
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: maxMagazineAmmoCount
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: maxMagazineHoldCount
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: currentMagazineAmmoCount
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: spawnPositions.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: 'spawnPositions.Array.data[0]'
-      value: 
-      objectReference: {fileID: 6244944546010247357}
-    - target: {fileID: 8326991310249369582, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 40
-      objectReference: {fileID: 0}
-    - target: {fileID: 8326991310249369582, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8326991310249369582, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8326991310249369582, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8326991310249369582, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dbcf46f064378be4eb023833409f763f, type: 3}
---- !u!1 &2039959483301452725 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4137244379339748582, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-  m_PrefabInstance: {fileID: 2676569194347736915}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2123445162985950248 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4058565287750214523, guid: dbcf46f064378be4eb023833409f763f, type: 3}
-  m_PrefabInstance: {fileID: 2676569194347736915}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &6244944546010247357 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8326991310249369582, guid: dbcf46f064378be4eb023833409f763f, type: 3}
   m_PrefabInstance: {fileID: 2676569194347736915}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &7890972265110820531 stripped
@@ -6367,7 +6237,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
   m_PrefabInstance: {fileID: 2676569194347736915}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2039959483301452725}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b85f66c61e90fa347b4cabde6fa6ac28, type: 3}

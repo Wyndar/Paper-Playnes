@@ -6,6 +6,7 @@ public class Weapon : MonoBehaviour
     public GameObject projectilePrefab;
     public GameObject weaponObject;
     public GameObject VFXObject;
+    public GameEvent playerAmmoUpdateEvent;
     public int weaponWeight;
     public float fireRate;
     public float reloadRate;
@@ -39,6 +40,7 @@ public class Weapon : MonoBehaviour
     public void Start()
     {
         CapMagazine();
+        playerAmmoUpdateEvent.RaiseEvent(magazineAmmoCount, magazineHoldCount);
         timeSinceLastShot = fireRate;
         timeSinceReloadStarted = 0;
         if (isPairedWeapon)
@@ -46,7 +48,7 @@ public class Weapon : MonoBehaviour
     }
     public void Fire(Vector3 targetPosition)
     {
-        if (cooldownRoutine != null || reloadRoutine != null)
+        if (cooldownRoutine != null || reloadRoutine != null || (magazineAmmoCount <= 0 && magazineHoldCount <= 0))
             return;
         if (firedLastShot && isPairedWeapon)
         {
@@ -72,7 +74,7 @@ public class Weapon : MonoBehaviour
         magazineAmmoCount--;
         timeSinceLastShot = 0;
         firedLastShot = true;
-
+        playerAmmoUpdateEvent.RaiseEvent(magazineAmmoCount, magazineHoldCount);
         if (magazineAmmoCount <= 0)
         {
             Reload();
@@ -84,6 +86,7 @@ public class Weapon : MonoBehaviour
     {
         magazineHoldCount--;
         magazineAmmoCount = maxMagazineAmmoCount;
+        playerAmmoUpdateEvent.RaiseEvent(magazineAmmoCount, magazineHoldCount);
         reloadRoutine ??= StartCoroutine(ReloadCooldown());
     }
 
