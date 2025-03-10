@@ -77,8 +77,8 @@ Material:
     - _SrcBlend: 1
     - _UVSec: 0
     - _WaveFrequency: 7.16
-    - _WaveHeight: 0.165
-    - _WaveSpeed: 3.23
+    - _WaveHeight: 0
+    - _WaveSpeed: 0.33
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
