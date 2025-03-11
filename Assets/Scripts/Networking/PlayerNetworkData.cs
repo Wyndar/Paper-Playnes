@@ -16,6 +16,7 @@ public class PlayerNetworkData : NetworkBehaviour
             PlayerName.Value = MultiplayerManager.PlayerName;
             PlayerLevel.Value = MultiplayerManager.PlayerLevel;
             ProfilePicture.Value = MultiplayerManager.ProfilePicture;
+            gameObject.name = MultiplayerManager.PlayerName + "'s data.";
         }
     }
 

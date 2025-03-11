@@ -102,6 +102,7 @@ public class PlayerController : NetworkBehaviour
         crosshairUI = GameObject.Find("Crosshair").GetComponent<RectTransform>();
         InitializeLocalGameManager();
         InitializeEvents();
+        gameObject.name = MultiplayerManager.PlayerName;
     }
 
     private void InitializeLocalGameManager()

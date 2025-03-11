@@ -4,7 +4,6 @@ using UnityEngine.UI;
 
 public class HUDMarker : MonoBehaviour
 {
-
     public HUDMarkerType markerType = HUDMarkerType.Undefined;
     public GameObject targetObject;
     public TMP_Text nameText;
@@ -14,14 +13,18 @@ public class HUDMarker : MonoBehaviour
     public RectTransform sliderContainer;
 
     public HealthComponent targetHealth;
-
     private RectTransform markerTransform;
     private Rigidbody targetRigidbody;
-    private UIManager manager;
     [SerializeField] private float rotationSpeed = 1f;
     [SerializeField] private float rotationAngle = 5f;
+    [SerializeField] private float minScale = 0.5f;
+    [SerializeField] private float maxScale = 1.5f;
+    [SerializeField] private float fadeOutThreshold = 1000f;
+    [SerializeField] private float maxDistance = 1200f;
+    [SerializeField] private float midFontScale;
     private Image[] fillImages;
     private Image[] backgroundImages;
+
     private void Awake()
     {
         markerTransform = GetComponent<RectTransform>();
@@ -36,9 +39,8 @@ public class HUDMarker : MonoBehaviour
         }
     }
 
-    public void Initialize(GameObject target, UIManager manager)
+    public void Initialize(GameObject target)
     {
-        this.manager = manager;
         targetObject = target;
         targetRigidbody = target.GetComponent<Rigidbody>();
         nameText.text = target.name;
@@ -57,13 +59,13 @@ public class HUDMarker : MonoBehaviour
             return;
         }
 
-        Vector3 screenPos = playerCamera.WorldToScreenPoint(targetObject.transform.position);
-        markerTransform.position = screenPos;
-        markerTransform.rotation = Quaternion.identity;
+        Vector3 worldPosition = targetObject.transform.position;
+        markerTransform.position = worldPosition;
+        markerTransform.rotation = Quaternion.LookRotation(markerTransform.position - playerCamera.transform.position);
 
-        float distance = Vector3.Distance(playerCamera.transform.position, targetObject.transform.position);
+        float distance = Vector3.Distance(playerCamera.transform.position, worldPosition);
         distanceText.text = $"{distance:F1}m";
-
+        float fadeFactor = Mathf.Clamp01(1f - (distance - fadeOutThreshold) / (maxDistance - fadeOutThreshold));
         if (targetRigidbody != null)
         {
             float speed = targetRigidbody.linearVelocity.magnitude;
@@ -72,12 +74,16 @@ public class HUDMarker : MonoBehaviour
 
         ScaleMarkerBasedOnDistance(distance);
         AnimateMarker();
+        SetMarkerAlpha(fadeFactor);
     }
 
     private void ScaleMarkerBasedOnDistance(float distance)
     {
-        float scaleFactor = Mathf.Lerp(1.5f, 0.5f, distance / 200f);
+        float scaleFactor = Mathf.Lerp(minScale, maxScale, distance / maxDistance);
         sliderContainer.localScale = Vector3.one * scaleFactor;
+        nameText.fontSize = midFontScale * scaleFactor;
+        distanceText.fontSize = midFontScale * scaleFactor;
+        velocityText.fontSize = midFontScale * scaleFactor;
     }
 
     private void AnimateMarker()
@@ -86,7 +92,18 @@ public class HUDMarker : MonoBehaviour
         float angle = Mathf.Sin(Time.time * rotationSpeed) * rotationAngle;
         sliderContainer.localRotation = Quaternion.Euler(0, 0, angle);
     }
-
+    private void SetMarkerAlpha(float alpha)
+    {
+        foreach (var image in markerTransform.GetComponentsInChildren<Image>())
+        {
+            Color color = image.color;
+            color.a = alpha;
+            image.color = color;
+        }
+        nameText.alpha = alpha;
+        distanceText.alpha = alpha;
+        velocityText.alpha = alpha;
+    }
     public void UpdateHP(int currentHP, int maxHP)
     {
         float remainingHP = currentHP;
@@ -94,7 +111,6 @@ public class HUDMarker : MonoBehaviour
 
         for (int i = 3; i >= 0; i--)
         {
-
             if (remainingHP <= 0)
             {
                 hpSliders[i].value = 0;
@@ -111,7 +127,6 @@ public class HUDMarker : MonoBehaviour
             remainingHP -= quarterMaxHP;
         }
     }
-
 
     public void Cleanup(bool isDead)
     {

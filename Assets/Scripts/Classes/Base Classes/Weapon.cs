@@ -6,12 +6,16 @@ public class Weapon : MonoBehaviour
     public GameObject projectilePrefab;
     public GameObject weaponObject;
     public GameObject VFXObject;
-    public GameEvent playerAmmoUpdateEvent;
+
     public int weaponWeight;
     public float fireRate;
     public float reloadRate;
     public float range;
     public int damage;
+
+    [Header("Events")]
+    public GameEvent playerAmmoUpdateEvent;
+    public GameEvent ammoPickUpEvent;
 
     [Header("Paired Weapon")]
     public bool isPairedWeapon;
@@ -24,6 +28,7 @@ public class Weapon : MonoBehaviour
     public int maxMagazineAmmoCount;
     public int magazineHoldCount;
     public int maxMagazineHoldCount;
+    public int magazineInAmmoPacks;
 
     [Header("OverHeat Stats")]
     //more work needs to be done here
@@ -46,6 +51,9 @@ public class Weapon : MonoBehaviour
         if (isPairedWeapon)
             VerifyPair();
     }
+
+    private void OnEnable() => ammoPickUpEvent.OnEventRaised += PickedUpAmmo;
+    private void OnDisable() => ammoPickUpEvent.OnEventRaised -= PickedUpAmmo;
     public void Fire(Vector3 targetPosition)
     {
         if (cooldownRoutine != null || reloadRoutine != null || (magazineAmmoCount <= 0 && magazineHoldCount <= 0))
@@ -118,7 +126,11 @@ public class Weapon : MonoBehaviour
             yield break;
         }
     }
-
+    private void PickedUpAmmo()
+    {
+        magazineHoldCount += magazineInAmmoPacks;
+        CapMagazine();
+    }
     private void CapMagazine() => magazineHoldCount = magazineHoldCount > maxMagazineHoldCount ? maxMagazineHoldCount : magazineHoldCount;
     private void VerifyPair()
     {

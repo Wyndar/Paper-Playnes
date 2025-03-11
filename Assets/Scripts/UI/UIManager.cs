@@ -39,9 +39,10 @@ public class UIManager : MonoBehaviour
 
     [HideInInspector] public Collider[] detectedColliders = new Collider[100];
 
-    private void Start()
+    private void Start() => InitializeMarkerPool();
+
+    private void OnEnable()
     {
-        InitializeMarkerPool();
         respawnEvent.OnGameObjectEventRaised += EnableRespawnPanel;
         playerAmmoUpdateEvent.OnUpdateStatEventRaised += UpdateMagText;
     }
@@ -122,7 +123,7 @@ public class UIManager : MonoBehaviour
             {
                 HUDMarker marker = GetPooledMarker(markerPool, markerPrefab);
                 marker.gameObject.SetActive(true);
-                marker.Initialize(target.gameObject, this);
+                marker.Initialize(target.gameObject);
                 activeMarkers[target] = marker;
             }
 
@@ -158,8 +159,7 @@ public class UIManager : MonoBehaviour
 
     private void RemoveItem<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey target) where TValue : HUDMarker
     {
-        if (!dictionary.ContainsKey(target))
-            return;
+        if (!dictionary.ContainsKey(target)) return;
 
         dictionary[target].Cleanup(false);
         dictionary.Remove(target);

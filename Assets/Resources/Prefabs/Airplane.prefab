@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6178926313832001266}
   - component: {fileID: 6613924976496242068}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AudioBoost
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -138,7 +138,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 674918389571935225}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Right Secondary Position
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -169,7 +169,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7226739540391040474}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Right Primary Position
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -202,7 +202,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8097000497692131590}
   - component: {fileID: 1953311085676840271}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Left Trail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -351,7 +351,7 @@ GameObject:
   - component: {fileID: 3555611253992368839}
   - component: {fileID: 6741008708597872392}
   - component: {fileID: 1040188268487712800}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Particle System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5189,7 +5189,8 @@ GameObject:
   - component: {fileID: 4771522328612152090}
   - component: {fileID: 3792938024661045079}
   - component: {fileID: 7090727553298456833}
-  m_Layer: 0
+  - component: {fileID: -2284274756143243373}
+  m_Layer: 7
   m_Name: Airplane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5235,7 +5236,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GlobalObjectIdHash: 2381539424
-  InScenePlacedSourceGlobalObjectIdHash: 0
+  InScenePlacedSourceGlobalObjectIdHash: 2381539424
   DeferredDespawnTick: 0
   Ownership: 4
   AlwaysReplicateAsRoot: 0
@@ -5472,6 +5473,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47aaa2156ce106049b83a0664a9dd909, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &-2284274756143243373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3480717988084276266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: caec3a767f3d70a45b940ed2336df621, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3615927806441666436
 GameObject:
   m_ObjectHideFlags: 0
@@ -5481,7 +5494,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1137932174301962057}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: 'Left Secondary Position '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5513,7 +5526,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5479386328013412821}
   - component: {fileID: 5924087388764067661}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Warning Speakers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5642,7 +5655,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1097631952581173247}
   - component: {fileID: 2193671259496585897}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FLy Loop Speaker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5770,7 +5783,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5805359484032528701}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: 'Left Primary Position '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5803,7 +5816,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6135476801449595890}
   - component: {fileID: 8104407416313711274}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Right Trail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5952,7 +5965,7 @@ GameObject:
   - component: {fileID: 7834267853201115474}
   - component: {fileID: 1816986671261811544}
   - component: {fileID: 429477755788905547}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: polySurface48
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6044,7 +6057,7 @@ GameObject:
   - component: {fileID: 7771658176713980251}
   - component: {fileID: 6727663908032795341}
   - component: {fileID: 5093529341606486364}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: polySurface48.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6142,7 +6155,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8459602342895292535}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: planeMesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6295,6 +6308,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Spitfire
       objectReference: {fileID: 0}
+    - target: {fileID: 4137244379339748582, guid: dbcf46f064378be4eb023833409f763f, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
       propertyPath: range
       value: 500
@@ -6358,6 +6375,10 @@ PrefabInstance:
     - target: {fileID: 8326991310249369582, guid: dbcf46f064378be4eb023833409f763f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8885761385879085771, guid: dbcf46f064378be4eb023833409f763f, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
