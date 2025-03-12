@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Destructible", menuName = "Scriptable/Destructible")]
@@ -25,5 +26,6 @@ public class Destructible : ScriptableObject
         if (!isDelayedRespawn)
             return;
         respawnEvent.RaiseEvent(gameObject);
+        TeamManager.Instance.LocalPlayerDied();
     }
 }

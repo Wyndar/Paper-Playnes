@@ -103,6 +103,7 @@ public class PlayerController : NetworkBehaviour
         InitializeLocalGameManager();
         InitializeEvents();
         gameObject.name = MultiplayerManager.PlayerName;
+        TeamManager.Instance.InitializeTeamScores();
     }
 
     private void InitializeLocalGameManager()

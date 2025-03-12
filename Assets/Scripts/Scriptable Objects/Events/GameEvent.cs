@@ -6,7 +6,8 @@ using UnityEngine;
 public class GameEvent : ScriptableObject
 {
     public event Action<GameObject> OnGameObjectEventRaised;
-    public event Action<int, int> OnUpdateStatEventRaised;
+    public event Action<int, int> OnStatEventRaised;
+    public event Action<Team, int, int> OnTeamEventRaised;
     public event Action OnEventRaised;
 
     [Header("Assign the corresponding PickUpType if it is a pick up Event")]
@@ -33,7 +34,8 @@ public class GameEvent : ScriptableObject
     }
     public void RaiseEvent() => OnEventRaised?.Invoke();
     public void RaiseEvent(GameObject obj) => OnGameObjectEventRaised?.Invoke(obj);
-    public void RaiseEvent(int currentStat, int maxStat) => OnUpdateStatEventRaised?.Invoke(currentStat, maxStat);
+    public void RaiseEvent(int currentStat, int maxStat) => OnStatEventRaised?.Invoke(currentStat, maxStat);
+    public void RaiseEvent(Team updateTeam, int currentStat, int maxOrPreviousStat) => OnTeamEventRaised?.Invoke(updateTeam, currentStat, maxOrPreviousStat);
 
     public static bool TryGetEvent(PickUpType type, out GameEvent gameEvent)
     {

@@ -14,7 +14,7 @@ public class SpawnManager : NetworkBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
+            Destroy(this);
             return;
         }
         Instance = this;
@@ -59,7 +59,6 @@ public class SpawnManager : NetworkBehaviour
         }
         else
             Debug.LogError("Player prefab does not have a NetworkObject component!");
-
     }
 
     [ServerRpc(RequireOwnership = false)]

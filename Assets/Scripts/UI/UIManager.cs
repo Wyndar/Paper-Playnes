@@ -10,6 +10,7 @@ public class UIManager : MonoBehaviour
     [Header("Game Events")]
     public GameEvent respawnEvent;
     public GameEvent playerAmmoUpdateEvent;
+    public GameEvent updateTeamScoreEvent;
 
     [Header("Prefabs")]
     public GameObject damageableMarkerPrefab;
@@ -23,6 +24,10 @@ public class UIManager : MonoBehaviour
     [Header("Ammunition UI")]
     public TMP_Text primaryWeaponAmmoCountText;
     public TMP_Text primaryWeaponMaxAmmoCountText;
+
+    [Header("Score UI")]
+    public TMP_Text redTeamScore;
+    public TMP_Text blueTeamScore;
 
     public GameObject respawningPanel;
     public Transform markerContainer;
@@ -44,12 +49,15 @@ public class UIManager : MonoBehaviour
     private void OnEnable()
     {
         respawnEvent.OnGameObjectEventRaised += EnableRespawnPanel;
-        playerAmmoUpdateEvent.OnUpdateStatEventRaised += UpdateMagText;
+        playerAmmoUpdateEvent.OnStatEventRaised += UpdateMagText;
+        updateTeamScoreEvent.OnTeamEventRaised += UpdateTeamScoreText;
+        Debug.Log("enabled");
     }
     private void OnDisable()
     {
         respawnEvent.OnGameObjectEventRaised -= EnableRespawnPanel;
-        playerAmmoUpdateEvent.OnUpdateStatEventRaised -= UpdateMagText;
+        playerAmmoUpdateEvent.OnStatEventRaised -= UpdateMagText;
+        updateTeamScoreEvent.OnTeamEventRaised -= UpdateTeamScoreText;
     }
 
     private void EnableRespawnPanel(GameObject go)
@@ -64,7 +72,13 @@ public class UIManager : MonoBehaviour
         primaryWeaponAmmoCountText.text = currentMagCount.ToString();
         primaryWeaponMaxAmmoCountText.text = maxMagCount.ToString();
     }
-
+    private void UpdateTeamScoreText(Team team, int currentTeamScore, int previousTeamScore)
+    {
+        if(team == Team.RedTeam)
+            redTeamScore.text = currentTeamScore.ToString();
+        else if(team==Team.BlueTeam)
+            blueTeamScore.text = currentTeamScore.ToString();
+    }
     private IEnumerator RespawnCoroutine(float respawnTime, GameObject go)
     {
         while (respawnTime > 0)
