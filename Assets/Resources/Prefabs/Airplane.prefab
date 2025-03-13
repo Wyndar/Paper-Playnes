@@ -5262,15 +5262,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   respawnEvent: {fileID: 11400000, guid: f83c521e605d15a4c972fd502a7af6b7, type: 2}
-  speed: 20
+  currentSpeed: 0
+  accumulatedYaw: 0
+  accumulatedPitch: 0
+  accumulatedRoll: 0
+  minimumSpeed: 20
   rotationSpeed: 5
-  turnAcceleration: 2
+  acceleration: 5
+  deceleration: 3
+  maxSpeed: 100
+  yawAcceleration: 2
   pitchAcceleration: 2
-  turnDecayRate: 2
+  rollAcceleration: 2
+  yawDecayRate: 2
   pitchDecayRate: 2
-  isInverted: 1
-  autoLevelMode: 0
-  autoLevelSpeed: 10
+  rollDecayRate: 2
+  isInverted: 0
+  autoLevelMode: 1
+  autoLevelSpeed: 0.35
   barrelRollSpeed: 360
   crosshairUI: {fileID: 0}
   crosshairTarget: {fileID: 0}
@@ -5284,7 +5293,7 @@ MonoBehaviour:
   boostMultiplier: 2
   boostDuration: 2
   boostVFX: {fileID: 269295487771220670}
-  maxAltitude: 600
+  maxAltitude: 800
   minAltitude: 10
   maxWeight: 0
   currentWeight: 0
@@ -5334,7 +5343,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 0.8
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}

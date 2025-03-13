@@ -14,13 +14,21 @@ public class PlayerController : NetworkBehaviour
     private CameraController playerCamera;
 
     [Header("Movement Settings")]
-    [SerializeField] private float speed = 20f;
+    [SerializeField] private float currentSpeed;
+    [SerializeField] private float accumulatedYaw = 0f;
+    [SerializeField] private float accumulatedPitch = 0f;
+    [SerializeField] private float accumulatedRoll = 0f;
+    [SerializeField] private float minimumSpeed = 20f;
     [SerializeField] private float rotationSpeed = 100f;
-    //[SerializeField] private float maxTiltAngle = 45f;
-    [SerializeField] private float turnAcceleration = 30f;
+    [SerializeField] private float acceleration = 5f;
+    [SerializeField] private float deceleration = 3f;
+    [SerializeField] private float maxSpeed = 100f;
+    [SerializeField] private float yawAcceleration = 30f;
     [SerializeField] private float pitchAcceleration = 20f;
-    [SerializeField] private float turnDecayRate = 2f;
+    [SerializeField] private float rollAcceleration = 20f;
+    [SerializeField] private float yawDecayRate = 2f;
     [SerializeField] private float pitchDecayRate = 2f;
+    [SerializeField] private float rollDecayRate = 2f;
     [SerializeField] private bool isInverted = false;
     [SerializeField] private AutoLevelMode autoLevelMode = AutoLevelMode.Off;
     [SerializeField] private float autoLevelSpeed = 2f;
@@ -76,13 +84,11 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private AudioSource warningSpeakers;
 
     private float boostTimer;
-    private float accumulatedYaw = 0f;
-    private float accumulatedPitch = 0f;
+
     private Vector2 crosshairPosition = Vector2.zero;
     public bool isBoosting;
-    private bool isTurning;
-    private Coroutine moveRoutine;
-    private Coroutine shootRoutine;
+    private bool isMoving;
+    private Rigidbody rb;
     private Coroutine crosshairRoutine;
     private const int MAX_TARGETS = 10;
     private RaycastHit[] assistHits = new RaycastHit[MAX_TARGETS];
@@ -95,6 +101,7 @@ public class PlayerController : NetworkBehaviour
             StopAllCoroutines();
             return;
         }
+        rb= GetComponent<Rigidbody>();
         healthBar = GetComponent<HealthBar>();
         healthComponent = GetComponent<HealthComponent>();
         SpawnManager.Instance.RegisterPlayer(this);
@@ -131,52 +138,64 @@ public class PlayerController : NetworkBehaviour
         InputManager.Instance.OnStartMove += StartCrosshairMovement;
         InputManager.Instance.OnEndMove += StopCrosshairMovement;
         InputManager.Instance.OnBoost += StartBoost;
-        InputManager.Instance.OnStartPrimaryWeapon += StartShooting;
-        InputManager.Instance.OnEndPrimaryWeapon += StopShooting;
+        InputManager.Instance.OnFirePrimaryWeapon += StartShooting;
         respawnEvent.OnGameObjectEventRaised += Respawn;
     }
-    private void OnEnable()
-    {
-        InputManager.Instance.OnStartMove += StartCrosshairMovement;
-        InputManager.Instance.OnEndMove += StopCrosshairMovement;
-        InputManager.Instance.OnBoost += StartBoost;
-        InputManager.Instance.OnStartPrimaryWeapon += StartShooting;
-        InputManager.Instance.OnEndPrimaryWeapon += StopShooting;
-        respawnEvent.OnGameObjectEventRaised += Respawn;
-    }
+    private void OnEnable() => InitializeEvents();
     private void OnDisable()
     {
-        InputManager.Instance.OnStartMove -= StartMove;
-        InputManager.Instance.OnEndMove -= StopMove;
-        InputManager.Instance.OnStartPrimaryWeapon -= StartShooting;
-        InputManager.Instance.OnEndPrimaryWeapon -= StopShooting;
+        InputManager.Instance.OnStartMove -= StartCrosshairMovement;
+        InputManager.Instance.OnEndMove -= StopCrosshairMovement;
+        InputManager.Instance.OnFirePrimaryWeapon -= StartShooting;
         respawnEvent.OnGameObjectEventRaised -= Respawn;
         StopAllCoroutines();
     }
 
     private void Update()
     {
-        float moveSpeed = isBoosting ? speed * boostMultiplier : speed;
-        transform.Translate(moveSpeed * Time.deltaTime * Vector3.forward);
-
-        Vector3 position = transform.position;
-        position.y = Mathf.Clamp(position.y, minAltitude, maxAltitude);
-        transform.position = position;
-        if (autoLevelMode == AutoLevelMode.On)
+        if (autoLevelMode == AutoLevelMode.On && !isMoving)
             AutoLevel();
+        HandleRotationDecay();
         HandleWingTrails();
     }
+    private void FixedUpdate()
+    {
+        ApplyPhysicsMovement();
+        ApplyPhysicsRotation();
+    }
 
-    private void StartCrosshairMovement() => crosshairRoutine ??= StartCoroutine(HandleCrosshairMovement());
+    private void ApplyPhysicsMovement()
+    {
+        float targetSpeed = isBoosting ? maxSpeed : minimumSpeed;
+        currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, (isBoosting ? acceleration : deceleration) * Time.fixedDeltaTime);
+
+        rb.linearVelocity = transform.forward * currentSpeed;
+    }
+
+    private void ApplyPhysicsRotation()
+    {
+        float pitchInput = isInverted ? accumulatedPitch : -accumulatedPitch;
+
+        Vector3 torque = Vector3.zero;
+        torque += pitchInput * pitchAcceleration * transform.right;
+        torque += accumulatedYaw * yawAcceleration * transform.up;  
+        torque += accumulatedRoll * rollAcceleration * transform.forward;
+
+        rb.AddTorque(torque, ForceMode.Acceleration);
+    }
+
+    private void StartCrosshairMovement()
+    {
+        isMoving = true;
+        crosshairRoutine ??= StartCoroutine(HandleCrosshairMovement());
+    }
 
     private void StopCrosshairMovement()
     {
+        isMoving = false;
         if (crosshairRoutine != null)
             StopCoroutine(crosshairRoutine);
         crosshairRoutine = null;
-        isTurning = false;
-        if (isActiveAndEnabled)
-            StartCoroutine(DecayRotation());
     }
 
     private IEnumerator HandleCrosshairMovement()
@@ -184,10 +203,8 @@ public class PlayerController : NetworkBehaviour
         while (true)
         {
             Vector2 inputVector = InputManager.Instance.CurrentMoveVector;
-
             if (inputVector.magnitude > 0)
             {
-                isTurning = true;
                 Vector2 newCrosshairPosition = crosshairPosition + (crosshairSpeed * Time.deltaTime * inputVector);
                 Vector2 adjustedPosition = ApplyCrosshairMagnetism(newCrosshairPosition);
 
@@ -200,78 +217,31 @@ public class PlayerController : NetworkBehaviour
                     crosshairPosition.y = adjustedPosition.y;
                 if (atLimitX || atLimitY)
                 {
-                    accumulatedYaw += inputVector.x * turnAcceleration * Time.deltaTime;
+                    accumulatedYaw += inputVector.x * yawAcceleration * Time.deltaTime;
                     float pitchInput = isInverted ? -inputVector.y : inputVector.y;
-                    accumulatedPitch -= pitchInput * pitchAcceleration * Time.deltaTime;
+                    accumulatedPitch += pitchInput * pitchAcceleration * Time.deltaTime;
+                    accumulatedRoll += -inputVector.x * rollAcceleration * Time.deltaTime;
                 }
             }
-            else
-                isTurning = false;
             GetCrosshairWorldPosition();
             crosshairUI.anchoredPosition = crosshairPosition;
-
-            RotatePlayer();
             yield return null;
         }
     }
-
-    private IEnumerator DecayRotation()
+    private void HandleRotationDecay()
     {
-        while (!isTurning && (Mathf.Abs(accumulatedYaw) > 0.1f || Mathf.Abs(accumulatedPitch) > 0.1f))
-        {
-            accumulatedYaw = Mathf.Lerp(accumulatedYaw, 0, Time.deltaTime * turnDecayRate);
-            accumulatedPitch = Mathf.Lerp(accumulatedPitch, 0, Time.deltaTime * pitchDecayRate);
-            yield return null;
-        }
-        accumulatedYaw = 0f;
-        accumulatedPitch = 0f;
+
+        if (Mathf.Abs(accumulatedYaw) > 0.01f)
+            accumulatedYaw = Mathf.MoveTowards(accumulatedYaw, 0, yawDecayRate * Time.deltaTime);
+        if (Mathf.Abs(accumulatedPitch) > 0.01f)
+            accumulatedPitch = Mathf.MoveTowards(accumulatedPitch, 0, pitchDecayRate * Time.deltaTime);
+        if (Mathf.Abs(accumulatedRoll) > 0.01f)
+            accumulatedRoll = Mathf.MoveTowards(accumulatedRoll, 0, rollDecayRate * Time.deltaTime);
     }
 
-    private void RotatePlayer()
-    {
-        float pitchInput = isInverted ? -accumulatedPitch : accumulatedPitch;
-        Quaternion yawRotation = Quaternion.AngleAxis(accumulatedYaw * rotationSpeed * Time.deltaTime, transform.up);
-        Quaternion pitchRotation = Quaternion.AngleAxis(pitchInput * rotationSpeed * Time.deltaTime, transform.right);
-        transform.rotation = yawRotation * pitchRotation * transform.rotation;
-    }
-
-    private void StartMove() => moveRoutine ??= StartCoroutine(Move());
-
-    private void StopMove()
-    {
-        if (moveRoutine != null)
-            StopCoroutine(moveRoutine);
-        moveRoutine = null;
-    }
     private void StartBoost() => StartCoroutine(HandleBoost());
-    private IEnumerator Move()
-    {
-        while (true)
-        {
-            Vector2 inputVector = InputManager.Instance.CurrentMoveVector.normalized;
-            float pitch = inputVector.y * (isInverted ? -1 : 1) * rotationSpeed * Time.deltaTime;
-            float yaw = inputVector.x * rotationSpeed * Time.deltaTime;
-            transform.Rotate(pitch, yaw, 0);
-            yield return null;
-        }
-    }
-    private void StartShooting() => shootRoutine ??= StartCoroutine(ShootPrimary());
-    private void StopShooting()
-    {
-        if (shootRoutine != null)
-            StopCoroutine(shootRoutine);
-        shootRoutine = null;
-    }
+    private void StartShooting() => primaryWeapon.Fire(GetCrosshairWorldPosition());
 
-    private IEnumerator ShootPrimary()
-    {
-        while (true)
-        {
-            Vector3 target = GetCrosshairWorldPosition();
-            primaryWeapon.Fire(target);
-            yield return new WaitForSeconds(primaryWeapon.fireRate);
-        }
-    }
     private Vector3 GetCrosshairWorldPosition()
     {
         Vector3 screenPosition = crosshairUI.position;
@@ -353,6 +323,7 @@ public class PlayerController : NetworkBehaviour
             }
             yield return null;
         }
+        yield break;
     }
 
     private IEnumerator PerformBarrelRoll()
