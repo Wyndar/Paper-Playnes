@@ -1,12 +1,17 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class PickUp : MonoBehaviour
+public class PickUp : NetworkBehaviour
 {
     public PickUpType pickupType;
     public bool isActive = true;
-
-    public void OnEnable() => gameObject.name = pickupType.ToString();
-
+    public override void OnNetworkSpawn()
+    {
+        gameObject.name = pickupType.ToString();
+        if (!IsServer) return;
+        isActive = true;
+        gameObject.SetActive(true);
+    }
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent(out PickUpHandler player))
@@ -18,6 +23,6 @@ public class PickUp : MonoBehaviour
         Debug.Log($"{player.name} collected {pickupType}");
         isActive = false;
         gameObject.SetActive(false);
-        player.HandlePickUp(pickupType);
+        player.HandlePickUp(pickupType, NetworkObject);
     }
 }

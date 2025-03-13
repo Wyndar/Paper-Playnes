@@ -24,6 +24,6 @@ public class MineData : ScriptableObject
         _ = Physics.OverlapSphereNonAlloc(position, explosionRadius, hitObjects);
         foreach (Collider hit in hitObjects)
             if (hit.TryGetComponent(out HealthComponent health))
-                health.TakeDamage(damage);
+                health.ModifyHealth(HealthModificationType.Damage, damage);
     }
 }

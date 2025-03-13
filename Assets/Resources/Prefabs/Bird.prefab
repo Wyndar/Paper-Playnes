@@ -1258,6 +1258,7 @@ GameObject:
   - component: {fileID: 1032946086409974666}
   - component: {fileID: 146350419948275746}
   - component: {fileID: 6475463616143596427}
+  - component: {fileID: 1240026916652368829}
   m_Layer: 0
   m_Name: Bird
   m_TagString: Untagged
@@ -1324,6 +1325,31 @@ MonoBehaviour:
   maxPauseTime: 3
   minAltitude: 200
   maxAltitude: 500
+--- !u!114 &1240026916652368829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7217532444140798903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 3303993003
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &7451003001702403067
 GameObject:
   m_ObjectHideFlags: 0

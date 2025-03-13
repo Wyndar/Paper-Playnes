@@ -8,7 +8,7 @@ public class DamageDealerComponent : MonoBehaviour
     {
         Debug.Log(collision.gameObject.name);
         if (collision.gameObject.TryGetComponent(out HealthComponent health))
-            health.TakeDamage(damageAmount);
+            health.ModifyHealth(HealthModificationType.Damage, damageAmount);
         Debug.Log(gameObject.transform.position);
     }
 }

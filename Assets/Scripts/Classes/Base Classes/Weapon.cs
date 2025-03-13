@@ -73,8 +73,8 @@ public class Weapon : MonoBehaviour
 
         if (Physics.Raycast(spawnTransform.position, shootDirection, out RaycastHit hit, 1000f))
         {
-            if (hit.collider.TryGetComponent<HealthComponent>(out var health))
-                health.TakeDamage(damage);
+            if (hit.collider.TryGetComponent(out HealthComponent health))
+                health.ModifyHealth(HealthModificationType.Damage, damage);
             if (VFXObject != null)
                 Instantiate(VFXObject, hit.point, Quaternion.LookRotation(hit.normal));
         }

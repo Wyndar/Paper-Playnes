@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 4524805307071167915}
   - component: {fileID: 1652596281200849932}
   - component: {fileID: 4469578321824004483}
+  - component: {fileID: 8042082357732881889}
   - component: {fileID: 607148366304564196}
   - component: {fileID: -5441389924087016877}
   m_Layer: 0
@@ -378,6 +379,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damageAmount: 80
   mineData: {fileID: 11400000, guid: 885114f89e21f2a448777f13c8613f3c, type: 2}
+--- !u!114 &8042082357732881889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6286750400230317656}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 2188265913
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &607148366304564196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -390,7 +416,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef92060797c173045bf41bbdd7e78f44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   destructible: {fileID: 11400000, guid: ad097893acc900845baede984c6eb01b, type: 2}
+  healthEvent: {fileID: 11400000, guid: 56b0c326c286aba46aab70eac92e24a9, type: 2}
 --- !u!54 &-5441389924087016877
 Rigidbody:
   m_ObjectHideFlags: 0

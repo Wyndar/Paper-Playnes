@@ -128,21 +128,21 @@ MonoBehaviour:
   weaponObject: {fileID: 4137244379339748582}
   VFXObject: {fileID: 5829954932819675323, guid: ec61ebf726bcb6d4087db0bbe61839a6, type: 3}
   weaponWeight: 50
-  fireRate: 0.5
-  reloadRate: 1
+  fireRate: 0.2
+  reloadRate: 2
   range: 500
-  damage: 20
+  damage: 10
   playerAmmoUpdateEvent: {fileID: 11400000, guid: 5c696146c0dfbe34da66c8cd0e36294a, type: 2}
   ammoPickUpEvent: {fileID: 11400000, guid: c4ef2320c855eec48a5f81faf87e6d59, type: 2}
   isPairedWeapon: 1
   isLeftWeapon: 1
   firedLastShot: 0
   pairedWeapon: {fileID: 0}
-  magazineAmmoCount: 6
-  maxMagazineAmmoCount: 6
-  magazineHoldCount: 10
-  maxMagazineHoldCount: 10
-  magazineInAmmoPacks: 0
+  magazineAmmoCount: 30
+  maxMagazineAmmoCount: 30
+  magazineHoldCount: 6
+  maxMagazineHoldCount: 6
+  magazineInAmmoPacks: 3
   overHeat: 0
   maxOverHeatCount: 0
   currentOverHeatCount: 0

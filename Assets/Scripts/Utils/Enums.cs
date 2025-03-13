@@ -22,3 +22,10 @@ public enum PickUpType
     HP,
     Overshield
 }
+public enum HealthModificationType
+{
+    Damage,
+    Heal,
+    MaxHPIncrease,
+    MaxHPDecrease
+}

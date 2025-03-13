@@ -5469,7 +5469,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef92060797c173045bf41bbdd7e78f44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   destructible: {fileID: 11400000, guid: c662e6e89f43d8d418ee2e4f77a54abe, type: 2}
+  healthEvent: {fileID: 11400000, guid: 56b0c326c286aba46aab70eac92e24a9, type: 2}
 --- !u!114 &7090727553298456833
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5494,6 +5496,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: caec3a767f3d70a45b940ed2336df621, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &3615927806441666436
 GameObject:
   m_ObjectHideFlags: 0
@@ -6327,7 +6330,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
       propertyPath: damage
-      value: 20
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
       propertyPath: VFXObject
@@ -6359,11 +6362,11 @@ PrefabInstance:
       objectReference: {fileID: 8905281686287481193, guid: e051363dd3a37a24fac40c823afd0261, type: 3}
     - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
       propertyPath: magazineAmmoCount
-      value: 6
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5235233320886499808, guid: dbcf46f064378be4eb023833409f763f, type: 3}
       propertyPath: maxMagazineAmmoCount
-      value: 6
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 8326991310249369582, guid: dbcf46f064378be4eb023833409f763f, type: 3}
       propertyPath: m_LocalPosition.y

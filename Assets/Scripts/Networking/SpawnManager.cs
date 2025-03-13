@@ -8,7 +8,12 @@ public class SpawnManager : NetworkBehaviour
     public Renderer redTeamSpawnArea; 
     public Renderer blueTeamSpawnArea; 
     public GameObject playerNetworkPrefab;
-
+    public Renderer spawnRenderer;
+    public GameObject destBoxPrefab;
+    public GameObject puBoxPrefab;
+    public GameObject birdsPrefab;
+    public GameObject minesPrefab;
+    public int spawnBoxCount;
     public List<PlayerController> activePlayers = new();
     private void Awake()
     {
@@ -19,6 +24,48 @@ public class SpawnManager : NetworkBehaviour
         }
         Instance = this;
     }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+            SpawnGameObjects();
+    }
+
+    private void SpawnGameObjects()
+    {
+        for (int i = 0; i < spawnBoxCount; i++)
+        {
+            SpawnNetworkObject(puBoxPrefab);
+            SpawnNetworkObject(minesPrefab);
+            SpawnNetworkObject(destBoxPrefab);
+
+            GameObject bird = SpawnNetworkObject(birdsPrefab);
+            if (bird.TryGetComponent(out BirdAI birdAI))
+                birdAI.flightArea = spawnRenderer;
+        }
+    }
+
+    private GameObject SpawnNetworkObject(GameObject prefab)
+    {
+        Vector3 spawnPosition = GetRandomPositionWithinBounds();
+        GameObject obj = Instantiate(prefab, spawnPosition, Quaternion.identity);
+        obj.transform.SetParent(transform);
+
+        if (obj.TryGetComponent(out NetworkObject networkObject))
+            networkObject.Spawn();
+
+        return obj;
+    }
+
+    public Vector3 GetRandomPositionWithinBounds()
+    {
+        Bounds bounds = spawnRenderer.bounds;
+        float x = Random.Range(bounds.min.x, bounds.max.x);
+        float y = Random.Range(bounds.min.y, bounds.max.y);
+        float z = Random.Range(bounds.min.z, bounds.max.z);
+        return new Vector3(x, y, z);
+    }
+
     public void RegisterPlayer(PlayerController player)
     {
         if (!activePlayers.Contains(player))

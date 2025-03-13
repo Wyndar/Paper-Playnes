@@ -43,7 +43,7 @@ public class Mine : DamageDealerComponent
             //    rb.AddForce(forceDirection * mineData.knockbackForce, ForceMode.Impulse);
             //}
             if (hitObjects[i].TryGetComponent(out HealthComponent health))
-                health.TakeDamage(mineData.damage);
+                health.ModifyHealth(HealthModificationType.Damage,mineData.damage);
         }
 
         //if (Camera.main.TryGetComponent(out ShockwaveEffect effect))

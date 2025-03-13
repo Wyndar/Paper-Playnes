@@ -1,13 +1,15 @@
 using UnityEngine;
 using System;
+using Unity.Netcode;
 
-public class HealthComponent : MonoBehaviour
+public class HealthComponent : NetworkBehaviour
 {
     public int MaxHP { get; private set; }
     public int CurrentHP { get; private set; }
     public bool IsDead { get; private set; }
 
     public Destructible destructible;
+    public GameEvent healthEvent;
     public event Action<int, int> OnHealthChanged;
     public event Action<bool> OnDeath;
 
@@ -20,35 +22,18 @@ public class HealthComponent : MonoBehaviour
         IsDead = false;
         OnHealthChanged?.Invoke(CurrentHP, MaxHP);
     }
-
-    public void TakeDamage(int amount)
+    public void ModifyHealth(HealthModificationType type, int amount)
     {
         if (IsDead) return;
+        healthEvent.RaiseEvent(this, type, amount, CurrentHP);
+    }
 
-        CurrentHP -= amount;
-        CurrentHP = Mathf.Clamp(CurrentHP, 0, MaxHP);
+    public void HandleHealthUpdate(int currentHP, int maxHP)
+    {
+        CurrentHP = currentHP;
+        MaxHP = maxHP;
         OnHealthChanged?.Invoke(CurrentHP, MaxHP);
-        if (CurrentHP <= 0)
-            Die();
-    }
-
-    public void Heal(int amount)
-    {
-        if (IsDead) return;
-
-        CurrentHP += amount;
-        CurrentHP = Mathf.Clamp(CurrentHP, 0, MaxHP);
-        OnHealthChanged?.Invoke(CurrentHP, MaxHP);
-    }
-    public void MaxHPIncrease(int amount)
-    {
-        MaxHP += amount;
-        Heal(amount);
-    }
-    public void MaxHPDecrease(int amount)
-    {
-        MaxHP -= amount;
-        TakeDamage(amount);
+        if (currentHP <= 0) Die();
     }
     private void Die()
     {
