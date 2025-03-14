@@ -29,3 +29,12 @@ public enum HealthModificationType
     MaxHPIncrease,
     MaxHPDecrease
 }
+public enum GameEventType
+{
+    Undefined,
+    NoParams,
+    GameObject,
+    StatUpdate,
+    TeamStatUpdate,
+    HealthModified
+}

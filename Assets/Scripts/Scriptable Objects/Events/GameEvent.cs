@@ -5,14 +5,15 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Game Event", menuName = "Scriptable/Game Event")]
 public class GameEvent : ScriptableObject
 {
+    public GameEventType selectedEventType;
+    [Header("Assign the corresponding PickUpType if it is a pick up Event")]
+    public PickUpType pickupType;
+
     public event Action OnEventRaised;
     public event Action<GameObject> OnGameObjectEventRaised;
     public event Action<int, int> OnStatEventRaised;
     public event Action<Team, int, int> OnTeamEventRaised;
-    public event Action<HealthComponent, HealthModificationType, int, int> OnHealthModified;
-
-    [Header("Assign the corresponding PickUpType if it is a pick up Event")]
-    public PickUpType pickupType;
+    public event Action<HealthComponent, HealthModificationType, int, int> OnHealthModifiedEventRaised;
 
     private static readonly Dictionary<PickUpType, WeakReference<GameEvent>> _eventRegistry = new();
 
@@ -39,7 +40,7 @@ public class GameEvent : ScriptableObject
     public void RaiseEvent(Team updateTeam, int currentStat, int maxOrPreviousStat) 
         => OnTeamEventRaised?.Invoke(updateTeam, currentStat, maxOrPreviousStat);
     public void RaiseEvent(HealthComponent component, HealthModificationType modificationType, int amount, int previousHP)
-        => OnHealthModified?.Invoke(component, modificationType, amount, previousHP);
+        => OnHealthModifiedEventRaised?.Invoke(component, modificationType, amount, previousHP);
 
     public static bool TryGetEvent(PickUpType type, out GameEvent gameEvent)
     {
@@ -65,4 +66,9 @@ public class GameEvent : ScriptableObject
                 _eventRegistry[type] = new WeakReference<GameEvent>(eventAsset);
         }
     }
+    public bool HasSubscribers() => OnEventRaised != null;
+    public bool HasGameObjectSubscribers() => OnGameObjectEventRaised != null;
+    public bool HasStatSubscribers() => OnStatEventRaised != null;
+    public bool HasTeamSubscribers() => OnTeamEventRaised != null;
+    public bool HasHealthModifiedSubscribers() => OnHealthModifiedEventRaised != null;
 }

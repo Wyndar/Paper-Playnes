@@ -17,16 +17,20 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private float currentSpeed;
     [SerializeField] private float accumulatedPitch = 0f;
     [SerializeField] private float accumulatedRoll = 0f;
+    [SerializeField] private float accumulatedYaw = 0f;
     [SerializeField] private float minimumSpeed = 20f;
     [SerializeField] private float rotationSpeed = 100f;
     [SerializeField] private float maxRollAngle = 45f;
+    [SerializeField] private float maxYawAngle = 45f;
     [SerializeField] private float acceleration = 5f;
     [SerializeField] private float deceleration = 3f;
     [SerializeField] private float maxSpeed = 100f;
     [SerializeField] private float pitchAcceleration = 20f;
     [SerializeField] private float rollAcceleration = 20f;
+    [SerializeField] private float yawAcceleration = 20f;
     [SerializeField] private float pitchDecayRate = 2f;
     [SerializeField] private float rollDecayRate = 2f;
+    [SerializeField] private float yawDecayRate = 2f;
     [SerializeField] private bool isInverted = false;
     [SerializeField] private AutoLevelMode autoLevelMode = AutoLevelMode.Off;
     [SerializeField] private float autoLevelSpeed = 2f;
@@ -175,8 +179,14 @@ public class PlayerController : NetworkBehaviour
         Vector3 torque = Vector3.zero;
         torque += pitchInput * pitchAcceleration * transform.right;
 
-        float currentRollAngle = GetCurrentRollAngle();
 
+        float currentYawAngle = Mathf.Rad2Deg * Mathf.Asin(transform.forward.x);
+        if ((Mathf.Abs(currentYawAngle) < maxYawAngle) || (Mathf.Sign(accumulatedYaw) != Mathf.Sign(currentYawAngle)))
+            torque += accumulatedYaw * yawAcceleration * transform.up;
+        else
+            accumulatedYaw = 0;
+
+        float currentRollAngle = Mathf.Rad2Deg * Mathf.Asin(transform.right.y);
         if ((currentRollAngle < maxRollAngle && currentRollAngle > -maxRollAngle) ||
             (Mathf.Sign(accumulatedRoll) != Mathf.Sign(currentRollAngle)))
             torque += accumulatedRoll * rollAcceleration * transform.forward;
@@ -185,12 +195,7 @@ public class PlayerController : NetworkBehaviour
 
         rb.AddTorque(torque, ForceMode.Acceleration);
     }
-    private float GetCurrentRollAngle()
-    {
-        float roll = Mathf.Rad2Deg * Mathf.Asin(transform.right.y);
-        if (roll > 180f) roll -= 360f;
-        return roll;
-    }
+
 
     private void StartCrosshairMovement()
     {
@@ -224,8 +229,10 @@ public class PlayerController : NetworkBehaviour
                 if (!atLimitY)
                     crosshairPosition.y = adjustedPosition.y;
                 if (atLimitX)
+                {
                     accumulatedRoll += -inputVector.x * rollAcceleration * Time.fixedDeltaTime;
-
+                    accumulatedYaw += inputVector.x * yawAcceleration * Time.fixedDeltaTime;
+                }
                 if (atLimitY)
                 {
                     float pitchInput = isInverted ? -inputVector.y : inputVector.y;
@@ -245,6 +252,8 @@ public class PlayerController : NetworkBehaviour
             accumulatedPitch = Mathf.MoveTowards(accumulatedPitch, 0, pitchDecayRate * Time.fixedDeltaTime);
         if (Mathf.Abs(accumulatedRoll) > 0.01f)
             accumulatedRoll = Mathf.MoveTowards(accumulatedRoll, 0, rollDecayRate * Time.fixedDeltaTime);
+        if (Mathf.Abs(accumulatedYaw) > 0.01f)
+            accumulatedYaw = Mathf.MoveTowards(accumulatedYaw, 0, yawDecayRate * Time.fixedDeltaTime);
     }
 
     private void StartBoost() => StartCoroutine(HandleBoost());

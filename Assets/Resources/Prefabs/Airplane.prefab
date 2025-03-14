@@ -5265,16 +5265,20 @@ MonoBehaviour:
   currentSpeed: 0
   accumulatedPitch: 0
   accumulatedRoll: 0
+  accumulatedYaw: 0
   minimumSpeed: 20
   rotationSpeed: 5
   maxRollAngle: 60
+  maxYawAngle: 60
   acceleration: 5
   deceleration: 3
   maxSpeed: 100
   pitchAcceleration: 4.4
   rollAcceleration: 4
+  yawAcceleration: 3
   pitchDecayRate: 2
   rollDecayRate: 2
+  yawDecayRate: 2
   isInverted: 0
   autoLevelMode: 1
   autoLevelSpeed: 0.35

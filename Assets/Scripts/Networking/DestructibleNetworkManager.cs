@@ -5,8 +5,8 @@ public class DestructibleNetworkManager : NetworkBehaviour
 {
     public GameEvent HealthModificationEvent;
 
-    private void OnEnable() => HealthModificationEvent.OnHealthModified += HandleHealthChange;
-    private void OnDisable() => HealthModificationEvent.OnHealthModified -= HandleHealthChange;
+    private void OnEnable() => HealthModificationEvent.OnHealthModifiedEventRaised += HandleHealthChange;
+    private void OnDisable() => HealthModificationEvent.OnHealthModifiedEventRaised -= HandleHealthChange;
 
     private void HandleHealthChange(HealthComponent component, HealthModificationType type, int amount, int previousHP)
     {
