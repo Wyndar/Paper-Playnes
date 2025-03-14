@@ -15,18 +15,16 @@ public class PlayerController : NetworkBehaviour
 
     [Header("Movement Settings")]
     [SerializeField] private float currentSpeed;
-    [SerializeField] private float accumulatedYaw = 0f;
     [SerializeField] private float accumulatedPitch = 0f;
     [SerializeField] private float accumulatedRoll = 0f;
     [SerializeField] private float minimumSpeed = 20f;
     [SerializeField] private float rotationSpeed = 100f;
+    [SerializeField] private float maxRollAngle = 45f;
     [SerializeField] private float acceleration = 5f;
     [SerializeField] private float deceleration = 3f;
     [SerializeField] private float maxSpeed = 100f;
-    [SerializeField] private float yawAcceleration = 30f;
     [SerializeField] private float pitchAcceleration = 20f;
     [SerializeField] private float rollAcceleration = 20f;
-    [SerializeField] private float yawDecayRate = 2f;
     [SerializeField] private float pitchDecayRate = 2f;
     [SerializeField] private float rollDecayRate = 2f;
     [SerializeField] private bool isInverted = false;
@@ -151,17 +149,15 @@ public class PlayerController : NetworkBehaviour
         StopAllCoroutines();
     }
 
-    private void Update()
-    {
-        if (autoLevelMode == AutoLevelMode.On && !isMoving)
-            AutoLevel();
-        HandleRotationDecay();
-        HandleWingTrails();
-    }
     private void FixedUpdate()
     {
+
         ApplyPhysicsMovement();
         ApplyPhysicsRotation();
+        ApplyAccumulationDecay();
+        if (autoLevelMode == AutoLevelMode.On && !isMoving)
+            AutoLevel();
+        HandleWingTrails();
     }
 
     private void ApplyPhysicsMovement()
@@ -178,10 +174,22 @@ public class PlayerController : NetworkBehaviour
 
         Vector3 torque = Vector3.zero;
         torque += pitchInput * pitchAcceleration * transform.right;
-        torque += accumulatedYaw * yawAcceleration * transform.up;  
-        torque += accumulatedRoll * rollAcceleration * transform.forward;
+
+        float currentRollAngle = GetCurrentRollAngle();
+
+        if ((currentRollAngle < maxRollAngle && currentRollAngle > -maxRollAngle) ||
+            (Mathf.Sign(accumulatedRoll) != Mathf.Sign(currentRollAngle)))
+            torque += accumulatedRoll * rollAcceleration * transform.forward;
+        else
+            accumulatedRoll = 0;
 
         rb.AddTorque(torque, ForceMode.Acceleration);
+    }
+    private float GetCurrentRollAngle()
+    {
+        float roll = Mathf.Rad2Deg * Mathf.Asin(transform.right.y);
+        if (roll > 180f) roll -= 360f;
+        return roll;
     }
 
     private void StartCrosshairMovement()
@@ -205,7 +213,7 @@ public class PlayerController : NetworkBehaviour
             Vector2 inputVector = InputManager.Instance.CurrentMoveVector;
             if (inputVector.magnitude > 0)
             {
-                Vector2 newCrosshairPosition = crosshairPosition + (crosshairSpeed * Time.deltaTime * inputVector);
+                Vector2 newCrosshairPosition = crosshairPosition + (crosshairSpeed * Time.fixedDeltaTime * inputVector);
                 Vector2 adjustedPosition = ApplyCrosshairMagnetism(newCrosshairPosition);
 
                 bool atLimitX = Mathf.Abs(adjustedPosition.x) >= crosshairRadius;
@@ -215,28 +223,28 @@ public class PlayerController : NetworkBehaviour
                     crosshairPosition.x = adjustedPosition.x;
                 if (!atLimitY)
                     crosshairPosition.y = adjustedPosition.y;
-                if (atLimitX || atLimitY)
+                if (atLimitX)
+                    accumulatedRoll += -inputVector.x * rollAcceleration * Time.fixedDeltaTime;
+
+                if (atLimitY)
                 {
-                    accumulatedYaw += inputVector.x * yawAcceleration * Time.deltaTime;
                     float pitchInput = isInverted ? -inputVector.y : inputVector.y;
-                    accumulatedPitch += pitchInput * pitchAcceleration * Time.deltaTime;
-                    accumulatedRoll += -inputVector.x * rollAcceleration * Time.deltaTime;
+                    accumulatedPitch += pitchInput * pitchAcceleration * Time.fixedDeltaTime;
                 }
+                accumulatedPitch = Mathf.Clamp(accumulatedPitch, -1f, 1f);
+                accumulatedRoll = Mathf.Clamp(accumulatedRoll, -1f, 1f);
             }
             GetCrosshairWorldPosition();
             crosshairUI.anchoredPosition = crosshairPosition;
             yield return null;
         }
     }
-    private void HandleRotationDecay()
+    private void ApplyAccumulationDecay()
     {
-
-        if (Mathf.Abs(accumulatedYaw) > 0.01f)
-            accumulatedYaw = Mathf.MoveTowards(accumulatedYaw, 0, yawDecayRate * Time.deltaTime);
         if (Mathf.Abs(accumulatedPitch) > 0.01f)
-            accumulatedPitch = Mathf.MoveTowards(accumulatedPitch, 0, pitchDecayRate * Time.deltaTime);
+            accumulatedPitch = Mathf.MoveTowards(accumulatedPitch, 0, pitchDecayRate * Time.fixedDeltaTime);
         if (Mathf.Abs(accumulatedRoll) > 0.01f)
-            accumulatedRoll = Mathf.MoveTowards(accumulatedRoll, 0, rollDecayRate * Time.deltaTime);
+            accumulatedRoll = Mathf.MoveTowards(accumulatedRoll, 0, rollDecayRate * Time.fixedDeltaTime);
     }
 
     private void StartBoost() => StartCoroutine(HandleBoost());
@@ -263,7 +271,7 @@ public class PlayerController : NetworkBehaviour
         if (crosshairUI.TryGetComponent(out Image crosshairImage))
         {
             Color targetColor = isTargetingEnemy ? crosshairOnTargetColor : crosshairColor;
-            crosshairImage.color = Color.Lerp(crosshairImage.color, targetColor, Time.deltaTime * 10f);
+            crosshairImage.color = Color.Lerp(crosshairImage.color, targetColor, Time.fixedDeltaTime * 10f);
         }
     }
 
@@ -298,7 +306,7 @@ public class PlayerController : NetworkBehaviour
         if (bestTarget != null)
         {
             UpdateCrosshairColor(true);
-            return Vector2.Lerp(currentPosition, bestScreenPosition, Time.deltaTime * magnetStrength);
+            return Vector2.Lerp(currentPosition, bestScreenPosition, Time.fixedDeltaTime * magnetStrength);
         }
 
         UpdateCrosshairColor(false);
@@ -356,7 +364,7 @@ public class PlayerController : NetworkBehaviour
     {
         Quaternion currentRotation = transform.rotation;
         Quaternion targetRotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
-        transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, autoLevelSpeed * Time.deltaTime);
+        transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, autoLevelSpeed * Time.fixedDeltaTime);
     }
 
     public void ToggleInversion() => isInverted = !isInverted;

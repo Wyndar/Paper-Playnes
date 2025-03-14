@@ -49,11 +49,10 @@ public class SpawnManager : NetworkBehaviour
     {
         Vector3 spawnPosition = GetRandomPositionWithinBounds();
         GameObject obj = Instantiate(prefab, spawnPosition, Quaternion.identity);
-        obj.transform.SetParent(transform);
 
         if (obj.TryGetComponent(out NetworkObject networkObject))
             networkObject.Spawn();
-
+        networkObject.TrySetParent(transform);
         return obj;
     }
 

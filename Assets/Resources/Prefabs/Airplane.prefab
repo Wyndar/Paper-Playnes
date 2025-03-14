@@ -5263,18 +5263,16 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   respawnEvent: {fileID: 11400000, guid: f83c521e605d15a4c972fd502a7af6b7, type: 2}
   currentSpeed: 0
-  accumulatedYaw: 0
   accumulatedPitch: 0
   accumulatedRoll: 0
   minimumSpeed: 20
   rotationSpeed: 5
+  maxRollAngle: 60
   acceleration: 5
   deceleration: 3
   maxSpeed: 100
-  yawAcceleration: 2
-  pitchAcceleration: 2
-  rollAcceleration: 2
-  yawDecayRate: 2
+  pitchAcceleration: 4.4
+  rollAcceleration: 4
   pitchDecayRate: 2
   rollDecayRate: 2
   isInverted: 0
@@ -5283,8 +5281,8 @@ MonoBehaviour:
   barrelRollSpeed: 360
   crosshairUI: {fileID: 0}
   crosshairTarget: {fileID: 0}
-  crosshairRadius: 20
-  crosshairSpeed: 50
+  crosshairRadius: 15
+  crosshairSpeed: 200
   assistRadius: 1.5
   magnetStrength: 5
   maxAssistRange: 400
@@ -5308,7 +5306,7 @@ MonoBehaviour:
   secondaryWeapons: []
   leftWingTrail: {fileID: 1953311085676840271}
   rightWingTrail: {fileID: 8104407416313711274}
-  trailActivationThreshold: 15
+  trailActivationThreshold: 30
   rollSound: {fileID: 8300000, guid: 2f02a5f010ee2c344ae1dbbcd75035e9, type: 3}
   warningSpeakers: {fileID: 5924087388764067661}
   isBoosting: 0
@@ -5357,7 +5355,7 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!82 &4771522328612152090
