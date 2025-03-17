@@ -19,11 +19,7 @@ public class GameOverPanelHandler : MonoBehaviour
             panelButton.onClick.AddListener(HandleGameOverClick);
     }
 
-    private void OnDisable()
-    {
-        if (ButtonCheck())
-            panelButton.onClick.RemoveListener(HandleGameOverClick);
-    }
+    private void OnDisable() => panelButton.onClick.RemoveAllListeners();
     private bool ButtonCheck()
     {
         if (panelButton == null)
@@ -43,8 +39,9 @@ public class GameOverPanelHandler : MonoBehaviour
     {
         if (NetworkManager.Singleton.IsConnectedClient)
             yield return MultiplayerManager.Instance.LeaveGameSession();
-        gameObject.SetActive(false);
         SceneLoadingManager.Instance.LoadScene(LoadingMode.Local, "Home");
+        yield return new WaitForSeconds(1f);
+        gameObject.SetActive(false);
         yield break;
     }
 }

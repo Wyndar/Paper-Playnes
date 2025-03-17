@@ -37,7 +37,11 @@ public class SceneLoadingManager : MonoBehaviour
 
     public void InitializeSceneLoader() => NetworkManager.Singleton.SceneManager.OnSceneEvent += HandleSceneEvent;
 
-    private void OnDisable() => NetworkManager.Singleton.SceneManager.OnSceneEvent -= HandleSceneEvent;
+    private void OnDisable()
+    {
+        if (NetworkManager.Singleton.SceneManager != null)
+            NetworkManager.Singleton.SceneManager.OnSceneEvent -= HandleSceneEvent;
+    }
 
     private void Update()
     {
@@ -88,6 +92,8 @@ public class SceneLoadingManager : MonoBehaviour
         }
 
         progressBar.value = 1f;
+        //this is dependent on device and may need some variation later
+        yield return new WaitForSeconds(1f);
         yield return StartCoroutine(FadeOutAndFinishLoading(operation));
     }
 
@@ -98,10 +104,10 @@ public class SceneLoadingManager : MonoBehaviour
         
         yield return StartCoroutine(FadeOverlay(1f, fadeDuration));
         loadingPanel.SetActive(false);
-        toggleListenersEvent.RaiseEvent(true);
-        yield return StartCoroutine(FadeOverlay(0f, fadeDuration));
         if (operation != null)
             operation.allowSceneActivation = true;
+        toggleListenersEvent.RaiseEvent(true);
+        yield return StartCoroutine(FadeOverlay(0f, fadeDuration));
         if(loadingMusic)
             loadingMusic.Stop();
     }

@@ -150,6 +150,7 @@ public class PlayerController : NetworkBehaviour
     {
         InputManager.Instance.OnStartMove -= StartCrosshairMovement;
         InputManager.Instance.OnEndMove -= StopCrosshairMovement;
+        InputManager.Instance.OnBoost -= StartBoost;
         InputManager.Instance.OnFirePrimaryWeapon -= StartShooting;
         respawnEvent.OnGameObjectEventRaised -= Respawn;
         gameOverEvent.OnEventRaised -= DisablePlaneObject;

@@ -75,4 +75,5 @@ public class GameEvent : ScriptableObject
     public bool HasStatSubscribers() => OnStatEventRaised != null;
     public bool HasTeamSubscribers() => OnTeamEventRaised != null;
     public bool HasHealthModifiedSubscribers() => OnHealthModifiedEventRaised != null;
+
 }

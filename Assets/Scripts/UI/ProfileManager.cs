@@ -24,6 +24,8 @@ public class ProfileManager : MonoBehaviour
             return;
         }
         Instance = this;
+        if (MultiplayerManager.Instance != null)
+            Initialize();
     }
     public void Initialize()
     {
