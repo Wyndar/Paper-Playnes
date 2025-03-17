@@ -11,6 +11,7 @@ public class UIManager : MonoBehaviour
     public GameEvent respawnEvent;
     public GameEvent playerAmmoUpdateEvent;
     public GameEvent updateTeamScoreEvent;
+    public GameEvent gameOverEvent;
 
     [Header("Prefabs")]
     public GameObject damageableMarkerPrefab;
@@ -29,6 +30,7 @@ public class UIManager : MonoBehaviour
     public TMP_Text redTeamScore;
     public TMP_Text blueTeamScore;
 
+    public GameObject gameOverPanel;
     public GameObject respawningPanel;
     public Transform markerContainer;
     public float detectionRadius = 200f;
@@ -51,6 +53,7 @@ public class UIManager : MonoBehaviour
         respawnEvent.OnGameObjectEventRaised += EnableRespawnPanel;
         playerAmmoUpdateEvent.OnStatEventRaised += UpdateMagText;
         updateTeamScoreEvent.OnTeamEventRaised += UpdateTeamScoreText;
+        gameOverEvent.OnEventRaised += ShowGameOverPopup;
         Debug.Log("enabled");
     }
     private void OnDisable()
@@ -58,6 +61,7 @@ public class UIManager : MonoBehaviour
         respawnEvent.OnGameObjectEventRaised -= EnableRespawnPanel;
         playerAmmoUpdateEvent.OnStatEventRaised -= UpdateMagText;
         updateTeamScoreEvent.OnTeamEventRaised -= UpdateTeamScoreText;
+        gameOverEvent.OnEventRaised -= ShowGameOverPopup;
     }
 
     private void EnableRespawnPanel(GameObject go)
@@ -67,6 +71,7 @@ public class UIManager : MonoBehaviour
         StartCoroutine(RespawnCoroutine(5f, go));
     }
 
+    private void ShowGameOverPopup() => gameOverPanel.SetActive(true);
     private void UpdateMagText(int currentMagCount, int maxMagCount)
     {
         primaryWeaponAmmoCountText.text = currentMagCount.ToString();

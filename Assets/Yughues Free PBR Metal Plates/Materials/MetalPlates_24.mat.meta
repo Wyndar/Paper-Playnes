@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: faa5759c251e8a2498973e72b2178226
+labels:
+- Metal
+- Plates
+timeCreated: 1429689611
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 35362
+  packageName: Yughues Free PBR Metal Plates
+  packageVersion: 1.0
+  assetPath: Assets/Yughues Free PBR Metal Plates/Materials/MetalPlates_24.mat
+  uploadId: 60632

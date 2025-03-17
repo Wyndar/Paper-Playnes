@@ -9,6 +9,7 @@ public class SceneLoadingManager : MonoBehaviour
 {
     public static SceneLoadingManager Instance;
 
+    public GameEvent toggleListenersEvent;
     public GameObject loadingPanel;
     public Slider progressBar;
     public TMP_Text statusText;
@@ -54,7 +55,8 @@ public class SceneLoadingManager : MonoBehaviour
             StartCoroutine(FadeOutMusic(1f, musicFadeOutDuration));
         }
         yield return StartCoroutine(FadeOverlay(1f, fadeDuration));
-        
+
+        toggleListenersEvent.RaiseEvent(false);
         loadingPanel.SetActive(true);
         DisplayRandomTip();
         progressBar.value = 0;
@@ -86,8 +88,6 @@ public class SceneLoadingManager : MonoBehaviour
         }
 
         progressBar.value = 1f;
-
-        yield return new WaitForSeconds(0.5f);
         yield return StartCoroutine(FadeOutAndFinishLoading(operation));
     }
 
@@ -98,6 +98,7 @@ public class SceneLoadingManager : MonoBehaviour
         
         yield return StartCoroutine(FadeOverlay(1f, fadeDuration));
         loadingPanel.SetActive(false);
+        toggleListenersEvent.RaiseEvent(true);
         yield return StartCoroutine(FadeOverlay(0f, fadeDuration));
         if (operation != null)
             operation.allowSceneActivation = true;

@@ -23,10 +23,10 @@ public class InputManager : MonoBehaviour
             return;
         }
         Instance = this;
-        playerInputs = new PlayerInputList();
+        playerInputs ??= new PlayerInputList();
     }
 
-    private void OnEnable() => playerInputs.Enable();
+    private void OnEnable() => playerInputs?.Enable();
 
     private void OnDisable() => playerInputs?.Disable();
 

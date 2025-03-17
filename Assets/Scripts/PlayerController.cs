@@ -9,6 +9,7 @@ public class PlayerController : NetworkBehaviour
 {
     public enum AutoLevelMode { Off, On }
     public GameEvent respawnEvent;
+    public GameEvent gameOverEvent;
     private HealthComponent healthComponent;
     private HealthBar healthBar;
     private CameraController playerCamera;
@@ -142,6 +143,7 @@ public class PlayerController : NetworkBehaviour
         InputManager.Instance.OnBoost += StartBoost;
         InputManager.Instance.OnFirePrimaryWeapon += StartShooting;
         respawnEvent.OnGameObjectEventRaised += Respawn;
+        gameOverEvent.OnEventRaised += DisablePlaneObject;
     }
     private void OnEnable() => InitializeEvents();
     private void OnDisable()
@@ -150,6 +152,7 @@ public class PlayerController : NetworkBehaviour
         InputManager.Instance.OnEndMove -= StopCrosshairMovement;
         InputManager.Instance.OnFirePrimaryWeapon -= StartShooting;
         respawnEvent.OnGameObjectEventRaised -= Respawn;
+        gameOverEvent.OnEventRaised -= DisablePlaneObject;
         StopAllCoroutines();
     }
 
@@ -255,7 +258,7 @@ public class PlayerController : NetworkBehaviour
         if (Mathf.Abs(accumulatedYaw) > 0.01f)
             accumulatedYaw = Mathf.MoveTowards(accumulatedYaw, 0, yawDecayRate * Time.fixedDeltaTime);
     }
-
+    private void DisablePlaneObject() => gameObject.SetActive(false);
     private void StartBoost() => StartCoroutine(HandleBoost());
     private void StartShooting() => primaryWeapon.Fire(GetCrosshairWorldPosition());
 

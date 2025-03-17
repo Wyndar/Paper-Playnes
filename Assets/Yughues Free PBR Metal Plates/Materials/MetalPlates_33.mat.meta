@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 50707c76b62c7914f9678be0b6c5ccfe
+labels:
+- Metal
+- Plates
+- Victorian
+timeCreated: 1429689613
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 35362
+  packageName: Yughues Free PBR Metal Plates
+  packageVersion: 1.0
+  assetPath: Assets/Yughues Free PBR Metal Plates/Materials/MetalPlates_33.mat
+  uploadId: 60632

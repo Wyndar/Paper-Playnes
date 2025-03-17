@@ -5262,6 +5262,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   respawnEvent: {fileID: 11400000, guid: f83c521e605d15a4c972fd502a7af6b7, type: 2}
+  gameOverEvent: {fileID: 11400000, guid: 2a05721b6c33d07458c79aa575a8f001, type: 2}
   currentSpeed: 0
   accumulatedPitch: 0
   accumulatedRoll: 0
@@ -5295,8 +5296,8 @@ MonoBehaviour:
   boostMultiplier: 2
   boostDuration: 2
   boostVFX: {fileID: 269295487771220670}
-  maxAltitude: 800
-  minAltitude: 10
+  maxAltitude: 1500
+  minAltitude: 0
   maxWeight: 0
   currentWeight: 0
   weightToSpeedReductionRatio: 0

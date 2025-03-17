@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2e6d0abdd6ffaf41876ac6bf19d1f82, type: 3}
   m_Name: Update Score Event
   m_EditorClassIdentifier: 
-  selectedEventType: 4
+  selectedEventType: 5
   pickupType: 0

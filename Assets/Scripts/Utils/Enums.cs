@@ -1,3 +1,4 @@
+//always add new enums after not before, can break enum order in inspector
 public enum LoadingMode 
 {
     Local,
@@ -15,6 +16,7 @@ public enum Team
     RedTeam,
     BlueTeam
 }
+
 public enum PickUpType
 {
     Undefined,
@@ -33,6 +35,7 @@ public enum GameEventType
 {
     Undefined,
     NoParams,
+    Toggle,
     GameObject,
     StatUpdate,
     TeamStatUpdate,

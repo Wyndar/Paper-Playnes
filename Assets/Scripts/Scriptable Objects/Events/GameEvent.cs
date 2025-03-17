@@ -10,10 +10,12 @@ public class GameEvent : ScriptableObject
     public PickUpType pickupType;
 
     public event Action OnEventRaised;
+    public event Action<bool> OnToggleEventRaised;
     public event Action<GameObject> OnGameObjectEventRaised;
     public event Action<int, int> OnStatEventRaised;
     public event Action<Team, int, int> OnTeamEventRaised;
     public event Action<HealthComponent, HealthModificationType, int, int> OnHealthModifiedEventRaised;
+    
 
     private static readonly Dictionary<PickUpType, WeakReference<GameEvent>> _eventRegistry = new();
 
@@ -35,6 +37,7 @@ public class GameEvent : ScriptableObject
             _eventRegistry.Remove(pickupType);
     }
     public void RaiseEvent() => OnEventRaised?.Invoke();
+    public void RaiseEvent(bool isOn) => OnToggleEventRaised?.Invoke(isOn);
     public void RaiseEvent(GameObject obj) => OnGameObjectEventRaised?.Invoke(obj);
     public void RaiseEvent(int currentStat, int maxStat) => OnStatEventRaised?.Invoke(currentStat, maxStat);
     public void RaiseEvent(Team updateTeam, int currentStat, int maxOrPreviousStat) 
@@ -67,6 +70,7 @@ public class GameEvent : ScriptableObject
         }
     }
     public bool HasSubscribers() => OnEventRaised != null;
+    public bool HasToggleSubscribers() => OnToggleEventRaised != null;
     public bool HasGameObjectSubscribers() => OnGameObjectEventRaised != null;
     public bool HasStatSubscribers() => OnStatEventRaised != null;
     public bool HasTeamSubscribers() => OnTeamEventRaised != null;
