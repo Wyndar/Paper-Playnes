@@ -148,7 +148,6 @@ public class PlayerController : NetworkBehaviour
     private void OnEnable() => InitializeEvents();
     private void OnDisable()
     {
-        Debug.Log("removing all refs");
         InputManager.Instance.OnStartMove -= StartCrosshairMovement;
         InputManager.Instance.OnEndMove -= StopCrosshairMovement;
         InputManager.Instance.OnBoost -= StartBoost;
@@ -160,6 +159,7 @@ public class PlayerController : NetworkBehaviour
 
     private void FixedUpdate()
     {
+
         ApplyPhysicsMovement();
         ApplyPhysicsRotation();
         ApplyAccumulationDecay();
@@ -200,12 +200,11 @@ public class PlayerController : NetworkBehaviour
         rb.AddTorque(torque, ForceMode.Acceleration);
     }
 
+
     private void StartCrosshairMovement()
     {
-        if (crosshairRoutine != null)
-            return;
-        StartCoroutine(HandleCrosshairMovement());
         isMoving = true;
+        crosshairRoutine ??= StartCoroutine(HandleCrosshairMovement());
     }
 
     private void StopCrosshairMovement()
@@ -260,12 +259,7 @@ public class PlayerController : NetworkBehaviour
         if (Mathf.Abs(accumulatedYaw) > 0.01f)
             accumulatedYaw = Mathf.MoveTowards(accumulatedYaw, 0, yawDecayRate * Time.fixedDeltaTime);
     }
-    private void DisablePlaneObject()
-    {
-        Debug.Log("disabling plane");
-        gameObject.SetActive(false);
-    }
-
+    private void DisablePlaneObject() => gameObject.SetActive(false);
     private void StartBoost() => StartCoroutine(HandleBoost());
     private void StartShooting() => primaryWeapon.Fire(GetCrosshairWorldPosition());
 
