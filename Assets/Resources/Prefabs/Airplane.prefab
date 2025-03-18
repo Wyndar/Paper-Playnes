@@ -5237,8 +5237,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GlobalObjectIdHash: 2381539424
   InScenePlacedSourceGlobalObjectIdHash: 2381539424
-  DeferredDespawnTick: 0
-  Ownership: 4
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   ActiveSceneSynchronization: 0
@@ -5246,8 +5244,6 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
 --- !u!114 &624853559991829974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5260,7 +5256,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa63d29d08466c847a27137d9b9fde18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
   respawnEvent: {fileID: 11400000, guid: f83c521e605d15a4c972fd502a7af6b7, type: 2}
   gameOverEvent: {fileID: 11400000, guid: 2a05721b6c33d07458c79aa575a8f001, type: 2}
   currentSpeed: 0
@@ -5277,9 +5272,9 @@ MonoBehaviour:
   pitchAcceleration: 4.4
   rollAcceleration: 4
   yawAcceleration: 3
-  pitchDecayRate: 2
-  rollDecayRate: 2
-  yawDecayRate: 2
+  pitchDecayRate: 5
+  rollDecayRate: 5
+  yawDecayRate: 5
   isInverted: 0
   autoLevelMode: 1
   autoLevelSpeed: 0.35
@@ -5472,7 +5467,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef92060797c173045bf41bbdd7e78f44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
   destructible: {fileID: 11400000, guid: c662e6e89f43d8d418ee2e4f77a54abe, type: 2}
   healthEvent: {fileID: 11400000, guid: 56b0c326c286aba46aab70eac92e24a9, type: 2}
 --- !u!114 &7090727553298456833
@@ -5499,7 +5493,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: caec3a767f3d70a45b940ed2336df621, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &3615927806441666436
 GameObject:
   m_ObjectHideFlags: 0
