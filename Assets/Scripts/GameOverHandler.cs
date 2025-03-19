@@ -6,6 +6,7 @@ using System.Collections;
 public class GameOverPanelHandler : MonoBehaviour
 {
     private Button panelButton;
+    public GameEvent toggleListenerEvent;
 
     private void Awake()
     {
@@ -15,11 +16,17 @@ public class GameOverPanelHandler : MonoBehaviour
 
     private void OnEnable()
     {
+        toggleListenerEvent.RaiseEvent(false);
         if (ButtonCheck())
             panelButton.onClick.AddListener(HandleGameOverClick);
     }
 
-    private void OnDisable() => panelButton.onClick.RemoveAllListeners();
+    private void OnDisable()
+    {
+        toggleListenerEvent.RaiseEvent(true);
+        panelButton.onClick.RemoveAllListeners();
+    }
+
     private bool ButtonCheck()
     {
         if (panelButton == null)

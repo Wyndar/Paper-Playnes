@@ -43,4 +43,10 @@ public class CameraController : MonoBehaviour
         transform.SetParent(player);
         Debug.Log("Camera teleported behind the player.");
     }
+    public void RemoveCameraFromPlayer()
+    {
+        transform.SetParent(null);
+        player = null;
+        Debug.Log("Camera removed the player.");
+    }
 }

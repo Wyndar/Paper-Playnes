@@ -9,7 +9,6 @@ public class PlayerController : NetworkBehaviour
 {
     public enum AutoLevelMode { Off, On }
     public GameEvent respawnEvent;
-    public GameEvent gameOverEvent;
     private HealthComponent healthComponent;
     private HealthBar healthBar;
     private CameraController playerCamera;
@@ -95,6 +94,9 @@ public class PlayerController : NetworkBehaviour
     private Coroutine crosshairRoutine;
     private const int MAX_TARGETS = 10;
     private RaycastHit[] assistHits = new RaycastHit[MAX_TARGETS];
+    private AltimeterSystem altimeterSystem;
+    private RadarSystem radarSystem;
+    private UIManager uiManager;    
 
     public override void OnNetworkSpawn()
     {
@@ -115,20 +117,31 @@ public class PlayerController : NetworkBehaviour
         gameObject.name = MultiplayerManager.PlayerName;
         TeamManager.Instance.InitializeTeamScores();
     }
+    public override void OnNetworkDespawn()
+    {
+        if (SpawnManager.Instance != null)
+            SpawnManager.Instance.UnregisterPlayer(this);
+        playerCamera.RemoveCameraFromPlayer();
+        altimeterSystem.enabled = false;
+        radarSystem.enabled = false;
+        uiManager.enabled = false;
+        CleanupEventsAndRoutines();
+        Destroy(gameObject);
+    }
 
     private void InitializeLocalGameManager()
     {
         GameObject LGM = GameObject.Find("Local Game Manager");
-        UIManager manager = LGM.GetComponent<UIManager>();
-        manager.playerHealth = healthComponent;
-        manager.enabled = true;
-        healthBar.InitializeHealthBar(manager.playerHealthBar);
+        uiManager = LGM.GetComponent<UIManager>();
+        uiManager.playerHealth = healthComponent;
+        uiManager.enabled = true;
+        healthBar.InitializeHealthBar(uiManager.playerHealthBar);
 
-        RadarSystem radarSystem = LGM.GetComponent<RadarSystem>();
+        radarSystem = LGM.GetComponent<RadarSystem>();
         radarSystem.player = transform;
         radarSystem.enabled = true;
         
-        AltimeterSystem altimeterSystem = LGM.GetComponent<AltimeterSystem>();
+        altimeterSystem = LGM.GetComponent<AltimeterSystem>();
         altimeterSystem.player = transform;
         altimeterSystem.warningSound = warningSpeakers;
         altimeterSystem.maxAltitude = maxAltitude;
@@ -143,23 +156,22 @@ public class PlayerController : NetworkBehaviour
         InputManager.Instance.OnBoost += StartBoost;
         InputManager.Instance.OnFirePrimaryWeapon += StartShooting;
         respawnEvent.OnGameObjectEventRaised += Respawn;
-        gameOverEvent.OnEventRaised += DisablePlaneObject;
     }
     private void OnEnable() => InitializeEvents();
-    private void OnDisable()
+    private void OnDisable() => CleanupEventsAndRoutines();
+
+    private void CleanupEventsAndRoutines()
     {
         InputManager.Instance.OnStartMove -= StartCrosshairMovement;
         InputManager.Instance.OnEndMove -= StopCrosshairMovement;
         InputManager.Instance.OnBoost -= StartBoost;
         InputManager.Instance.OnFirePrimaryWeapon -= StartShooting;
         respawnEvent.OnGameObjectEventRaised -= Respawn;
-        gameOverEvent.OnEventRaised -= DisablePlaneObject;
         StopAllCoroutines();
     }
 
     private void FixedUpdate()
     {
-
         ApplyPhysicsMovement();
         ApplyPhysicsRotation();
         ApplyAccumulationDecay();
@@ -199,7 +211,6 @@ public class PlayerController : NetworkBehaviour
 
         rb.AddTorque(torque, ForceMode.Acceleration);
     }
-
 
     private void StartCrosshairMovement()
     {
@@ -259,7 +270,7 @@ public class PlayerController : NetworkBehaviour
         if (Mathf.Abs(accumulatedYaw) > 0.01f)
             accumulatedYaw = Mathf.MoveTowards(accumulatedYaw, 0, yawDecayRate * Time.fixedDeltaTime);
     }
-    private void DisablePlaneObject() => gameObject.SetActive(false);
+
     private void StartBoost() => StartCoroutine(HandleBoost());
     private void StartShooting() => primaryWeapon.Fire(GetCrosshairWorldPosition());
 
@@ -402,9 +413,5 @@ public class PlayerController : NetworkBehaviour
         transform.SetPositionAndRotation(newSpawnPosition, Quaternion.identity);
         healthComponent.InitializeHealth();
     }
-    public override void OnNetworkDespawn()
-    {
-        if (SpawnManager.Instance != null)
-            SpawnManager.Instance.UnregisterPlayer(this);
-    }
+ 
 }
