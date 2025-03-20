@@ -29,7 +29,7 @@ public class SceneTransitionManager : NetworkBehaviour
 
         if (IsServer)
         {
-            TeamManager.Instance.RequestTeamAssignmentServerRpc(clientId);
+            SpawnManager.Instance.RequestPlayerSpawnServerRpc(clientId);
             ClientLoadedScene(clientId);
         }
     }

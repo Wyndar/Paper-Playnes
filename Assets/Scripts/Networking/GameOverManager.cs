@@ -19,9 +19,9 @@ public class GameOverManager : NetworkBehaviour
 
     private IEnumerator DespawnPlayersAndFinalizeGameOver()
     {
-        for (int i = SpawnManager.Instance.activePlayers.Count - 1; i >= 0; i--)
+        for (int i = SpawnManager.Instance.activeControllers.Count - 1; i >= 0; i--)
         {
-            PlayerController player = SpawnManager.Instance.activePlayers[i];
+            Controller player = SpawnManager.Instance.activeControllers[i];
             if (player != null && player.TryGetComponent(out NetworkObject networkObject))
             {
                 networkObject.Despawn();

@@ -1,11 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerController : NetworkBehaviour
+public class PlayerController : Controller
 {
     public enum AutoLevelMode { Off, On }
     public GameEvent respawnEvent;
@@ -98,7 +97,7 @@ public class PlayerController : NetworkBehaviour
     private RadarSystem radarSystem;
     private UIManager uiManager;    
 
-    public override void OnNetworkSpawn()
+    public override void Initialize()
     {
         if (!IsOwner)
         {
@@ -109,7 +108,10 @@ public class PlayerController : NetworkBehaviour
         rb= GetComponent<Rigidbody>();
         healthBar = GetComponent<HealthBar>();
         healthComponent = GetComponent<HealthComponent>();
-        SpawnManager.Instance.RegisterPlayer(this);
+        SpawnManager.Instance.RegisterController(this);
+        ulong ownerId = NetworkManager.Singleton.LocalClientId;
+        Team assignedTeam = TeamManager.Instance.GetTeam(this);
+        InitializeEntity(false, ownerId, assignedTeam);
         FindLocalCamera();
         crosshairUI = GameObject.Find("Crosshair").GetComponent<RectTransform>();
         InitializeLocalGameManager();
@@ -120,7 +122,7 @@ public class PlayerController : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         if (SpawnManager.Instance != null)
-            SpawnManager.Instance.UnregisterPlayer(this);
+            SpawnManager.Instance.UnregisterController(this);
         playerCamera.RemoveCameraFromPlayer();
         altimeterSystem.enabled = false;
         radarSystem.enabled = false;
@@ -408,7 +410,7 @@ public class PlayerController : NetworkBehaviour
     }
     public void Respawn(GameObject gameObject)
     {
-        Team currentTeam = TeamManager.Instance.GetTeam(OwnerClientId);
+        Team currentTeam = TeamManager.Instance.GetTeam(this);
         Vector3 newSpawnPosition = SpawnManager.Instance.GetRandomSpawnPoint(currentTeam);
         transform.SetPositionAndRotation(newSpawnPosition, Quaternion.identity);
         healthComponent.InitializeHealth();

@@ -88,7 +88,7 @@ public class RadarSystem : MonoBehaviour
         if (SpawnManager.Instance == null || !player.TryGetComponent(out PlayerController localPlayer))
             return;
 
-        isRedPlayer = TeamManager.Instance.GetTeam(localPlayer.OwnerClientId) == Team.RedTeam;
+        isRedPlayer = TeamManager.Instance.GetTeam(localPlayer) == Team.RedTeam;
         GameObject blip = isRedPlayer ? Instantiate(redTeamBlipPrefab, radarPanel.transform) : Instantiate(blueTeamBlipPrefab, radarPanel.transform);
         playerBlip = blip.GetComponent<RectTransform>();
 
@@ -107,14 +107,14 @@ public class RadarSystem : MonoBehaviour
         float playerYaw = player.eulerAngles.y;
         PlayerController localPlayer = player.GetComponent<PlayerController>();
 
-        foreach (PlayerController otherPlayer in SpawnManager.Instance.activePlayers)
+        foreach (PlayerController otherPlayer in SpawnManager.Instance.activeControllers)
         {
             if (otherPlayer == null || otherPlayer == localPlayer) continue;
 
             Vector3 relativePosition = otherPlayer.transform.position - player.position;
             float distance = relativePosition.magnitude;
 
-            bool isRedTeam = TeamManager.Instance.GetTeam(otherPlayer.OwnerClientId) == Team.RedTeam;
+            bool isRedTeam = TeamManager.Instance.GetTeam(otherPlayer) == Team.RedTeam;
             Vector2 radarPos = GetBlipPosition(relativePosition, out bool isOffScreen);
             float fadeAmount = Mathf.InverseLerp(maxFadeDistance, minFadeDistance, distance);
 

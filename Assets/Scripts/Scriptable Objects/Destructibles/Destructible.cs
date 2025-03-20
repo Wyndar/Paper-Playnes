@@ -26,6 +26,6 @@ public class Destructible : ScriptableObject
         if (!isDelayedRespawn)
             return;
         respawnEvent.RaiseEvent(gameObject);
-        TeamManager.Instance.LocalPlayerDied();
+        TeamManager.Instance.LocalPlayerDied(gameObject.GetComponent<Controller>());
     }
 }
