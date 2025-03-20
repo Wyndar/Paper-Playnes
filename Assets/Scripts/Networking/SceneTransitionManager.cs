@@ -31,6 +31,9 @@ public class SceneTransitionManager : NetworkBehaviour
         {
             SpawnManager.Instance.RequestPlayerSpawnServerRpc(clientId);
             ClientLoadedScene(clientId);
+            int botCount = 10 - NetworkManager.Singleton.ConnectedClientsList.Count;
+            for (int i = botCount - 1; i >= 0; i--)
+                SpawnManager.Instance.RequestBotSpawnServerRpc();
         }
     }
 

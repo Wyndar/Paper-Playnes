@@ -95,7 +95,8 @@ public class PlayerController : Controller
     private RaycastHit[] assistHits = new RaycastHit[MAX_TARGETS];
     private AltimeterSystem altimeterSystem;
     private RadarSystem radarSystem;
-    private UIManager uiManager;    
+    private UIManager uiManager;
+    private bool hasInitialized;
 
     public override void Initialize()
     {
@@ -105,7 +106,8 @@ public class PlayerController : Controller
             StopAllCoroutines();
             return;
         }
-        rb= GetComponent<Rigidbody>();
+
+        rb = GetComponent<Rigidbody>();
         healthBar = GetComponent<HealthBar>();
         healthComponent = GetComponent<HealthComponent>();
         SpawnManager.Instance.RegisterController(this);
@@ -118,7 +120,9 @@ public class PlayerController : Controller
         InitializeEvents();
         gameObject.name = MultiplayerManager.PlayerName;
         TeamManager.Instance.InitializeTeamScores();
+        hasInitialized = true;
     }
+
     public override void OnNetworkDespawn()
     {
         if (SpawnManager.Instance != null)
@@ -153,6 +157,8 @@ public class PlayerController : Controller
 
     private void InitializeEvents()
     {
+        if (!hasInitialized) return;
+
         InputManager.Instance.OnStartMove += StartCrosshairMovement;
         InputManager.Instance.OnEndMove += StopCrosshairMovement;
         InputManager.Instance.OnBoost += StartBoost;
@@ -164,6 +170,8 @@ public class PlayerController : Controller
 
     private void CleanupEventsAndRoutines()
     {
+        if (!hasInitialized) return;
+
         InputManager.Instance.OnStartMove -= StartCrosshairMovement;
         InputManager.Instance.OnEndMove -= StopCrosshairMovement;
         InputManager.Instance.OnBoost -= StartBoost;
@@ -174,6 +182,8 @@ public class PlayerController : Controller
 
     private void FixedUpdate()
     {
+        if (!hasInitialized) return;
+
         ApplyPhysicsMovement();
         ApplyPhysicsRotation();
         ApplyAccumulationDecay();

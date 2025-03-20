@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
+using System.Collections;
 
 public class SpawnManager : NetworkBehaviour
 {
@@ -15,8 +16,9 @@ public class SpawnManager : NetworkBehaviour
     public int spawnBoxCount;
     public Renderer spawnRenderer;
 
+    public string[] botNames = new string[10];
     public List<Controller> activeControllers = new();
-
+    private int botNamesTaken = 0;
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -29,6 +31,7 @@ public class SpawnManager : NetworkBehaviour
 
     private void Start()
     {
+        if(!IsServer) return;
         InstantiateBoxes();
         RearrangeBoxes();
     }
@@ -37,13 +40,19 @@ public class SpawnManager : NetworkBehaviour
     {
         for (int i = 0; i < spawnBoxCount; i++)
         {
-            Instantiate(puBoxPrefab).transform.SetParent(transform);
-            Instantiate(minesPrefab).transform.SetParent(transform);
-            Instantiate(destBoxPrefab).transform.SetParent(transform);
-            GameObject bird = Instantiate(birdsPrefab);
-            bird.transform.SetParent(transform);
-            bird.GetComponent<BirdAI>().flightArea = spawnRenderer;
+            SpawnShit(puBoxPrefab);
+            SpawnShit(minesPrefab);
+            SpawnShit(birdsPrefab);
+            SpawnShit(destBoxPrefab);
         }
+    }
+    private void SpawnShit(GameObject prefab)
+    {
+        GameObject pu = Instantiate(prefab);
+        pu.GetComponent<NetworkObject>().SpawnWithOwnership(NetworkManager.ServerClientId);
+        pu.transform.SetParent(transform);
+        if (pu.TryGetComponent(out BirdAI bird))
+            bird.flightArea = spawnRenderer;
     }
 
     public void RearrangeBoxes()
@@ -87,7 +96,11 @@ public class SpawnManager : NetworkBehaviour
             Random.Range(bounds.min.z, bounds.max.z)
         );
     }
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestPlayerSpawnServerRpc(ulong clientId) => SpawnEntity(clientId, false);
 
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestBotSpawnServerRpc() => SpawnEntity();
     private void SpawnEntity(ulong clientId = NetworkManager.ServerClientId, bool isBot = true)
     {
         if (!IsServer) return;
@@ -104,13 +117,19 @@ public class SpawnManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void SendSpawnedPlayerCallbackClientRpc(NetworkObjectReference entityObject, bool isBot)
+    private void SendSpawnedPlayerCallbackClientRpc(NetworkObjectReference entityObject, bool isBot) => StartCoroutine(ResolveSpawnedPlayerCallback(entityObject, isBot));
+
+    private IEnumerator ResolveSpawnedPlayerCallback(NetworkObjectReference entityObject, bool isBot)
     {
         if (!entityObject.TryGet(out NetworkObject netObj))
-            return;
+            yield break;
         Destroy(isBot ? netObj.gameObject.GetComponent<PlayerController>() : netObj.gameObject.GetComponent<BotController>());
         Controller controller = isBot ? netObj.gameObject.GetComponent<BotController>() : netObj.gameObject.GetComponent<PlayerController>();
         RegisterController(controller);
+        Debug.Log(isBot);
+
+        //to ensure we don't call the wrong initialize on a destroyed controller, skip a few frames
+        yield return new WaitForSeconds(0.2f);
         if (NetworkManager.Singleton.LocalClientId == netObj.OwnerClientId)
             TeamManager.Instance.RequestTeamAssignmentServerRpc(entityObject);
     }
@@ -128,10 +147,10 @@ public class SpawnManager : NetworkBehaviour
         if (networkObjectReference.TryGet(out NetworkObject netObj) && netObj.TryGetComponent(out Controller component))
             component.Initialize();
     }
-
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestPlayerSpawnServerRpc(ulong clientId) => SpawnEntity(clientId, false);
-
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestBotSpawnServerRpc() => SpawnEntity();
+    public string GetBotName()
+    {
+        string returnString = botNames[botNamesTaken];
+        botNamesTaken++;
+        return returnString;
+    }
 }

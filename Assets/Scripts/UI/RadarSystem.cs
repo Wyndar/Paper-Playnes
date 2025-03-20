@@ -72,7 +72,7 @@ public class RadarSystem : MonoBehaviour
         UpdateRadar();
         UpdateDirectionMarkers();
         UpdateBlips(uiManager.detectedColliders, hpBlips, hpBlipPrefab, ref activeHPBlips,
-            col => col.TryGetComponent(out HealthComponent _) && !col.TryGetComponent(out PlayerController _));
+            col => col.TryGetComponent(out HealthComponent _) && !col.TryGetComponent(out Controller _));
         UpdateBlips(uiManager.detectedColliders, pickupBlips, pickupBlipPrefab, ref activePickupBlips,
             col => col.TryGetComponent(out PickUp pickup) && pickup.isActive);
     }
@@ -107,7 +107,7 @@ public class RadarSystem : MonoBehaviour
         float playerYaw = player.eulerAngles.y;
         PlayerController localPlayer = player.GetComponent<PlayerController>();
 
-        foreach (PlayerController otherPlayer in SpawnManager.Instance.activeControllers)
+        foreach (Controller otherPlayer in SpawnManager.Instance.activeControllers)
         {
             if (otherPlayer == null || otherPlayer == localPlayer) continue;
 
@@ -135,9 +135,10 @@ public class RadarSystem : MonoBehaviour
         activeBlueArrows = 0;
     }
 
-    private void HandleBlipVisibility(Vector2 radarPos, PlayerController otherPlayer, float fadeAmount, bool isRedTeam, float playerYaw)
+    private void HandleBlipVisibility(Vector2 radarPos, Controller otherPlayer, float fadeAmount, bool isRedTeam, float playerYaw)
     {
-        GameObject blip = GetOrCreateBlip(isRedTeam ? redTeamBlips : blueTeamBlips, isRedTeam ? redTeamBlipPrefab : blueTeamBlipPrefab, ref activeRedBlips, ref activeBlueBlips);
+        GameObject blip = GetOrCreateBlip(isRedTeam ? redTeamBlips : blueTeamBlips, isRedTeam ? redTeamBlipPrefab :
+            blueTeamBlipPrefab, ref activeRedBlips, ref activeBlueBlips);
         RectTransform blipTransform = blip.GetComponent<RectTransform>();
 
         blipTransform.anchoredPosition = RotateBlipPosition(radarPos, playerYaw);
@@ -151,7 +152,8 @@ public class RadarSystem : MonoBehaviour
 
     private void HandleDirectionalArrow(Vector2 radarPos, bool isRedTeam, float playerYaw)
     {
-        GameObject arrowBlip = GetOrCreateBlip(isRedTeam ? redTeamArrows : blueTeamArrows, isRedTeam ? redArrowBlipPrefab : blueArrowBlipPrefab, ref activeRedArrows, ref activeBlueArrows);
+        GameObject arrowBlip = GetOrCreateBlip(isRedTeam ? redTeamArrows : blueTeamArrows, isRedTeam ? redArrowBlipPrefab :
+            blueArrowBlipPrefab, ref activeRedArrows, ref activeBlueArrows);
         RectTransform arrowTransform = arrowBlip.GetComponent<RectTransform>();
 
         arrowTransform.anchoredPosition = RotateBlipPosition(radarPos, playerYaw);

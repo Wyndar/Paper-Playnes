@@ -5,6 +5,7 @@ using Unity.Netcode;
 public class BotController : Controller
 {
     [SerializeField] private float decisionCooldown = 1f;
+    [SerializeField] private float spawnerCooldown = 10f;
     [SerializeField] private float detectionRadius = 500f;
     [SerializeField] private float firingRange = 200f;
     [SerializeField] private float avoidanceStrength = 5f;
@@ -19,20 +20,22 @@ public class BotController : Controller
     private static Collider[] detectedColliders = new Collider[50];
 #pragma warning restore IDE0044 // Add readonly modifier
 
-    public override void OnNetworkSpawn()
+    public override void Initialize()
     {
         if (!IsServer) return;
         rb = GetComponent<Rigidbody>();
         healthComponent = GetComponent<HealthComponent>();
         StartCoroutine(BotBehaviorLoop());
-        ulong ownerId = NetworkManager.Singleton.LocalClientId;
-        Team assignedTeam = TeamManager.Instance.AssignTeam(this);
+        ulong ownerId = NetworkManager.ServerClientId;
+        Team assignedTeam = TeamManager.Instance.GetTeam(this);
         InitializeEntity(true, ownerId, assignedTeam);
+        gameObject.name = SpawnManager.Instance.GetBotName();
     }
 
     private IEnumerator BotBehaviorLoop()
     {
-        while (true)
+        spawnerCooldown -= Time.deltaTime;
+        while (spawnerCooldown <= 0)
         {
             FindTarget();
             MoveTowardsTarget();
@@ -40,6 +43,7 @@ public class BotController : Controller
             ShootAtTarget();
             yield return new WaitForSeconds(decisionCooldown);
         }
+        yield return null;
     }
 
     private void FindTarget()
