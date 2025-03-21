@@ -71,13 +71,13 @@ public class GameEventDebugger : Editor
                 break;
 
             case GameEventType.HealthModified:
-                healthComponent = (HealthComponent)EditorGUILayout.ObjectField("Health Component", healthComponent, typeof(HealthComponent), true);
-                healthModificationType = (HealthModificationType)EditorGUILayout.EnumPopup("Health Mod Type", healthModificationType);
+                healthComponent = (HealthComponent)EditorGUILayout.ObjectField("healthComponent Component", healthComponent, typeof(HealthComponent), true);
+                healthModificationType = (HealthModificationType)EditorGUILayout.EnumPopup("healthComponent Mod Type", healthModificationType);
                 intParam1 = EditorGUILayout.IntField("Amount", intParam1);
                 intParam2 = EditorGUILayout.IntField("Previous HP", intParam2);
-                if (gameEvent.HasHealthModifiedSubscribers() && GUILayout.Button("Raise Event (Health Modified)"))
+                if (gameEvent.HasHealthModifiedSubscribers() && GUILayout.Button("Raise Event (healthComponent Modified)"))
                     if (healthComponent == null)
-                        Debug.LogWarning("Cannot raise event: Health Component parameter is null.");
+                        Debug.LogWarning("Cannot raise event: healthComponent Component parameter is null.");
                     else
                         gameEvent.RaiseEvent(healthComponent, healthModificationType, intParam1, intParam2);
                 break;

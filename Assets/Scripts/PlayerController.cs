@@ -8,8 +8,6 @@ public class PlayerController : Controller
 {
     public enum AutoLevelMode { Off, On }
     public GameEvent respawnEvent;
-    private HealthComponent healthComponent;
-    private HealthBar healthBar;
     private CameraController playerCamera;
 
     [Header("Movement Settings")]
@@ -89,7 +87,6 @@ public class PlayerController : Controller
     private Vector2 crosshairPosition = Vector2.zero;
     public bool isBoosting;
     private bool isMoving;
-    private Rigidbody rb;
     private Coroutine crosshairRoutine;
     private const int MAX_TARGETS = 10;
     private RaycastHit[] assistHits = new RaycastHit[MAX_TARGETS];
@@ -106,21 +103,16 @@ public class PlayerController : Controller
             StopAllCoroutines();
             return;
         }
-
-        rb = GetComponent<Rigidbody>();
-        healthBar = GetComponent<HealthBar>();
-        healthComponent = GetComponent<HealthComponent>();
-        SpawnManager.Instance.RegisterController(this);
         ulong ownerId = NetworkManager.Singleton.LocalClientId;
         Team assignedTeam = TeamManager.Instance.GetTeam(this);
         InitializeEntity(false, ownerId, assignedTeam);
         FindLocalCamera();
         crosshairUI = GameObject.Find("Crosshair").GetComponent<RectTransform>();
+        hasInitialized = true;
         InitializeLocalGameManager();
         InitializeEvents();
         gameObject.name = MultiplayerManager.PlayerName;
         TeamManager.Instance.InitializeTeamScores();
-        hasInitialized = true;
     }
 
     public override void OnNetworkDespawn()
@@ -417,13 +409,5 @@ public class PlayerController : Controller
         }
         else
             Debug.LogError("No Main Camera found for Player " + OwnerClientId);
-    }
-    public void Respawn(GameObject gameObject)
-    {
-        Team currentTeam = TeamManager.Instance.GetTeam(this);
-        Vector3 newSpawnPosition = SpawnManager.Instance.GetRandomSpawnPoint(currentTeam);
-        transform.SetPositionAndRotation(newSpawnPosition, Quaternion.identity);
-        healthComponent.InitializeHealth();
-    }
- 
+    } 
 }

@@ -13,23 +13,28 @@ public class BotController : Controller
     [SerializeField] private float maxSpeed = 20f;
     [SerializeField] private Weapon primaryWeapon;
     
-    private Rigidbody rb;
-    private HealthComponent healthComponent;
     private Transform target;
 #pragma warning disable IDE0044 // Add readonly modifier
     private static Collider[] detectedColliders = new Collider[50];
 #pragma warning restore IDE0044 // Add readonly modifier
 
+    public void OnEnable()
+    {
+        if (spawnerCooldown <= 0)
+            StartCoroutine(BotBehaviorLoop());
+    }
+    public void OnDisable()
+    {
+        StopAllCoroutines();
+    }
     public override void Initialize()
     {
         if (!IsServer) return;
-        rb = GetComponent<Rigidbody>();
-        healthComponent = GetComponent<HealthComponent>();
-        StartCoroutine(BotBehaviorLoop());
         ulong ownerId = NetworkManager.ServerClientId;
         Team assignedTeam = TeamManager.Instance.GetTeam(this);
         InitializeEntity(true, ownerId, assignedTeam);
         gameObject.name = SpawnManager.Instance.GetBotName();
+        StartCoroutine(BotBehaviorLoop());
     }
 
     private IEnumerator BotBehaviorLoop()

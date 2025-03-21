@@ -37,12 +37,17 @@ public class CameraController : MonoBehaviour
     }
     public void TeleportCameraBehindPlayer()
     {
-        transform.position = player.position + (player.forward * offset.z) + (player.up * offset.y);
-        transform.LookAt(player.position + (Vector3.up * 1.5f));
-        //comment this if using update follow
+        if (player == null)
+        {
+            Debug.LogWarning("Player not assigned to CameraController.");
+            return;
+        }
+
         transform.SetParent(player);
-        Debug.Log("Camera teleported behind the player.");
+        transform.SetLocalPositionAndRotation(offset, Quaternion.LookRotation(Vector3.forward, Vector3.up));
+        Debug.Log("Camera teleported and aligned behind the player.");
     }
+
     public void RemoveCameraFromPlayer()
     {
         transform.SetParent(null);

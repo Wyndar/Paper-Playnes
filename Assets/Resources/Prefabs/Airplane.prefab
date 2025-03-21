@@ -5191,6 +5191,8 @@ GameObject:
   - component: {fileID: 7090727553298456833}
   - component: {fileID: -2284274756143243373}
   - component: {fileID: 5331881747387328446}
+  - component: {fileID: -7437710712365796133}
+  - component: {fileID: -8233528788106921607}
   m_Layer: 7
   m_Name: Airplane
   m_TagString: Untagged
@@ -5256,12 +5258,18 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3480717988084276266}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fa63d29d08466c847a27137d9b9fde18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  IsBot: 0
+  Team: 0
+  healthComponent: {fileID: 0}
+  healthBar: {fileID: 0}
+  pickUpHandler: {fileID: 0}
+  rb: {fileID: 0}
   respawnEvent: {fileID: 11400000, guid: f83c521e605d15a4c972fd502a7af6b7, type: 2}
   currentSpeed: 0
   accumulatedPitch: 0
@@ -5467,7 +5475,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3480717988084276266}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ef92060797c173045bf41bbdd7e78f44, type: 3}
   m_Name: 
@@ -5482,7 +5490,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3480717988084276266}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 47aaa2156ce106049b83a0664a9dd909, type: 3}
   m_Name: 
@@ -5494,7 +5502,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3480717988084276266}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: caec3a767f3d70a45b940ed2336df621, type: 3}
   m_Name: 
@@ -5507,19 +5515,79 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3480717988084276266}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a5c28559509365d41bb98887caeaa789, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  IsBot: 0
+  Team: 0
+  healthComponent: {fileID: 0}
+  healthBar: {fileID: 0}
+  pickUpHandler: {fileID: 0}
+  rb: {fileID: 0}
   decisionCooldown: 1
+  spawnerCooldown: 10
   detectionRadius: 1200
   firingRange: 500
   avoidanceStrength: 5
   obstacleDetectionDistance: 100
   maxSpeed: 20
   primaryWeapon: {fileID: 7890972265110820531}
+--- !u!114 &-7437710712365796133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3480717988084276266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkTransformExpanded: 0
+  AuthorityMode: 1
+  TickSyncChildren: 0
+  UseUnreliableDeltas: 0
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 1
+  SyncScaleX: 0
+  SyncScaleY: 0
+  SyncScaleZ: 0
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  UseQuaternionSynchronization: 0
+  UseQuaternionCompression: 0
+  UseHalfFloatPrecision: 0
+  InLocalSpace: 0
+  SwitchTransformSpaceWhenParented: 0
+  Interpolate: 1
+  SlerpPosition: 0
+--- !u!114 &-8233528788106921607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3480717988084276266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6c0be61502bb534f922ebb746851216, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkRigidbodyBaseExpanded: 0
+  UseRigidBodyForMotion: 1
+  AutoUpdateKinematicState: 1
+  AutoSetKinematicOnDespawn: 1
 --- !u!1 &3615927806441666436
 GameObject:
   m_ObjectHideFlags: 0

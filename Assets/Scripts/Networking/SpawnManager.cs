@@ -125,8 +125,8 @@ public class SpawnManager : NetworkBehaviour
             yield break;
         Destroy(isBot ? netObj.gameObject.GetComponent<PlayerController>() : netObj.gameObject.GetComponent<BotController>());
         Controller controller = isBot ? netObj.gameObject.GetComponent<BotController>() : netObj.gameObject.GetComponent<PlayerController>();
+        controller.enabled = true;
         RegisterController(controller);
-        Debug.Log(isBot);
 
         //to ensure we don't call the wrong initialize on a destroyed controller, skip a few frames
         yield return new WaitForSeconds(0.2f);
@@ -138,13 +138,12 @@ public class SpawnManager : NetworkBehaviour
     {
         if (!IsServer) return;
         Vector3 spawnPoint = GetRandomSpawnPoint(team);
-        controller.transform.SetPositionAndRotation(spawnPoint, Quaternion.identity);
         InitializeControllerClientRpc(controller.GetComponent<NetworkObject>());
     }
     [ClientRpc]
     private void InitializeControllerClientRpc(NetworkObjectReference networkObjectReference)
     {
-        if (networkObjectReference.TryGet(out NetworkObject netObj) && netObj.TryGetComponent(out Controller component))
+        if (networkObjectReference.TryGet(out NetworkObject netObj) && netObj.TryGetComponent(out Controller component))    
             component.Initialize();
     }
     public string GetBotName()

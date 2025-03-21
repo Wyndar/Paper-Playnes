@@ -56,7 +56,7 @@ namespace GolemKin.ToonAirplaneController
 
                 foreach (var obj in hitObjects)
                 {
-                    // Handle damage logic here (e.g., reduce health of the target)
+                    // Handle damage logic here (e.g., reduce healthComponent of the target)
                 }
                 
                 if (other.CompareTag(enemyTag))
