@@ -14,13 +14,12 @@ public class Controller : NetworkBehaviour
     public PickUpHandler pickUpHandler;
     public Rigidbody rb;
 
-    public virtual void Initialize() => Debug.LogError("Failed virtual override");
+    public virtual void Initialize(Team team) => Debug.LogError("Failed virtual override");
     public void InitializeEntity(bool isBot, ulong? ownerId, Team team)
     {
         IsBot = isBot;
         OwnerId = ownerId;
         Team = team;
-        SpawnManager.Instance.RegisterController(this);
         rb = GetComponent<Rigidbody>();
         healthBar = GetComponent<HealthBar>();
         pickUpHandler = GetComponent<PickUpHandler>();
@@ -33,10 +32,10 @@ public class Controller : NetworkBehaviour
     public void Respawn(GameObject _)
     {
         Team currentTeam = TeamManager.Instance.GetTeam(this);
-        Vector3 newSpawnPosition = SpawnManager.Instance.GetRandomSpawnPoint(currentTeam);
+        var newSpawnPosition = SpawnManager.Instance.GetRandomSpawnPoint(currentTeam);
 
         if (TryGetComponent(out NetworkTransform networkTransform))
-            networkTransform.Teleport(newSpawnPosition, Quaternion.identity,transform.localScale);
+            networkTransform.Teleport(newSpawnPosition.Item1, newSpawnPosition.Item2,transform.localScale);
         else
             throw new MissingComponentException("Attach a Network Transform");
         healthComponent.InitializeHealth();

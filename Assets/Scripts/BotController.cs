@@ -27,12 +27,11 @@ public class BotController : Controller
     {
         StopAllCoroutines();
     }
-    public override void Initialize()
+    public override void Initialize(Team team)
     {
         if (!IsServer) return;
         ulong ownerId = NetworkManager.ServerClientId;
-        Team assignedTeam = TeamManager.Instance.GetTeam(this);
-        InitializeEntity(true, ownerId, assignedTeam);
+        InitializeEntity(true, ownerId, team);
         gameObject.name = SpawnManager.Instance.GetBotName();
         StartCoroutine(BotBehaviorLoop());
     }
@@ -43,9 +42,9 @@ public class BotController : Controller
         while (spawnerCooldown <= 0)
         {
             FindTarget();
-            MoveTowardsTarget();
-            AvoidObstacles();
-            ShootAtTarget();
+            //MoveTowardsTarget();
+            //AvoidObstacles();
+            //ShootAtTarget();
             yield return new WaitForSeconds(decisionCooldown);
         }
         yield return null;

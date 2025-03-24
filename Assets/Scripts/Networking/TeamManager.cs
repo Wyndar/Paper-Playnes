@@ -23,7 +23,7 @@ public class TeamManager : NetworkBehaviour
         teamScores.Clear();
     }
 
-    public Team AssignTeam(Controller entity)
+    private Team AssignTeam(Controller entity)
     {
         if (!IsServer) return Team.Undefined;
 
@@ -57,7 +57,7 @@ public class TeamManager : NetworkBehaviour
     public void RequestTeamAssignmentServerRpc(NetworkObjectReference entityRef)
     {
         if (entityRef.TryGet(out NetworkObject entityObj) && entityObj.TryGetComponent(out Controller controller))
-            SpawnManager.Instance.DesignateSpawnPoint(controller, AssignTeam(controller));
+            SpawnManager.Instance.TriggerControllerInitialize(controller, AssignTeam(controller));
     }
 
     public void LocalPlayerDied(Controller entity)
@@ -91,15 +91,8 @@ public class TeamManager : NetworkBehaviour
     [ClientRpc]
     private void ReceiveTeamScoreAtClientRpc(Team teamToChangeScore, int scoreAtServerAfterChange, int scoreAtServerBeforeChange)
     {
-        if (!teamScores.ContainsKey(teamToChangeScore))
-        {
+        if (!teamScores.ContainsKey(teamToChangeScore) || teamScores[teamToChangeScore] < scoreAtServerAfterChange)
             teamScores[teamToChangeScore] = scoreAtServerAfterChange;
-        }
-        else if (teamScores[teamToChangeScore] < scoreAtServerAfterChange)
-        {
-            teamScores[teamToChangeScore] = scoreAtServerAfterChange;
-        }
-        Debug.Log(teamScores[teamToChangeScore]);
         UpdateTeamScoreEvent.RaiseEvent(teamToChangeScore, scoreAtServerAfterChange, scoreAtServerBeforeChange);
     }
 }

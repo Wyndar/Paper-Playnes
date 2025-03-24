@@ -29,12 +29,12 @@ public class SpawnManager : NetworkBehaviour
         Instance = this;
     }
 
-    private void Start()
-    {
-        if(!IsServer) return;
-        InstantiateBoxes();
-        RearrangeBoxes();
-    }
+    //private void Start()
+    //{
+    //    if(!IsServer) return;
+    //    InstantiateBoxes();
+    //    RearrangeBoxes();
+    //}
 
     private void InstantiateBoxes()
     {
@@ -85,17 +85,19 @@ public class SpawnManager : NetworkBehaviour
             activeControllers.Remove(controller);
     }
 
-    public Vector3 GetRandomSpawnPoint(Team team)
+    public (Vector3, Quaternion) GetRandomSpawnPoint(Team team)
     {
         Renderer spawnArea = (team == Team.RedTeam) ? redTeamSpawnArea : blueTeamSpawnArea;
         Bounds bounds = spawnArea.bounds;
-
-        return new Vector3(
+        Vector3 vector = new(
             Random.Range(bounds.min.x, bounds.max.x),
             Random.Range(bounds.min.y, bounds.max.y),
             Random.Range(bounds.min.z, bounds.max.z)
         );
+        Quaternion quaternion = spawnArea.transform.rotation;
+        return (vector, quaternion);
     }
+
     [ServerRpc(RequireOwnership = false)]
     public void RequestPlayerSpawnServerRpc(ulong clientId) => SpawnEntity(clientId, false);
 
@@ -134,17 +136,16 @@ public class SpawnManager : NetworkBehaviour
             TeamManager.Instance.RequestTeamAssignmentServerRpc(entityObject);
     }
    
-    public void DesignateSpawnPoint(Controller controller, Team team)
+    public void TriggerControllerInitialize(Controller controller, Team team)
     {
         if (!IsServer) return;
-        Vector3 spawnPoint = GetRandomSpawnPoint(team);
-        InitializeControllerClientRpc(controller.GetComponent<NetworkObject>());
+        InitializeControllerClientRpc(controller.GetComponent<NetworkObject>(), team);
     }
     [ClientRpc]
-    private void InitializeControllerClientRpc(NetworkObjectReference networkObjectReference)
+    private void InitializeControllerClientRpc(NetworkObjectReference networkObjectReference, Team team)
     {
         if (networkObjectReference.TryGet(out NetworkObject netObj) && netObj.TryGetComponent(out Controller component))    
-            component.Initialize();
+            component.Initialize(team);
     }
     public string GetBotName()
     {

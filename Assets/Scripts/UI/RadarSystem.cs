@@ -137,11 +137,11 @@ public class RadarSystem : MonoBehaviour
 
     private void HandleBlipVisibility(Vector2 radarPos, Controller otherPlayer, float fadeAmount, bool isRedTeam, float playerYaw)
     {
-        GameObject blip = GetOrCreateBlip(isRedTeam ? redTeamBlips : blueTeamBlips, isRedTeam ? redTeamBlipPrefab :
-            blueTeamBlipPrefab, ref activeRedBlips, ref activeBlueBlips);
+        GameObject blip = isRedTeam ? GetOrCreateBlip(redTeamBlips, redTeamBlipPrefab, ref activeRedBlips) :
+            GetOrCreateBlip(blueTeamBlips, blueTeamBlipPrefab, ref activeBlueBlips);
         RectTransform blipTransform = blip.GetComponent<RectTransform>();
 
-        blipTransform.anchoredPosition = RotateBlipPosition(radarPos, playerYaw);
+        blipTransform.anchoredPosition = radarPos;
         blipTransform.rotation = Quaternion.Euler(0, 0, -otherPlayer.transform.eulerAngles.y);
 
         Color blipColor = blip.GetComponent<Image>().color;
@@ -152,23 +152,14 @@ public class RadarSystem : MonoBehaviour
 
     private void HandleDirectionalArrow(Vector2 radarPos, bool isRedTeam, float playerYaw)
     {
-        GameObject arrowBlip = GetOrCreateBlip(isRedTeam ? redTeamArrows : blueTeamArrows, isRedTeam ? redArrowBlipPrefab :
-            blueArrowBlipPrefab, ref activeRedArrows, ref activeBlueArrows);
+        GameObject arrowBlip = isRedTeam ? GetOrCreateBlip(redTeamArrows, redArrowBlipPrefab, ref activeRedArrows) :
+            GetOrCreateBlip(blueTeamArrows, blueArrowBlipPrefab, ref activeBlueArrows);
         RectTransform arrowTransform = arrowBlip.GetComponent<RectTransform>();
 
-        arrowTransform.anchoredPosition = RotateBlipPosition(radarPos, playerYaw);
+        arrowTransform.anchoredPosition = radarPos;
         arrowTransform.localRotation = Quaternion.LookRotation(Vector3.forward, radarPos);
 
         arrowBlip.SetActive(true);
-    }
-
-    private Vector2 RotateBlipPosition(Vector2 position, float playerYaw)
-    {
-        float angle = playerYaw * Mathf.Deg2Rad;
-        float cos = Mathf.Cos(angle);
-        float sin = Mathf.Sin(angle);
-
-        return new Vector2(cos * position.x - sin * position.y, sin * position.x + cos * position.y);
     }
 
     private void UpdateDirectionMarkers()
@@ -189,10 +180,7 @@ public class RadarSystem : MonoBehaviour
         return radarPos;
     }
 
-    //there's two refs to check which one we're using when called
-    #pragma warning disable IDE0060
-    private GameObject GetOrCreateBlip(List<GameObject> pool, GameObject prefab, ref int activeCount, ref int activeOtherCount)
-    #pragma warning restore IDE0060 
+    private GameObject GetOrCreateBlip(List<GameObject> pool, GameObject prefab, ref int activeCount)
     {
         if (activeCount < pool.Count) return pool[activeCount++];
 
@@ -231,7 +219,7 @@ public class RadarSystem : MonoBehaviour
             if (col == null || !filter(col)) continue;
             Vector3 relativePosition = col.transform.position - player.position;
             if (relativePosition.magnitude > radarRange) continue;
-            GameObject blip = GetOrCreateBlip(blipList, prefab, ref activeCount, ref activeCount);
+            GameObject blip = GetOrCreateBlip(blipList, prefab, ref activeCount);
             blip.GetComponent<RectTransform>().anchoredPosition = GetBlipPosition(relativePosition, out _);
             blip.SetActive(true);
             activeCount++;

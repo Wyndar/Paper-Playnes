@@ -95,7 +95,7 @@ public class PlayerController : Controller
     private UIManager uiManager;
     private bool hasInitialized;
 
-    public override void Initialize()
+    public override void Initialize(Team team)
     {
         if (!IsOwner)
         {
@@ -104,8 +104,7 @@ public class PlayerController : Controller
             return;
         }
         ulong ownerId = NetworkManager.Singleton.LocalClientId;
-        Team assignedTeam = TeamManager.Instance.GetTeam(this);
-        InitializeEntity(false, ownerId, assignedTeam);
+        InitializeEntity(false, ownerId, team);
         FindLocalCamera();
         crosshairUI = GameObject.Find("Crosshair").GetComponent<RectTransform>();
         hasInitialized = true;

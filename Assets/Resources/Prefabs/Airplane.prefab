@@ -5184,13 +5184,13 @@ GameObject:
   - component: {fileID: 6512046262935363189}
   - component: {fileID: 4056280326084310104}
   - component: {fileID: 624853559991829974}
+  - component: {fileID: 5331881747387328446}
   - component: {fileID: 7042715206100132785}
   - component: {fileID: 6215844237939699533}
   - component: {fileID: 4771522328612152090}
   - component: {fileID: 3792938024661045079}
   - component: {fileID: 7090727553298456833}
   - component: {fileID: -2284274756143243373}
-  - component: {fileID: 5331881747387328446}
   - component: {fileID: -7437710712365796133}
   - component: {fileID: -8233528788106921607}
   m_Layer: 7
@@ -5323,6 +5323,33 @@ MonoBehaviour:
   rollSound: {fileID: 8300000, guid: 2f02a5f010ee2c344ae1dbbcd75035e9, type: 3}
   warningSpeakers: {fileID: 5924087388764067661}
   isBoosting: 0
+--- !u!114 &5331881747387328446
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3480717988084276266}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5c28559509365d41bb98887caeaa789, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  IsBot: 0
+  Team: 0
+  healthComponent: {fileID: 0}
+  healthBar: {fileID: 0}
+  pickUpHandler: {fileID: 0}
+  rb: {fileID: 0}
+  decisionCooldown: 1
+  spawnerCooldown: 10
+  detectionRadius: 1200
+  firingRange: 500
+  avoidanceStrength: 5
+  obstacleDetectionDistance: 100
+  maxSpeed: 20
+  primaryWeapon: {fileID: 7890972265110820531}
 --- !u!135 &7042715206100132785
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -5508,33 +5535,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
---- !u!114 &5331881747387328446
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3480717988084276266}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a5c28559509365d41bb98887caeaa789, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  IsBot: 0
-  Team: 0
-  healthComponent: {fileID: 0}
-  healthBar: {fileID: 0}
-  pickUpHandler: {fileID: 0}
-  rb: {fileID: 0}
-  decisionCooldown: 1
-  spawnerCooldown: 10
-  detectionRadius: 1200
-  firingRange: 500
-  avoidanceStrength: 5
-  obstacleDetectionDistance: 100
-  maxSpeed: 20
-  primaryWeapon: {fileID: 7890972265110820531}
 --- !u!114 &-7437710712365796133
 MonoBehaviour:
   m_ObjectHideFlags: 0
