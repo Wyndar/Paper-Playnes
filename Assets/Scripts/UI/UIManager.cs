@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections;
 using TMPro;
 using UnityEngine.UI;
+using System.Threading.Tasks;
+using Unity.Netcode;
 
 public class UIManager : MonoBehaviour
 {
@@ -63,8 +65,8 @@ public class UIManager : MonoBehaviour
 
     private void EnableRespawnPanel(GameObject go)
     {
-        respawningPanel.SetActive(true);
-        go.SetActive(false);
+        if (go == playerHealth.gameObject)
+            respawningPanel.SetActive(true);
         StartCoroutine(RespawnCoroutine(5f, go));
     }
 
@@ -87,7 +89,10 @@ public class UIManager : MonoBehaviour
             respawnTime -= Time.deltaTime;
             yield return null;
         }
-        go.SetActive(true);
+        TeamManager.Instance.RequestGameObjectStateChangeAtServerRpc(go.GetComponent<NetworkObject>(), true);
+        yield return new WaitForEndOfFrame();
+        go.GetComponent<Controller>().Respawn();
+        yield return new WaitForEndOfFrame();
         respawningPanel.SetActive(false);
         yield break;
     }

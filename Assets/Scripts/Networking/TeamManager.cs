@@ -63,12 +63,25 @@ public class TeamManager : NetworkBehaviour
     public void LocalPlayerDied(Controller entity)
     {
         Team playerTeam = GetTeam(entity);
-        if (playerTeam == Team.Undefined) return;
-
+        if (playerTeam == Team.Undefined)
+            throw new MissingReferenceException("Team not found");
         Team enemyTeam = (playerTeam == Team.RedTeam) ? Team.BlueTeam : Team.RedTeam;
+        RequestGameObjectStateChangeAtServerRpc(entity.GetComponent<NetworkObject>(), false);
         RequestScoreChangeServerRpc(enemyTeam, 1, teamScores[enemyTeam]);
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestGameObjectStateChangeAtServerRpc(NetworkObjectReference entityRef, bool isActive) => ReceiveGameObjectStateChangeAtClientRpc(entityRef, isActive);
+    
+    [ClientRpc]
+    private void ReceiveGameObjectStateChangeAtClientRpc(NetworkObjectReference entityRef, bool isActive)
+    {
+        if (!entityRef.TryGet(out NetworkObject networkObject))
+            throw new MissingComponentException("This should not even be possible");
+        networkObject.gameObject.SetActive(isActive);
+        Debug.Log(networkObject.gameObject.name+" "+isActive);
+    }
+    
     [ServerRpc(RequireOwnership = false)]
     public void RequestScoreChangeServerRpc(Team teamToChangeScore, int scoreChangeAmount, int scoreAtRequestingClientBeforeChange) => UpdateTeamScore(teamToChangeScore, scoreChangeAmount, scoreAtRequestingClientBeforeChange);
 

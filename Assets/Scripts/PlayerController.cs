@@ -154,7 +154,6 @@ public class PlayerController : Controller
         InputManager.Instance.OnEndMove += StopCrosshairMovement;
         InputManager.Instance.OnBoost += StartBoost;
         InputManager.Instance.OnFirePrimaryWeapon += StartShooting;
-        respawnEvent.OnGameObjectEventRaised += Respawn;
     }
     private void OnEnable() => InitializeEvents();
     private void OnDisable() => CleanupEventsAndRoutines();
@@ -167,7 +166,6 @@ public class PlayerController : Controller
         InputManager.Instance.OnEndMove -= StopCrosshairMovement;
         InputManager.Instance.OnBoost -= StartBoost;
         InputManager.Instance.OnFirePrimaryWeapon -= StartShooting;
-        respawnEvent.OnGameObjectEventRaised -= Respawn;
         StopAllCoroutines();
     }
 
@@ -187,7 +185,6 @@ public class PlayerController : Controller
     {
         float targetSpeed = isBoosting ? maxSpeed : minimumSpeed;
         currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, (isBoosting ? acceleration : deceleration) * Time.fixedDeltaTime);
-
         rb.linearVelocity = transform.forward * currentSpeed;
     }
 

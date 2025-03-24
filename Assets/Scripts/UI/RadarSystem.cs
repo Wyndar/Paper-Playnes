@@ -119,9 +119,9 @@ public class RadarSystem : MonoBehaviour
             float fadeAmount = Mathf.InverseLerp(maxFadeDistance, minFadeDistance, distance);
 
             if (isOffScreen)
-                HandleDirectionalArrow(radarPos, isRedTeam, playerYaw);
+                HandleDirectionalArrow(radarPos, isRedTeam);
             else
-                HandleBlipVisibility(radarPos, otherPlayer, fadeAmount, isRedTeam, playerYaw);
+                HandleBlipVisibility(radarPos, otherPlayer, fadeAmount, isRedTeam);
         }
 
         DeactivateUnusedBlips();
@@ -135,7 +135,7 @@ public class RadarSystem : MonoBehaviour
         activeBlueArrows = 0;
     }
 
-    private void HandleBlipVisibility(Vector2 radarPos, Controller otherPlayer, float fadeAmount, bool isRedTeam, float playerYaw)
+    private void HandleBlipVisibility(Vector2 radarPos, Controller otherPlayer, float fadeAmount, bool isRedTeam)
     {
         GameObject blip = isRedTeam ? GetOrCreateBlip(redTeamBlips, redTeamBlipPrefab, ref activeRedBlips) :
             GetOrCreateBlip(blueTeamBlips, blueTeamBlipPrefab, ref activeBlueBlips);
@@ -150,7 +150,7 @@ public class RadarSystem : MonoBehaviour
         blip.SetActive(true);
     }
 
-    private void HandleDirectionalArrow(Vector2 radarPos, bool isRedTeam, float playerYaw)
+    private void HandleDirectionalArrow(Vector2 radarPos, bool isRedTeam)
     {
         GameObject arrowBlip = isRedTeam ? GetOrCreateBlip(redTeamArrows, redArrowBlipPrefab, ref activeRedArrows) :
             GetOrCreateBlip(blueTeamArrows, blueArrowBlipPrefab, ref activeBlueArrows);

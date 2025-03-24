@@ -1,7 +1,5 @@
 using UnityEngine;
 using Unity.Netcode;
-using System.Collections;
-using log4net.Util;
 using Unity.Netcode.Components;
 
 public class Controller : NetworkBehaviour
@@ -27,9 +25,9 @@ public class Controller : NetworkBehaviour
         healthBar.enabled = true;
         pickUpHandler.enabled = true;
         healthComponent.enabled = true;
-        Respawn(gameObject);
+        Respawn();
     }
-    public void Respawn(GameObject _)
+    public void Respawn()
     {
         Team currentTeam = TeamManager.Instance.GetTeam(this);
         var newSpawnPosition = SpawnManager.Instance.GetRandomSpawnPoint(currentTeam);
