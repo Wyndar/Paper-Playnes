@@ -42,8 +42,8 @@ public class BotController : Controller
         while (spawnerCooldown <= 0)
         {
             FindTarget();
-            //MoveTowardsTarget();
-            //AvoidObstacles();
+            MoveTowardsTarget();
+            AvoidObstacles();
             //ShootAtTarget();
             yield return new WaitForSeconds(decisionCooldown);
         }
