@@ -104,7 +104,7 @@ public class MultiplayerManager : MonoBehaviour
         {
             var sessionOptions = new SessionOptions
             {
-                MaxPlayers = 10,
+                MaxPlayers = 20,
                 IsPrivate = false,
                 IsLocked = false
             };

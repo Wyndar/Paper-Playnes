@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -6,12 +7,8 @@ public class TeamManager : NetworkBehaviour
 {
     public GameEvent UpdateTeamScoreEvent;
     public static TeamManager Instance { get; private set; }
+    public List<TeamData> teamDataList = new();
 
-#pragma warning disable IDE0044 // Add readonly modifier
-    private Dictionary<Controller, Team> entityTeams = new();
-    private Dictionary<Team, int> teamScores = new();
-    private List<Controller> allEntities = new();
-#pragma warning restore IDE0044 // Add readonly modifier
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -20,38 +17,24 @@ public class TeamManager : NetworkBehaviour
             return;
         }
         Instance = this;
-        teamScores.Clear();
     }
 
     private Team AssignTeam(Controller entity)
     {
         if (!IsServer) return Team.Undefined;
 
-        if (!entityTeams.ContainsKey(entity))
-        {
-            Team assignedTeam = GetSmallerTeam();
-            entityTeams[entity] = assignedTeam;
-            allEntities.Add(entity);
-
-            Debug.Log($"Assigned {entity.name} to {assignedTeam}");
-        }
-        return entityTeams[entity];
+        TeamData smallestTeam = teamDataList.OrderBy(t => t.teamMembers.Count).First();
+        smallestTeam.teamMembers.Add(entity);
+        return smallestTeam.team;
     }
 
-    private Team GetSmallerTeam()
+    public Team GetTeam(Controller entity)
     {
-        int redCount = 0, blueCount = 0;
-
-        foreach (var team in entityTeams.Values)
-        {
-            if (team == Team.RedTeam) redCount++;
-            else if (team == Team.BlueTeam) blueCount++;
-        }
-
-        return (redCount <= blueCount) ? Team.RedTeam : Team.BlueTeam;
+        foreach (var teamData in teamDataList)
+            if (teamData.teamMembers.Contains(entity))
+                return teamData.team;
+        return Team.Undefined;
     }
-
-    public Team GetTeam(Controller entity) => entityTeams.TryGetValue(entity, out Team team) ? team : Team.Undefined;
 
     [ServerRpc(RequireOwnership = false)]
     public void RequestTeamAssignmentServerRpc(NetworkObjectReference entityRef)
@@ -60,52 +43,62 @@ public class TeamManager : NetworkBehaviour
             SpawnManager.Instance.TriggerControllerInitialize(controller, AssignTeam(controller));
     }
 
-    public void LocalPlayerDied(Controller entity)
+    public void LocalPlayerDied(Controller entity, List<Controller> damageSources)
     {
-        Team playerTeam = GetTeam(entity);
-        if (playerTeam == Team.Undefined)
-            throw new MissingReferenceException("Team not found");
-        Team enemyTeam = (playerTeam == Team.RedTeam) ? Team.BlueTeam : Team.RedTeam;
+        Controller killer = damageSources.Count > 0 ? damageSources[^1] : null;
+        if (killer != null)
+        {
+            Team killTeam = GetTeam(killer);
+            if (killTeam != Team.Undefined)
+            {
+                TeamData killTeamData = teamDataList.Find(t => t.team == killTeam);
+                RequestScoreChangeServerRpc(killTeam, 1, killTeamData.teamScore);
+                //request message broadcast here for kills and assists
+            }
+        }
         RequestGameObjectStateChangeAtServerRpc(entity.GetComponent<NetworkObject>(), false);
-        RequestScoreChangeServerRpc(enemyTeam, 1, teamScores[enemyTeam]);
     }
 
     [ServerRpc(RequireOwnership = false)]
     public void RequestGameObjectStateChangeAtServerRpc(NetworkObjectReference entityRef, bool isActive) => ReceiveGameObjectStateChangeAtClientRpc(entityRef, isActive);
-    
+
     [ClientRpc]
     private void ReceiveGameObjectStateChangeAtClientRpc(NetworkObjectReference entityRef, bool isActive)
     {
         if (!entityRef.TryGet(out NetworkObject networkObject))
-            throw new MissingComponentException("This should not even be possible");
+            throw new MissingComponentException("If you're seeing this, something is wrong with Netcode and your code is working as intended.");
         networkObject.gameObject.SetActive(isActive);
-        Debug.Log(networkObject.gameObject.name+" "+isActive);
     }
-    
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestScoreChangeServerRpc(Team teamToChangeScore, int scoreChangeAmount, int scoreAtRequestingClientBeforeChange) => UpdateTeamScore(teamToChangeScore, scoreChangeAmount, scoreAtRequestingClientBeforeChange);
 
-    private void UpdateTeamScore(Team teamToChangeScore, int scoreChangeAmount, int scoreAtRequestingClientBeforeChange)
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestScoreChangeServerRpc(Team teamToChangeScore, int scoreChangeAmount, int scoreAtRequestingClientBeforeChange)
     {
         if (!IsServer) return;
 
-        if (!teamScores.TryGetValue(teamToChangeScore, out int score)) return;
+        TeamData targetTeamData = teamDataList.Find(t => t.team == teamToChangeScore);
+        if (targetTeamData == null) return;
 
-        teamScores[teamToChangeScore] = score + scoreChangeAmount;
-        ReceiveTeamScoreAtClientRpc(teamToChangeScore, teamScores[teamToChangeScore], score);
+        int previousScore = targetTeamData.teamScore;
+        int newScore = targetTeamData.teamScore + scoreChangeAmount;
+
+        ReceiveTeamScoreAtClientRpc(teamToChangeScore, newScore, previousScore);
     }
 
     public void InitializeTeamScores()
     {
-        ReceiveTeamScoreAtClientRpc(Team.RedTeam, teamScores.GetValueOrDefault(Team.RedTeam, 0), 0);
-        ReceiveTeamScoreAtClientRpc(Team.BlueTeam, teamScores.GetValueOrDefault(Team.BlueTeam, 0), 0);
+        foreach (var teamData in teamDataList)
+            ReceiveTeamScoreAtClientRpc(teamData.team, teamData.teamScore, 0);
     }
 
     [ClientRpc]
     private void ReceiveTeamScoreAtClientRpc(Team teamToChangeScore, int scoreAtServerAfterChange, int scoreAtServerBeforeChange)
     {
-        if (!teamScores.ContainsKey(teamToChangeScore) || teamScores[teamToChangeScore] < scoreAtServerAfterChange)
-            teamScores[teamToChangeScore] = scoreAtServerAfterChange;
+        TeamData teamData = teamDataList.Find(t => t.team == teamToChangeScore);
+        if (teamData == null) return;
+
+        if (teamData.teamScore < scoreAtServerAfterChange)
+            teamData.teamScore = scoreAtServerAfterChange;
+
         UpdateTeamScoreEvent.RaiseEvent(teamToChangeScore, scoreAtServerAfterChange, scoreAtServerBeforeChange);
     }
 }

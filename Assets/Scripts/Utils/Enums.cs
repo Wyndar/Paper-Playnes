@@ -14,7 +14,9 @@ public enum Team
 {
     Undefined,
     RedTeam,
-    BlueTeam
+    BlueTeam,
+    GreenTeam,
+    YellowTeam
 }
 
 public enum PickUpType

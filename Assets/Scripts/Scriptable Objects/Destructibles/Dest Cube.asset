@@ -15,6 +15,5 @@ MonoBehaviour:
   maxHP: 80
   destructionVFX: {fileID: 130346, guid: 061d98fffe21ebe44907c94636b572f2, type: 3}
   destructionSFX: {fileID: 8300000, guid: 4b8e51dd99d3ccd46b9f3a988f79c296, type: 3}
-  canRespawn: 0
-  isDelayedRespawn: 0
+  isController: 0
   respawnEvent: {fileID: 0}

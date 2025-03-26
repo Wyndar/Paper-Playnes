@@ -27,7 +27,6 @@ public class Mine : DamageDealerComponent
 
     private void Explode()
     {
-        Debug.Log("Sonic Mine Exploded!");
 
         if (mineData.explosionSound)
             AudioSource.PlayClipAtPoint(mineData.explosionSound, transform.position);
@@ -43,7 +42,7 @@ public class Mine : DamageDealerComponent
             //    rb.AddForce(forceDirection * mineData.knockbackForce, ForceMode.Impulse);
             //}
             if (hitObjects[i].TryGetComponent(out HealthComponent health))
-                health.ModifyHealth(HealthModificationType.Damage,mineData.damage);
+                health.ModifyHealth(HealthModificationType.Damage,mineData.damage, controller);
         }
 
         //if (Camera.main.TryGetComponent(out ShockwaveEffect effect))

@@ -272,7 +272,7 @@ public class PlayerController : Controller
     }
 
     private void StartBoost() => StartCoroutine(HandleBoost());
-    private void StartShooting() => primaryWeapon.Fire(GetCrosshairWorldPosition());
+    private void StartShooting() => primaryWeapon.Fire(GetCrosshairWorldPosition(), this);
 
     private Vector3 GetCrosshairWorldPosition()
     {

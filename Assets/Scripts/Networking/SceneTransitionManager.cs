@@ -6,7 +6,6 @@ public class SceneTransitionManager : NetworkBehaviour
 {
     public static SceneTransitionManager Instance { get; private set; }
     private int clientsLoaded = 0;
-
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -31,7 +30,8 @@ public class SceneTransitionManager : NetworkBehaviour
         {
             SpawnManager.Instance.RequestPlayerSpawnServerRpc(clientId);
             ClientLoadedScene(clientId);
-            int botCount = 10 - NetworkManager.Singleton.ConnectedClientsList.Count;
+            //this magic number should be gotten from gamemode settings later
+            int botCount = 20 - NetworkManager.Singleton.ConnectedClientsList.Count;
             for (int i = botCount - 1; i >= 0; i--)
                 SpawnManager.Instance.RequestBotSpawnServerRpc();
         }
@@ -41,11 +41,12 @@ public class SceneTransitionManager : NetworkBehaviour
     {
         clientsLoaded++;
         Debug.Log($"Client {clientId} loaded. {clientsLoaded}/{NetworkManager.Singleton.ConnectedClientsList.Count} clients ready.");
-
+        //this should be a proper broadcast as well that notifies player joining and leaving
         if (clientsLoaded == NetworkManager.Singleton.ConnectedClientsList.Count)
             Debug.Log("All clients have loaded the scene.");
     }
 
     [ServerRpc]
     public void NotifyServerLoadedSceneServerRpc(ulong clientId) => ClientLoadedScene(clientId);
+
 }

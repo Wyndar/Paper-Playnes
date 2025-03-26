@@ -12,6 +12,7 @@ public class GameEventDebugger : Editor
     private int intParam2;
     private Team teamParam;
     private HealthComponent healthComponent;
+    private Controller controller;
     private HealthModificationType healthModificationType;
 
     private void OnEnable() => gameEvent = (GameEvent)target;
@@ -75,11 +76,16 @@ public class GameEventDebugger : Editor
                 healthModificationType = (HealthModificationType)EditorGUILayout.EnumPopup("healthComponent Mod Type", healthModificationType);
                 intParam1 = EditorGUILayout.IntField("Amount", intParam1);
                 intParam2 = EditorGUILayout.IntField("Previous HP", intParam2);
+                controller = (Controller)EditorGUILayout.ObjectField("Modification Source", controller, typeof(Controller), true);
                 if (gameEvent.HasHealthModifiedSubscribers() && GUILayout.Button("Raise Event (healthComponent Modified)"))
+                {
                     if (healthComponent == null)
                         Debug.LogWarning("Cannot raise event: healthComponent Component parameter is null.");
+                    else if (controller == null)
+                        Debug.LogWarning("Cannot raise event: controller Component parameter is null");
                     else
-                        gameEvent.RaiseEvent(healthComponent, healthModificationType, intParam1, intParam2);
+                        gameEvent.RaiseEvent(healthComponent, healthModificationType, intParam1, intParam2, controller);
+                }
                 break;
         }
     }

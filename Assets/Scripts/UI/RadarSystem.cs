@@ -17,43 +17,33 @@ public class RadarSystem : MonoBehaviour
     [SerializeField] private float edgeBuffer = 5f;
 
     [Header("Blip Settings")]
-    public GameObject redTeamBlipPrefab;
-    public GameObject blueTeamBlipPrefab;
-    public GameObject redArrowBlipPrefab;
-    public GameObject blueArrowBlipPrefab;
     public GameObject hpBlipPrefab;
     public GameObject pickupBlipPrefab;
     public Transform blipContainer;
     public RectTransform playerBlip;
 
+    [Header("Radar Configs")]
+    public List<RadarVisualConfig> radarConfigs;
+
     [Header("Direction Markers")]
     public RectTransform directionMarkerContainer;
 
-    private bool isRedPlayer = false;
-#pragma warning disable IDE0044
-    private List<GameObject> redTeamBlips = new();
-    private List<GameObject> blueTeamBlips = new();
-    private List<GameObject> redTeamArrows = new();
-    private List<GameObject> blueTeamArrows = new();
     private List<GameObject> hpBlips = new();
     private List<GameObject> pickupBlips = new();
-#pragma warning restore IDE0044
-
-    private int activeRedBlips = 0;
-    private int activeBlueBlips = 0;
-    private int activeRedArrows = 0;
-    private int activeBlueArrows = 0;
     private int activePickupBlips = 0;
     private int activeHPBlips = 0;
+    private RadarVisualConfig localPlayerConfig;
 
     private UIManager uiManager;
 
     private void Start()
     {
-        InitializeBlips(redTeamBlips, redTeamBlipPrefab, 5);
-        InitializeBlips(blueTeamBlips, blueTeamBlipPrefab, 5);
-        InitializeBlips(redTeamArrows, redArrowBlipPrefab, 5);
-        InitializeBlips(blueTeamArrows, blueArrowBlipPrefab, 5);
+        foreach (var config in radarConfigs)
+        {
+            InitializeBlips(config.blipPool, config.blipPrefab, 5);
+            InitializeBlips(config.arrowPool, config.arrowPrefab, 5);
+        }
+
         InitializeBlips(hpBlips, hpBlipPrefab, 50);
         InitializeBlips(pickupBlips, pickupBlipPrefab, 50);
 
@@ -88,8 +78,16 @@ public class RadarSystem : MonoBehaviour
         if (SpawnManager.Instance == null || !player.TryGetComponent(out PlayerController localPlayer))
             return;
 
-        isRedPlayer = TeamManager.Instance.GetTeam(localPlayer) == Team.RedTeam;
-        GameObject blip = isRedPlayer ? Instantiate(redTeamBlipPrefab, radarPanel.transform) : Instantiate(blueTeamBlipPrefab, radarPanel.transform);
+        Team team = TeamManager.Instance.GetTeam(localPlayer);
+        localPlayerConfig = radarConfigs.Find(cfg => cfg.team == team);
+
+        if (localPlayerConfig == null)
+        {
+            Debug.LogError("No radar config found for local player team");
+            return;
+        }
+
+        GameObject blip = Instantiate(localPlayerConfig.blipPrefab, radarPanel.transform);
         playerBlip = blip.GetComponent<RectTransform>();
 
         playerBlip.gameObject.SetActive(true);
@@ -102,9 +100,12 @@ public class RadarSystem : MonoBehaviour
     {
         if (SpawnManager.Instance == null) return;
 
-        ResetActiveBlipCounts();
+        foreach (var config in radarConfigs)
+        {
+            config.activeBlips = 0;
+            config.activeArrows = 0;
+        }
 
-        float playerYaw = player.eulerAngles.y;
         PlayerController localPlayer = player.GetComponent<PlayerController>();
 
         foreach (Controller otherPlayer in SpawnManager.Instance.activeControllers)
@@ -114,31 +115,30 @@ public class RadarSystem : MonoBehaviour
             Vector3 relativePosition = otherPlayer.transform.position - player.position;
             float distance = relativePosition.magnitude;
 
-            bool isRedTeam = TeamManager.Instance.GetTeam(otherPlayer) == Team.RedTeam;
+            Team team = TeamManager.Instance.GetTeam(otherPlayer);
+            RadarVisualConfig config = radarConfigs.Find(cfg => cfg.team == team);
+            if (config == null) 
+                throw new MissingReferenceException("player doesn't have config");
+
             Vector2 radarPos = GetBlipPosition(relativePosition, out bool isOffScreen);
             float fadeAmount = Mathf.InverseLerp(maxFadeDistance, minFadeDistance, distance);
 
             if (isOffScreen)
-                HandleDirectionalArrow(radarPos, isRedTeam);
+                HandleDirectionalArrow(radarPos, config);
             else
-                HandleBlipVisibility(radarPos, otherPlayer, fadeAmount, isRedTeam);
+                HandleBlipVisibility(radarPos, otherPlayer, fadeAmount, config);
         }
 
-        DeactivateUnusedBlips();
+        foreach (var config in radarConfigs)
+        {
+            DeactivateBlipPool(config.blipPool, config.activeBlips);
+            DeactivateBlipPool(config.arrowPool, config.activeArrows);
+        }
     }
 
-    private void ResetActiveBlipCounts()
+    private void HandleBlipVisibility(Vector2 radarPos, Controller otherPlayer, float fadeAmount, RadarVisualConfig config)
     {
-        activeRedBlips = 0;
-        activeBlueBlips = 0;
-        activeRedArrows = 0;
-        activeBlueArrows = 0;
-    }
-
-    private void HandleBlipVisibility(Vector2 radarPos, Controller otherPlayer, float fadeAmount, bool isRedTeam)
-    {
-        GameObject blip = isRedTeam ? GetOrCreateBlip(redTeamBlips, redTeamBlipPrefab, ref activeRedBlips) :
-            GetOrCreateBlip(blueTeamBlips, blueTeamBlipPrefab, ref activeBlueBlips);
+        GameObject blip = GetOrCreateBlip(config.blipPool, config.blipPrefab, ref config.activeBlips);
         RectTransform blipTransform = blip.GetComponent<RectTransform>();
 
         blipTransform.anchoredPosition = radarPos;
@@ -150,15 +150,13 @@ public class RadarSystem : MonoBehaviour
         blip.SetActive(true);
     }
 
-    private void HandleDirectionalArrow(Vector2 radarPos, bool isRedTeam)
+    private void HandleDirectionalArrow(Vector2 radarPos, RadarVisualConfig config)
     {
-        GameObject arrowBlip = isRedTeam ? GetOrCreateBlip(redTeamArrows, redArrowBlipPrefab, ref activeRedArrows) :
-            GetOrCreateBlip(blueTeamArrows, blueArrowBlipPrefab, ref activeBlueArrows);
+        GameObject arrowBlip = GetOrCreateBlip(config.arrowPool, config.arrowPrefab, ref config.activeArrows);
         RectTransform arrowTransform = arrowBlip.GetComponent<RectTransform>();
 
         arrowTransform.anchoredPosition = radarPos;
         arrowTransform.localRotation = Quaternion.LookRotation(Vector3.forward, radarPos);
-
         arrowBlip.SetActive(true);
     }
 
@@ -194,14 +192,6 @@ public class RadarSystem : MonoBehaviour
         GameObject blip = Instantiate(prefab, blipContainer);
         blip.SetActive(false);
         return blip;
-    }
-
-    private void DeactivateUnusedBlips()
-    {
-        DeactivateBlipPool(redTeamBlips, activeRedBlips);
-        DeactivateBlipPool(blueTeamBlips, activeBlueBlips);
-        DeactivateBlipPool(redTeamArrows, activeRedArrows);
-        DeactivateBlipPool(blueTeamArrows, activeBlueArrows);
     }
 
     private void DeactivateBlipPool(List<GameObject> pool, int activeCount)

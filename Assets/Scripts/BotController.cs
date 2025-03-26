@@ -89,10 +89,4 @@ public class BotController : Controller
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(avoidanceDirection), Time.deltaTime * avoidanceStrength);
         }
     }
-
-    private void ShootAtTarget()
-    {
-        if (target != null && Vector3.Distance(transform.position, target.position) < firingRange)
-            primaryWeapon.Fire(target.position);
-    }
 }

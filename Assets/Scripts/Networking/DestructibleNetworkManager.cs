@@ -3,12 +3,13 @@ using UnityEngine;
 
 public class DestructibleNetworkManager : NetworkBehaviour
 {
+    //add a way to keep track of damage and healing done and received here for each player
     public GameEvent HealthModificationEvent;
 
     private void OnEnable() => HealthModificationEvent.OnHealthModifiedEventRaised += HandleHealthChange;
     private void OnDisable() => HealthModificationEvent.OnHealthModifiedEventRaised -= HandleHealthChange;
 
-    private void HandleHealthChange(HealthComponent component, HealthModificationType type, int amount, int previousHP)
+    private void HandleHealthChange(HealthComponent component, HealthModificationType type, int amount, int previousHP, Controller modificationSource)
     {
         if (!IsServer) return;
 
@@ -32,14 +33,19 @@ public class DestructibleNetworkManager : NetworkBehaviour
                 newHP = Mathf.Clamp(newHP, 0, maxHP);
                 break;
         }
-
-        UpdateHealthClientRpc(component.NetworkObject, newHP, maxHP);
+        NetworkObjectReference reference = modificationSource != null ? modificationSource.NetworkObject : null;
+        UpdateHealthClientRpc(component.NetworkObject, newHP, maxHP, reference);
     }
 
     [ClientRpc]
-    private void UpdateHealthClientRpc(NetworkObjectReference componentRef, int newHP, int maxHP)
+    private void UpdateHealthClientRpc(NetworkObjectReference modifiedHealth, int newHP, int maxHP, NetworkObjectReference modificationSource)
     {
-        if (componentRef.TryGet(out NetworkObject netObj) && netObj.TryGetComponent(out HealthComponent component))
-            component.HandleHealthUpdate(newHP, maxHP);
+        if (modifiedHealth.TryGet(out NetworkObject netObj) && netObj.TryGetComponent(out HealthComponent component))
+        {
+            Controller controller = null;
+            if (modificationSource.TryGet(out NetworkObject modifierObj) && modifierObj.TryGetComponent(out Controller c))
+                controller = c;
+            component.HandleHealthUpdate(newHP, maxHP, controller);
+        }
     }
 }

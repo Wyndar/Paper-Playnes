@@ -45,7 +45,6 @@ public class CameraController : MonoBehaviour
 
         transform.SetParent(player);
         transform.SetLocalPositionAndRotation(offset, Quaternion.LookRotation(Vector3.forward, Vector3.up));
-        Debug.Log("Camera teleported and aligned behind the player.");
     }
 
     public void RemoveCameraFromPlayer()

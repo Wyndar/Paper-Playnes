@@ -14,7 +14,7 @@ public class GameEvent : ScriptableObject
     public event Action<GameObject> OnGameObjectEventRaised;
     public event Action<int, int> OnStatEventRaised;
     public event Action<Team, int, int> OnTeamEventRaised;
-    public event Action<HealthComponent, HealthModificationType, int, int> OnHealthModifiedEventRaised;
+    public event Action<HealthComponent, HealthModificationType, int, int, Controller> OnHealthModifiedEventRaised;
     
 
     private static readonly Dictionary<PickUpType, WeakReference<GameEvent>> _eventRegistry = new();
@@ -42,8 +42,8 @@ public class GameEvent : ScriptableObject
     public void RaiseEvent(int currentStat, int maxStat) => OnStatEventRaised?.Invoke(currentStat, maxStat);
     public void RaiseEvent(Team updateTeam, int currentStat, int maxOrPreviousStat) 
         => OnTeamEventRaised?.Invoke(updateTeam, currentStat, maxOrPreviousStat);
-    public void RaiseEvent(HealthComponent component, HealthModificationType modificationType, int amount, int previousHP)
-        => OnHealthModifiedEventRaised?.Invoke(component, modificationType, amount, previousHP);
+    public void RaiseEvent(HealthComponent component, HealthModificationType modificationType, int amount, int previousHP, Controller modificationSource)
+        => OnHealthModifiedEventRaised?.Invoke(component, modificationType, amount, previousHP, modificationSource);
 
     public static bool TryGetEvent(PickUpType type, out GameEvent gameEvent)
     {

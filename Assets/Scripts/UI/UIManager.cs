@@ -30,6 +30,8 @@ public class UIManager : MonoBehaviour
     [Header("Score UI")]
     public TMP_Text redTeamScore;
     public TMP_Text blueTeamScore;
+    public TMP_Text greenTeamScore;
+    public TMP_Text yellowTeamScore;
 
     public GameObject gameOverPanel;
     public GameObject respawningPanel;
@@ -53,8 +55,6 @@ public class UIManager : MonoBehaviour
     {
         respawnEvent.OnGameObjectEventRaised += EnableRespawnPanel;
         playerAmmoUpdateEvent.OnStatEventRaised += UpdateMagText;
-        updateTeamScoreEvent.OnTeamEventRaised += UpdateTeamScoreText;
-        Debug.Log("enabled");
     }
     private void OnDisable()
     {
@@ -77,10 +77,23 @@ public class UIManager : MonoBehaviour
     }
     private void UpdateTeamScoreText(Team team, int currentTeamScore, int previousTeamScore)
     {
-        if(team == Team.RedTeam)
-            redTeamScore.text = currentTeamScore.ToString();
-        else if(team==Team.BlueTeam)
-            blueTeamScore.text = currentTeamScore.ToString();
+        switch (team)
+        {
+            case Team.RedTeam:
+                redTeamScore.text = currentTeamScore.ToString();
+                break;
+            case Team.BlueTeam:
+                blueTeamScore.text = currentTeamScore.ToString();
+                break;
+            case Team.GreenTeam:
+                greenTeamScore.text = currentTeamScore.ToString();
+                break;
+            case Team.YellowTeam:
+                yellowTeamScore.text = currentTeamScore.ToString();
+                break;
+            default:
+                throw new MissingReferenceException("Team not found");
+        }
     }
     private IEnumerator RespawnCoroutine(float respawnTime, GameObject go)
     {

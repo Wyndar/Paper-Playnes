@@ -6,8 +6,6 @@ using System.Collections;
 public class SpawnManager : NetworkBehaviour
 {
     public static SpawnManager Instance { get; private set; }
-    public Renderer redTeamSpawnArea;
-    public Renderer blueTeamSpawnArea;
     public GameObject playerNetworkPrefab;
     public GameObject destBoxPrefab;
     public GameObject puBoxPrefab;
@@ -16,7 +14,7 @@ public class SpawnManager : NetworkBehaviour
     public int spawnBoxCount;
     public Renderer spawnRenderer;
 
-    public string[] botNames = new string[10];
+    public string[] botNames = new string[20];
     public List<Controller> activeControllers = new();
     private int botNamesTaken = 0;
     private void Awake()
@@ -87,7 +85,7 @@ public class SpawnManager : NetworkBehaviour
 
     public (Vector3, Quaternion) GetRandomSpawnPoint(Team team)
     {
-        Renderer spawnArea = (team == Team.RedTeam) ? redTeamSpawnArea : blueTeamSpawnArea;
+        Renderer spawnArea = TeamManager.Instance.teamDataList.Find(x => x.team == team).teamSpawnArea;
         Bounds bounds = spawnArea.bounds;
         Vector3 vector = new(
             Random.Range(bounds.min.x, bounds.max.x),
@@ -134,6 +132,7 @@ public class SpawnManager : NetworkBehaviour
         yield return new WaitForSeconds(0.2f);
         if (NetworkManager.Singleton.LocalClientId == netObj.OwnerClientId)
             TeamManager.Instance.RequestTeamAssignmentServerRpc(entityObject);
+        yield break;
     }
    
     public void TriggerControllerInitialize(Controller controller, Team team)

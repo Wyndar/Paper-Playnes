@@ -53,6 +53,7 @@ public class SceneLoadingManager : MonoBehaviour
 
     private IEnumerator FadeInAndStartLoading(LoadingMode mode, string sceneName)
     {
+        progressBar.gameObject.SetActive(false);
         if (loadingMusic)
         {
             loadingMusic.Play();
@@ -74,7 +75,6 @@ public class SceneLoadingManager : MonoBehaviour
         }
         else if (mode == LoadingMode.Network)
         {
-            progressBar.gameObject.SetActive(false);
             statusText.text = "Waiting for server...";
             NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
         }

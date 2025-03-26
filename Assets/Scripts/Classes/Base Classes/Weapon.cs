@@ -54,14 +54,14 @@ public class Weapon : MonoBehaviour
 
     private void OnEnable() => ammoPickUpEvent.OnEventRaised += PickedUpAmmo;
     private void OnDisable() => ammoPickUpEvent.OnEventRaised -= PickedUpAmmo;
-    public void Fire(Vector3 targetPosition)
+    public void Fire(Vector3 targetPosition, Controller player)
     {
         if (cooldownRoutine != null || reloadRoutine != null || (magazineAmmoCount <= 0 && magazineHoldCount <= 0))
             return;
         if (firedLastShot && isPairedWeapon)
         {
             firedLastShot = false;
-            pairedWeapon.Fire(targetPosition);
+            pairedWeapon.Fire(targetPosition, player);
             return;
         }
         //we need to work on projectiles later
@@ -74,7 +74,7 @@ public class Weapon : MonoBehaviour
         if (Physics.Raycast(spawnTransform.position, shootDirection, out RaycastHit hit, 1000f))
         {
             if (hit.collider.TryGetComponent(out HealthComponent health))
-                health.ModifyHealth(HealthModificationType.Damage, damage);
+                health.ModifyHealth(HealthModificationType.Damage, damage, player);
             if (VFXObject != null)
                 Instantiate(VFXObject, hit.point, Quaternion.LookRotation(hit.normal));
         }
