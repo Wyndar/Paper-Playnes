@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections;
 using TMPro;
 using UnityEngine.UI;
-using System.Threading.Tasks;
 using Unity.Netcode;
 
 public class UIManager : MonoBehaviour
@@ -55,6 +54,7 @@ public class UIManager : MonoBehaviour
     {
         respawnEvent.OnGameObjectEventRaised += EnableRespawnPanel;
         playerAmmoUpdateEvent.OnStatEventRaised += UpdateMagText;
+        updateTeamScoreEvent.OnTeamEventRaised += UpdateTeamScoreText;
     }
     private void OnDisable()
     {

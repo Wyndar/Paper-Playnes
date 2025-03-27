@@ -59,7 +59,7 @@ public class TeamManager : NetworkBehaviour
     public void InitializeTeamScores()
     {
         foreach (var teamData in teamDataList)
-            ReceiveTeamScoreAtClientRpc(teamData.team, teamData.teamScore, 0);
+            RequestScoreChangeServerRpc(teamData.team, teamData.teamScore, 0);
     }
 
     [ClientRpc]

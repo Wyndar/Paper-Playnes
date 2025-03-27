@@ -7,6 +7,7 @@ public class DestructibleNetworkManager : NetworkBehaviour
     public static DestructibleNetworkManager Instance { get; private set; }
     //add a way to keep track of damage and healing done and received here for each player
     public GameEvent HealthModificationEvent;
+    public GameEvent RespawnEvent;
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -58,6 +59,7 @@ public class DestructibleNetworkManager : NetworkBehaviour
     }
     public void LocalPlayerDied(Controller entity, List<Controller> damageSources)
     {
+        RespawnEvent.RaiseEvent(entity.gameObject);
         Controller killer = damageSources.Count > 0 ? damageSources[^1] : null;
         if (killer != null)
         {

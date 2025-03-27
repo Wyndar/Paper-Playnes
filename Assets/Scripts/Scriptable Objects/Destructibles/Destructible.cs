@@ -8,7 +8,6 @@ public class Destructible : ScriptableObject
     public GameObject destructionVFX;
     public AudioClip destructionSFX;
     public bool isController = false;
-    public GameEvent respawnEvent;
     public void Die(GameObject gameObject, List<Controller> damageSources)
     {
         if (destructionVFX != null)

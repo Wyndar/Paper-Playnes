@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class PlayerController : Controller
 {
     public enum AutoLevelMode { Off, On }
-    public GameEvent respawnEvent;
     private CameraController playerCamera;
 
     [Header("Movement Settings")]
