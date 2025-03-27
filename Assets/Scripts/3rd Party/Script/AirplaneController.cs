@@ -8,7 +8,6 @@ namespace GolemKin.ToonAirplaneController
     public class AirplaneController : MonoBehaviour
     {
         public enum AutoLevelMode { Off, On }
-        public InputManager InputManager;
 
         [Header("Movement Settings")]
         [SerializeField] private float speed = 20f;
@@ -90,14 +89,14 @@ namespace GolemKin.ToonAirplaneController
         private void Update()
         {
             HandleMovement();
-            //HandleBoost();
-            //HandleAirBrake();
-            //HandleBarrelRoll();
-            //HandleQuickTurn();
-            //HandleWingTrails();
-            //LimitAltitude();
-            //HandleMissileSystem(); // Add this line
-            //HandleMachineGun();
+            HandleBoost();
+            HandleAirBrake();
+            HandleBarrelRoll();
+            HandleQuickTurn();
+            HandleWingTrails();
+            LimitAltitude();
+            HandleMissileSystem(); // Add this line
+            HandleMachineGun();
             if (autoLevelMode == AutoLevelMode.On)
             {
                 AutoLevel();
@@ -251,11 +250,8 @@ namespace GolemKin.ToonAirplaneController
         private void HandleMovement()
         {
             // Apply inversion based on the isInverted toggle
-            Vector2 inputVector = InputManager.CurrentMoveVector.normalized;
-            float pitch = inputVector.y * (isInverted ? -1 : 1) * rotationSpeed * Time.deltaTime;
-            float yaw = inputVector.x * rotationSpeed * Time.deltaTime;
-            //float pitch = Input.GetAxis("Vertical") * (isInverted ? -1 : 1) * rotationSpeed * Time.deltaTime;
-            //float yaw = Input.GetAxis("Horizontal") * rotationSpeed * Time.deltaTime;
+            float pitch = Input.GetAxis("Vertical") * (isInverted ? -1 : 1) * rotationSpeed * Time.deltaTime;
+            float yaw = Input.GetAxis("Horizontal") * rotationSpeed * Time.deltaTime;
             transform.Rotate(pitch, yaw, 0);
 
             float moveSpeed = isBoosting ? speed * boostMultiplier : speed;

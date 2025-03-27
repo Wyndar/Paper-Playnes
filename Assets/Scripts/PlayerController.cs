@@ -84,11 +84,13 @@ public class PlayerController : Controller
     private float boostTimer;
 
     private Vector2 crosshairPosition = Vector2.zero;
+    private Vector3 magnetWorldHitPoint;
+    private HealthComponent magnetTarget;
     public bool isBoosting;
-    private bool isMoving;
-    private Coroutine crosshairRoutine;
     private const int MAX_TARGETS = 10;
+#pragma warning disable IDE0044 // Add readonly modifier
     private RaycastHit[] assistHits = new RaycastHit[MAX_TARGETS];
+#pragma warning restore IDE0044 // Add readonly modifier
     private AltimeterSystem altimeterSystem;
     private RadarSystem radarSystem;
     private UIManager uiManager;
@@ -149,9 +151,6 @@ public class PlayerController : Controller
     private void InitializeEvents()
     {
         if (!hasInitialized) return;
-
-        InputManager.Instance.OnStartMove += StartCrosshairMovement;
-        InputManager.Instance.OnEndMove += StopCrosshairMovement;
         InputManager.Instance.OnBoost += StartBoost;
         InputManager.Instance.OnFirePrimaryWeapon += StartShooting;
     }
@@ -161,9 +160,6 @@ public class PlayerController : Controller
     private void CleanupEventsAndRoutines()
     {
         if (!hasInitialized) return;
-
-        InputManager.Instance.OnStartMove -= StartCrosshairMovement;
-        InputManager.Instance.OnEndMove -= StopCrosshairMovement;
         InputManager.Instance.OnBoost -= StartBoost;
         InputManager.Instance.OnFirePrimaryWeapon -= StartShooting;
         StopAllCoroutines();
@@ -172,11 +168,12 @@ public class PlayerController : Controller
     private void FixedUpdate()
     {
         if (!hasInitialized) return;
-
+        HandleCrosshairMovement();
         ApplyPhysicsMovement();
         ApplyPhysicsRotation();
         ApplyAccumulationDecay();
-        if (autoLevelMode == AutoLevelMode.On && !isMoving)
+        ApplyAutoRealign();
+        if (autoLevelMode == AutoLevelMode.On)
             AutoLevel();
         HandleWingTrails();
     }
@@ -195,71 +192,62 @@ public class PlayerController : Controller
         Vector3 torque = Vector3.zero;
         torque += pitchInput * pitchAcceleration * transform.right;
 
-
-        float currentYawAngle = Mathf.Rad2Deg * Mathf.Asin(transform.forward.x);
-        if ((Mathf.Abs(currentYawAngle) < maxYawAngle) || (Mathf.Sign(accumulatedYaw) != Mathf.Sign(currentYawAngle)))
+        float currentYawAngle = Vector3.SignedAngle(Vector3.forward, transform.forward, Vector3.up);
+        if (Mathf.Abs(currentYawAngle) < maxYawAngle || Mathf.Sign(accumulatedYaw) != Mathf.Sign(currentYawAngle))
             torque += accumulatedYaw * yawAcceleration * transform.up;
         else
             accumulatedYaw = 0;
 
-        float currentRollAngle = Mathf.Rad2Deg * Mathf.Asin(transform.right.y);
-        if ((currentRollAngle < maxRollAngle && currentRollAngle > -maxRollAngle) ||
-            (Mathf.Sign(accumulatedRoll) != Mathf.Sign(currentRollAngle)))
+        float currentRollAngle = Vector3.SignedAngle(Vector3.up, transform.up, transform.forward);
+        if (Mathf.Abs(currentRollAngle) < maxRollAngle || Mathf.Sign(accumulatedRoll) != Mathf.Sign(currentRollAngle))
             torque += accumulatedRoll * rollAcceleration * transform.forward;
         else
             accumulatedRoll = 0;
 
         rb.AddTorque(torque, ForceMode.Acceleration);
+
+        Vector3 localAngularVelocity = transform.InverseTransformDirection(rb.angularVelocity);
+
+        if (Mathf.Abs(accumulatedYaw) < 0.01f)
+            localAngularVelocity.y = 0f;
+        if (Mathf.Abs(accumulatedRoll) < 0.01f)
+            localAngularVelocity.z = 0f;
+
+        rb.angularVelocity = transform.TransformDirection(localAngularVelocity);
     }
 
-    private void StartCrosshairMovement()
-    {
-        isMoving = true;
-        crosshairRoutine ??= StartCoroutine(HandleCrosshairMovement());
-    }
 
-    private void StopCrosshairMovement()
+    private void HandleCrosshairMovement()
     {
-        isMoving = false;
-        if (crosshairRoutine != null)
-            StopCoroutine(crosshairRoutine);
-        crosshairRoutine = null;
-    }
-
-    private IEnumerator HandleCrosshairMovement()
-    {
-        while (true)
+        Vector2 inputVector = InputManager.Instance.CurrentMoveVector;
+        if (inputVector.magnitude > 0)
         {
-            Vector2 inputVector = InputManager.Instance.CurrentMoveVector;
-            if (inputVector.magnitude > 0)
+            Vector2 newCrosshairPosition = crosshairPosition + (crosshairSpeed * Time.fixedDeltaTime * inputVector);
+            Vector2 adjustedPosition = ApplyCrosshairMagnetism(newCrosshairPosition);
+
+            bool atLimitX = Mathf.Abs(adjustedPosition.x) >= crosshairRadius;
+            bool atLimitY = Mathf.Abs(adjustedPosition.y) >= crosshairRadius;
+
+            if (!atLimitX)
+                crosshairPosition.x = adjustedPosition.x;
+            if (!atLimitY)
+                crosshairPosition.y = adjustedPosition.y;
+            if (atLimitX)
             {
-                Vector2 newCrosshairPosition = crosshairPosition + (crosshairSpeed * Time.fixedDeltaTime * inputVector);
-                Vector2 adjustedPosition = ApplyCrosshairMagnetism(newCrosshairPosition);
-
-                bool atLimitX = Mathf.Abs(adjustedPosition.x) >= crosshairRadius;
-                bool atLimitY = Mathf.Abs(adjustedPosition.y) >= crosshairRadius;
-
-                if (!atLimitX)
-                    crosshairPosition.x = adjustedPosition.x;
-                if (!atLimitY)
-                    crosshairPosition.y = adjustedPosition.y;
-                if (atLimitX)
-                {
-                    accumulatedRoll += -inputVector.x * rollAcceleration * Time.fixedDeltaTime;
-                    accumulatedYaw += inputVector.x * yawAcceleration * Time.fixedDeltaTime;
-                }
-                if (atLimitY)
-                {
-                    float pitchInput = isInverted ? -inputVector.y : inputVector.y;
-                    accumulatedPitch += pitchInput * pitchAcceleration * Time.fixedDeltaTime;
-                }
-                accumulatedPitch = Mathf.Clamp(accumulatedPitch, -1f, 1f);
-                accumulatedRoll = Mathf.Clamp(accumulatedRoll, -1f, 1f);
+                accumulatedRoll += -inputVector.x * rollAcceleration * Time.fixedDeltaTime;
+                accumulatedYaw += inputVector.x * yawAcceleration * Time.fixedDeltaTime;
             }
-            GetCrosshairWorldPosition();
-            crosshairUI.anchoredPosition = crosshairPosition;
-            yield return null;
+            if (atLimitY)
+            {
+                float pitchInput = isInverted ? -inputVector.y : inputVector.y;
+                accumulatedPitch += pitchInput * pitchAcceleration * Time.fixedDeltaTime;
+            }
+            accumulatedPitch = Mathf.Clamp(accumulatedPitch, -0.4f, 0.4f);
+            accumulatedRoll = Mathf.Clamp(accumulatedRoll, -0.4f, 0.4f);
+            accumulatedYaw = Mathf.Clamp(accumulatedYaw, -0.4f, 0.4f);
         }
+        GetCrosshairWorldPosition();
+        crosshairUI.anchoredPosition = crosshairPosition;
     }
     private void ApplyAccumulationDecay()
     {
@@ -273,21 +261,50 @@ public class PlayerController : Controller
 
     private void StartBoost() => StartCoroutine(HandleBoost());
     private void StartShooting() => primaryWeapon.Fire(GetCrosshairWorldPosition(), this);
-
     private Vector3 GetCrosshairWorldPosition()
     {
-        Vector3 screenPosition = crosshairUI.position;
-        Camera cam = Camera.main;
-        Ray ray = cam.ScreenPointToRay(screenPosition);
+        if (magnetTarget != null)
+            return magnetWorldHitPoint;
+        Ray ray = playerCamera.GetComponent<Camera>().ScreenPointToRay(crosshairUI.position);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, 1000f))
-        {
-            crosshairTarget = hit.collider.GetComponent<HealthComponent>();
-            UpdateCrosshairColor(crosshairTarget != null);
+        if (Physics.Raycast(ray, out RaycastHit hit, maxAssistRange))
             return hit.point;
+
+        return ray.origin + ray.direction * maxAssistRange;
+    }
+
+    private bool RunCrosshairAssistRaycast(Vector2 screenPos, out Vector2 targetScreenPos)
+    {
+        Camera cam = Camera.main;
+        Ray ray = cam.ScreenPointToRay(screenPos);
+        int hitCount = Physics.SphereCastNonAlloc(ray, assistRadius, assistHits, maxAssistRange);
+
+        float closestAngle = float.MaxValue;
+        magnetTarget = null;
+        magnetWorldHitPoint = Vector3.zero;
+        targetScreenPos = screenPos;
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            var hit = assistHits[i];
+            if (!hit.collider.TryGetComponent(out HealthComponent health)) continue;
+
+            Vector3 worldPos = hit.point;
+            Vector2 hitScreenPos = cam.WorldToScreenPoint(worldPos);
+            float distanceToCrosshair = Vector2.Distance(hitScreenPos, screenPos);
+            if (distanceToCrosshair > crosshairRadius) continue;
+
+            float angle = Vector3.Angle(ray.direction, (worldPos - ray.origin).normalized);
+            if (angle < closestAngle)
+            {
+                closestAngle = angle;
+                magnetTarget = health;
+                magnetWorldHitPoint = worldPos;
+                targetScreenPos = hitScreenPos;
+            }
         }
-        UpdateCrosshairColor(false);
-        return transform.position + transform.forward * 50f;
+
+        return magnetTarget != null;
     }
 
     private void UpdateCrosshairColor(bool isTargetingEnemy)
@@ -301,41 +318,16 @@ public class PlayerController : Controller
 
     private Vector2 ApplyCrosshairMagnetism(Vector2 currentPosition)
     {
-        Camera cam = Camera.main;
-        Ray ray = cam.ScreenPointToRay(currentPosition);
-
-        int numHits = Physics.SphereCastNonAlloc(ray, assistRadius, assistHits, maxAssistRange);
-
-        Transform bestTarget = null;
-        float closestAngle = float.MaxValue;
-        Vector2 bestScreenPosition = currentPosition;
-
-        for (int i = 0; i < numHits; i++)
-        {
-            RaycastHit hit = assistHits[i];
-            if (!hit.collider.TryGetComponent(out HealthComponent _)) continue;
-
-            Vector3 worldPos = hit.collider.bounds.center;
-            Vector2 screenPos = cam.WorldToScreenPoint(worldPos);
-
-            float angle = Vector3.Angle(ray.direction, (worldPos - ray.origin).normalized);
-
-            if (angle >= closestAngle)
-                continue;
-            closestAngle = angle;
-            bestTarget = hit.transform;
-            bestScreenPosition = screenPos;
-        }
-
-        if (bestTarget != null)
+        if (RunCrosshairAssistRaycast(currentPosition, out Vector2 magnetizedPos))
         {
             UpdateCrosshairColor(true);
-            return Vector2.Lerp(currentPosition, bestScreenPosition, Time.fixedDeltaTime * magnetStrength);
+            return Vector2.Lerp(currentPosition, magnetizedPos, Time.fixedDeltaTime * magnetStrength);
         }
 
         UpdateCrosshairColor(false);
         return currentPosition;
     }
+
 
     private IEnumerator HandleBoost()
     {
@@ -389,6 +381,34 @@ public class PlayerController : Controller
         Quaternion currentRotation = transform.rotation;
         Quaternion targetRotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
         transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, autoLevelSpeed * Time.fixedDeltaTime);
+    }
+    private void ApplyAutoRealign()
+    {
+        if (crosshairPosition.magnitude < 0.1f)
+            return;
+
+        Camera cam = playerCamera.GetComponent<Camera>();
+        Ray currentRay = cam.ScreenPointToRay(crosshairUI.position);
+        Vector3 currentDir = currentRay.direction.normalized;
+        Ray zeroRay = cam.ScreenPointToRay(cam.pixelRect.center);
+        Vector3 zeroDir = zeroRay.direction.normalized;
+
+        Quaternion rotationOffset = Quaternion.FromToRotation(zeroDir, currentDir);
+        Quaternion currentRotation = transform.rotation;
+        Quaternion rawTargetRotation = rotationOffset * currentRotation;
+        Vector3 currentEuler = currentRotation.eulerAngles;
+        Vector3 targetEuler = rawTargetRotation.eulerAngles;
+
+        float pitch = currentEuler.x;
+        if (Mathf.Abs(accumulatedPitch) < 0.01f)
+            pitch = targetEuler.x;
+        float yaw = targetEuler.y;
+        float roll = targetEuler.z;
+
+        Quaternion constrainedRotation = Quaternion.Euler(pitch, yaw, roll);
+        transform.rotation = Quaternion.Slerp(currentRotation, constrainedRotation, autoLevelSpeed * Time.fixedDeltaTime);
+        crosshairPosition = Vector2.Lerp(crosshairPosition, Vector2.zero, autoLevelSpeed * Time.fixedDeltaTime);
+        crosshairUI.anchoredPosition = crosshairPosition;
     }
 
     public void ToggleInversion() => isInverted = !isInverted;
