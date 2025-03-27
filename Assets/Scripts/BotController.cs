@@ -31,8 +31,9 @@ public class BotController : Controller
     {
         if (!IsServer) return;
         ulong ownerId = NetworkManager.ServerClientId;
-        InitializeEntity(true, ownerId, team);
+        //this should be set by rpc
         gameObject.name = SpawnManager.Instance.GetBotName();
+        InitializeEntity(true, ownerId, team);
         StartCoroutine(BotBehaviorLoop());
     }
 

@@ -41,12 +41,11 @@ public class SceneTransitionManager : NetworkBehaviour
     {
         clientsLoaded++;
         Debug.Log($"Client {clientId} loaded. {clientsLoaded}/{NetworkManager.Singleton.ConnectedClientsList.Count} clients ready.");
-        //this should be a proper broadcast as well that notifies player joining and leaving
+       
         if (clientsLoaded == NetworkManager.Singleton.ConnectedClientsList.Count)
             Debug.Log("All clients have loaded the scene.");
     }
 
     [ServerRpc]
     public void NotifyServerLoadedSceneServerRpc(ulong clientId) => ClientLoadedScene(clientId);
-
 }

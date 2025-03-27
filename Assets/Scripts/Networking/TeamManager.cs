@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
-using UnityEngine;
 
 public class TeamManager : NetworkBehaviour
 {
@@ -41,33 +40,6 @@ public class TeamManager : NetworkBehaviour
     {
         if (entityRef.TryGet(out NetworkObject entityObj) && entityObj.TryGetComponent(out Controller controller))
             SpawnManager.Instance.TriggerControllerInitialize(controller, AssignTeam(controller));
-    }
-
-    public void LocalPlayerDied(Controller entity, List<Controller> damageSources)
-    {
-        Controller killer = damageSources.Count > 0 ? damageSources[^1] : null;
-        if (killer != null)
-        {
-            Team killTeam = GetTeam(killer);
-            if (killTeam != Team.Undefined)
-            {
-                TeamData killTeamData = teamDataList.Find(t => t.team == killTeam);
-                RequestScoreChangeServerRpc(killTeam, 1, killTeamData.teamScore);
-                //request message broadcast here for kills and assists
-            }
-        }
-        RequestGameObjectStateChangeAtServerRpc(entity.GetComponent<NetworkObject>(), false);
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestGameObjectStateChangeAtServerRpc(NetworkObjectReference entityRef, bool isActive) => ReceiveGameObjectStateChangeAtClientRpc(entityRef, isActive);
-
-    [ClientRpc]
-    private void ReceiveGameObjectStateChangeAtClientRpc(NetworkObjectReference entityRef, bool isActive)
-    {
-        if (!entityRef.TryGet(out NetworkObject networkObject))
-            throw new MissingComponentException("If you're seeing this, something is wrong with Netcode and your code is working as intended.");
-        networkObject.gameObject.SetActive(isActive);
     }
 
     [ServerRpc(RequireOwnership = false)]

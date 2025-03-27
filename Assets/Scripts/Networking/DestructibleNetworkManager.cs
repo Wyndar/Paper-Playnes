@@ -1,18 +1,26 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
 public class DestructibleNetworkManager : NetworkBehaviour
 {
+    public static DestructibleNetworkManager Instance { get; private set; }
     //add a way to keep track of damage and healing done and received here for each player
     public GameEvent HealthModificationEvent;
-
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+            return;
+        }
+        Instance = this;
+    }
     private void OnEnable() => HealthModificationEvent.OnHealthModifiedEventRaised += HandleHealthChange;
     private void OnDisable() => HealthModificationEvent.OnHealthModifiedEventRaised -= HandleHealthChange;
 
     private void HandleHealthChange(HealthComponent component, HealthModificationType type, int amount, int previousHP, Controller modificationSource)
     {
-        if (!IsServer) return;
-
         int newHP = previousHP;
         int maxHP = component.MaxHP;
 
@@ -47,5 +55,33 @@ public class DestructibleNetworkManager : NetworkBehaviour
                 controller = c;
             component.HandleHealthUpdate(newHP, maxHP, controller);
         }
+    }
+    public void LocalPlayerDied(Controller entity, List<Controller> damageSources)
+    {
+        Controller killer = damageSources.Count > 0 ? damageSources[^1] : null;
+        if (killer != null)
+        {
+            Team killTeam = TeamManager.Instance.GetTeam(killer);
+            if (killTeam != Team.Undefined)
+            {
+                TeamData killTeamData = TeamManager.Instance.teamDataList.Find(t => t.team == killTeam);
+                TeamManager.Instance.RequestScoreChangeServerRpc(killTeam, 1, killTeamData.teamScore);
+                MessageFeedManger.Instance.RequestKillFeedBroadcastAtServerRpc(killer.name, killTeam, entity.name, TeamManager.Instance.GetTeam(entity), "spitfire");
+            }
+        }
+        else
+            MessageFeedManger.Instance.RequestEnvironmentKillFeedBroadcastAtServerRpc(entity.name, TeamManager.Instance.GetTeam(entity), "wall", "wall");
+        RequestGameObjectStateChangeAtServerRpc(entity.GetComponent<NetworkObject>(), false);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestGameObjectStateChangeAtServerRpc(NetworkObjectReference entityRef, bool isActive) => ReceiveGameObjectStateChangeAtClientRpc(entityRef, isActive);
+
+    [ClientRpc]
+    private void ReceiveGameObjectStateChangeAtClientRpc(NetworkObjectReference entityRef, bool isActive)
+    {
+        if (!entityRef.TryGet(out NetworkObject networkObject))
+            throw new MissingComponentException("If you're seeing this, something is wrong with Netcode and your code is working as intended.");
+        networkObject.gameObject.SetActive(isActive);
     }
 }

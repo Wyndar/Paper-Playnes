@@ -102,7 +102,7 @@ public class UIManager : MonoBehaviour
             respawnTime -= Time.deltaTime;
             yield return null;
         }
-        TeamManager.Instance.RequestGameObjectStateChangeAtServerRpc(go.GetComponent<NetworkObject>(), true);
+        DestructibleNetworkManager.Instance.RequestGameObjectStateChangeAtServerRpc(go.GetComponent<NetworkObject>(), true);
         yield return new WaitForEndOfFrame();
         go.GetComponent<Controller>().Respawn();
         yield return new WaitForEndOfFrame();

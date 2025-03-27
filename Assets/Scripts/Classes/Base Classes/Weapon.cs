@@ -67,7 +67,7 @@ public class Weapon : MonoBehaviour
         //we need to work on projectiles later
         //GameObject proj = Instantiate(projectilePrefab, spawnTransform.position, spawnTransform.rotation);
         //Projectile projectile = proj.GetComponent<Projectile>();
-        //projectile.Initialize(targetPosition);
+        //projectile.InitializeDisplay(targetPosition);
         // Perform a raycast instead of instantiating a projectile
         Vector3 shootDirection = (targetPosition - spawnTransform.position).normalized;
 

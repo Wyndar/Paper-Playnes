@@ -16,7 +16,7 @@ public class Destructible : ScriptableObject
         if (destructionSFX != null)
             destructionVFX.GetComponent<AudioSource>().clip = destructionSFX; 
         if (isController)
-            TeamManager.Instance.LocalPlayerDied(gameObject.GetComponent<Controller>(), damageSources);
+            DestructibleNetworkManager.Instance.LocalPlayerDied(gameObject.GetComponent<Controller>(), damageSources);
         //else 
             //need new logic here to handle disabling pick up pool
     }

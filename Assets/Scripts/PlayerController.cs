@@ -104,13 +104,14 @@ public class PlayerController : Controller
             return;
         }
         ulong ownerId = NetworkManager.Singleton.LocalClientId;
+        //we need to broadcast names over network too
+        gameObject.name = MultiplayerManager.PlayerName;
         InitializeEntity(false, ownerId, team);
         FindLocalCamera();
         crosshairUI = GameObject.Find("Crosshair").GetComponent<RectTransform>();
         hasInitialized = true;
         InitializeLocalGameManager();
         InitializeEvents();
-        gameObject.name = MultiplayerManager.PlayerName;
         TeamManager.Instance.InitializeTeamScores();
     }
 

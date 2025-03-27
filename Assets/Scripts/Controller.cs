@@ -26,6 +26,7 @@ public class Controller : NetworkBehaviour
         pickUpHandler.enabled = true;
         healthComponent.enabled = true;
         Respawn();
+        MessageFeedManger.Instance.RequestJoinFeedBroadcastAtServerRpc(gameObject.name, team);
     }
     public void Respawn()
     {
@@ -33,9 +34,10 @@ public class Controller : NetworkBehaviour
         var newSpawnPosition = SpawnManager.Instance.GetRandomSpawnPoint(currentTeam);
 
         if (TryGetComponent(out NetworkTransform networkTransform))
-            networkTransform.Teleport(newSpawnPosition.Item1, newSpawnPosition.Item2,transform.localScale);
+            networkTransform.Teleport(newSpawnPosition.Item1, newSpawnPosition.Item2, transform.localScale);
         else
             throw new MissingComponentException("Attach a Network Transform");
         healthComponent.InitializeHealth();
     }
+    public override void OnNetworkDespawn() => MessageFeedManger.Instance.RequestLeaveFeedBroadcastAtServerRpc(gameObject.name, Team);
 }

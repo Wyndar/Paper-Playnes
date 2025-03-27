@@ -31,7 +31,7 @@ namespace GolemKin.ToonAirplaneController
 
         private void Awake()
         {
-            // Initialize Rigidbody
+            // InitializeDisplay Rigidbody
             rb = GetComponentInChildren<Rigidbody>();
             if (rb == null)
             {
