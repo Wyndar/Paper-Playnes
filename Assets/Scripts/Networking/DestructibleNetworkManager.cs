@@ -60,6 +60,7 @@ public class DestructibleNetworkManager : NetworkBehaviour
     public void LocalPlayerDied(Controller entity, List<Controller> damageSources)
     {
         RespawnEvent.RaiseEvent(entity.gameObject);
+        RequestGameObjectStateChangeAtServerRpc(entity.GetComponent<NetworkObject>(), false);
         Controller killer = damageSources.Count > 0 ? damageSources[^1] : null;
         if (killer != null)
         {
@@ -73,7 +74,6 @@ public class DestructibleNetworkManager : NetworkBehaviour
         }
         else
             MessageFeedManger.Instance.RequestEnvironmentKillFeedBroadcastAtServerRpc(entity.name, TeamManager.Instance.GetTeam(entity), "wall", "wall");
-        RequestGameObjectStateChangeAtServerRpc(entity.GetComponent<NetworkObject>(), false);
     }
 
     [ServerRpc(RequireOwnership = false)]

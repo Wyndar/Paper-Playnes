@@ -29,7 +29,7 @@ public class SpawnManager : NetworkBehaviour
 
     //private void Start()
     //{
-    //    if(!IsServer) return;
+    //    if (!IsServer) return;
     //    InstantiateBoxes();
     //    RearrangeBoxes();
     //}

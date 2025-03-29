@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -7463463897239464629}
   - component: {fileID: 7645564889722665742}
   - component: {fileID: 4730976131055133425}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Dest Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -151,6 +151,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   destructible: {fileID: 11400000, guid: 1d147fba6237304429f3bd26635b4fcf, type: 2}
   healthEvent: {fileID: 11400000, guid: 56b0c326c286aba46aab70eac92e24a9, type: 2}
+  damageSources: []
 --- !u!114 &4730976131055133425
 MonoBehaviour:
   m_ObjectHideFlags: 0

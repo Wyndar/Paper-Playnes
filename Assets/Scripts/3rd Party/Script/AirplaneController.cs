@@ -50,7 +50,6 @@ namespace GolemKin.ToonAirplaneController
 
         private float missileCooldownTimer;
 
-
         [Header("Machine Gun Settings")]
         [SerializeField] private KeyCode fireGunKey = KeyCode.Mouse1; // Key to fire the machine gun
         [SerializeField] private GameObject bulletPrefab; // Prefab for the bullets

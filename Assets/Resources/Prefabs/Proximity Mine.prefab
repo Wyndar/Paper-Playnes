@@ -19,7 +19,7 @@ GameObject:
   - component: {fileID: 8042082357732881889}
   - component: {fileID: 607148366304564196}
   - component: {fileID: -5441389924087016877}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Proximity Mine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -378,6 +378,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damageAmount: 80
+  controller: {fileID: 0}
   mineData: {fileID: 11400000, guid: 885114f89e21f2a448777f13c8613f3c, type: 2}
 --- !u!114 &8042082357732881889
 MonoBehaviour:
@@ -419,6 +420,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   destructible: {fileID: 11400000, guid: ad097893acc900845baede984c6eb01b, type: 2}
   healthEvent: {fileID: 11400000, guid: 56b0c326c286aba46aab70eac92e24a9, type: 2}
+  damageSources: []
 --- !u!54 &-5441389924087016877
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -457,7 +459,7 @@ GameObject:
   - component: {fileID: 7436920656319727019}
   - component: {fileID: 7631760828113504459}
   - component: {fileID: 2051072067704512405}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: sea mine export
   m_TagString: Untagged
   m_Icon: {fileID: 0}

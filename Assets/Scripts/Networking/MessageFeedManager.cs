@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -9,7 +10,7 @@ public class MessageFeedManger : NetworkBehaviour
     [Header("Feed Settings")]
     public Transform messageContainer;
     public GameObject messagePrefab;
-    public int maxMessages = 6;
+    public int maxMessagesCount = 6;
     public float baseLifetime = 5f;
     public float minLifetime = 1.5f;
     public float killStreakResetTime = 10f;
@@ -141,7 +142,7 @@ public class MessageFeedManger : NetworkBehaviour
         isProcessingQueue = false;
     }
 
-    private void SpawnMessage(System.Action<FeedMessage> initializer)
+    private void SpawnMessage(Action<FeedMessage> initializer)
     {
         GameObject messageGO = GetMessageFromPool();
         messageGO.transform.SetParent(messageContainer, false);
@@ -154,7 +155,7 @@ public class MessageFeedManger : NetworkBehaviour
         messageGO.SetActive(true);
         messageQueue.Enqueue(message);
 
-        if (messageQueue.Count > maxMessages)
+        if (messageQueue.Count > maxMessagesCount)
             ShortenOldestMessage();
     }
 

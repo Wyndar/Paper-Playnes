@@ -23,10 +23,7 @@ public class BotController : Controller
         if (spawnerCooldown <= 0)
             StartCoroutine(BotBehaviorLoop());
     }
-    public void OnDisable()
-    {
-        StopAllCoroutines();
-    }
+    public void OnDisable() => StopAllCoroutines();
     public override void Initialize(Team team)
     {
         if (!IsServer) return;
@@ -42,7 +39,7 @@ public class BotController : Controller
         spawnerCooldown -= Time.deltaTime;
         while (spawnerCooldown <= 0)
         {
-            FindTarget();
+            FindNearestTarget();
             MoveTowardsTarget();
             AvoidObstacles();
             //ShootAtTarget();
@@ -51,7 +48,7 @@ public class BotController : Controller
         yield return null;
     }
 
-    private void FindTarget()
+    private void FindNearestTarget()
     {
         int numTargets = Physics.OverlapSphereNonAlloc(transform.position, detectionRadius, detectedColliders);
         Transform closestEnemy = null;
@@ -59,14 +56,14 @@ public class BotController : Controller
 
         for (int i = 0; i < numTargets; i++)
         {
-            Collider col = detectedColliders[i];
-            if (col.TryGetComponent(out HealthComponent enemyHealth) && enemyHealth != healthComponent && !enemyHealth.IsDead)
+            Collider closestCollider = detectedColliders[i];
+            if (closestCollider.TryGetComponent(out HealthComponent enemyHealth) && enemyHealth != healthComponent && !enemyHealth.IsDead)
             {
-                float distance = Vector3.Distance(transform.position, col.transform.position);
+                float distance = Vector3.Distance(transform.position, closestCollider.transform.position);
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
-                    closestEnemy = col.transform;
+                    closestEnemy = closestCollider.transform;
                 }
             }
         }

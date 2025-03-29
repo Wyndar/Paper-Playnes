@@ -39,10 +39,12 @@ public class PlayerController : Controller
     [SerializeField] private HealthComponent crosshairTarget;
     [SerializeField] private float crosshairRadius = 50f;
     [SerializeField] private float crosshairSpeed = 500f;
+    [SerializeField] private float crosshairThreshold;
     [SerializeField] private float assistRadius = 1.5f;
+    [SerializeField] private float sweepAngle = 30f;
     [SerializeField] private float magnetStrength = 8f;
     [SerializeField] private float maxAssistRange = 1000f;
-
+    [SerializeField] private LayerMask destructibleLayerMask;
     [SerializeField] private Color crosshairColor;
     [SerializeField] private Color crosshairOnTargetColor;
 
@@ -61,20 +63,16 @@ public class PlayerController : Controller
     public float weightToSpeedReductionRatio;
 
     [Header("Weapon Positions")]
-    [SerializeField] private Transform leftPrimaryWeaponObject;
-    [SerializeField] private Transform rightPrimaryWeaponObject;
-    [SerializeField] private Transform leftSecondaryWeaponObject;
-    [SerializeField] private Transform rightSecondaryWeaponObject;
-    [SerializeField] private Transform undersideWeaponObject;
-    [SerializeField] private Transform cockpitWeaponObject;
+    [SerializeField]
+    private Transform leftPrimaryWeaponObject, rightPrimaryWeaponObject, leftSecondaryWeaponObject,
+        rightSecondaryWeaponObject, undersideWeaponObject, cockpitWeaponObject;
 
     [Header("Equipped Weapon Settings")]
     [SerializeField] private Weapon primaryWeapon;
     [SerializeField] private List<Weapon> secondaryWeapons;
 
     [Header("Wing Trails")]
-    [SerializeField] private TrailRenderer leftWingTrail;
-    [SerializeField] private TrailRenderer rightWingTrail;
+    [SerializeField] private TrailRenderer leftWingTrail, rightWingTrail;
     [SerializeField] private float trailActivationThreshold = 15f;
 
     [Header("Audio Settings")]
@@ -87,7 +85,7 @@ public class PlayerController : Controller
     private Vector3 magnetWorldHitPoint;
     private HealthComponent magnetTarget;
     public bool isBoosting;
-    private const int MAX_TARGETS = 10;
+    private const int MAX_TARGETS = 50;
 #pragma warning disable IDE0044 // Add readonly modifier
     private RaycastHit[] assistHits = new RaycastHit[MAX_TARGETS];
 #pragma warning restore IDE0044 // Add readonly modifier
@@ -95,7 +93,6 @@ public class PlayerController : Controller
     private RadarSystem radarSystem;
     private UIManager uiManager;
     private bool hasInitialized;
-
     public override void Initialize(Team team)
     {
         if (!IsOwner)
@@ -172,7 +169,7 @@ public class PlayerController : Controller
         ApplyPhysicsMovement();
         ApplyPhysicsRotation();
         ApplyAccumulationDecay();
-        ApplyAutoRealign();
+       // ApplyAutoRealign();
         if (autoLevelMode == AutoLevelMode.On)
             AutoLevel();
         HandleWingTrails();
@@ -223,6 +220,7 @@ public class PlayerController : Controller
         if (inputVector.magnitude > 0)
         {
             Vector2 newCrosshairPosition = crosshairPosition + (crosshairSpeed * Time.fixedDeltaTime * inputVector);
+            crosshairUI.anchoredPosition = newCrosshairPosition;
             Vector2 adjustedPosition = ApplyCrosshairMagnetism(newCrosshairPosition);
 
             bool atLimitX = Mathf.Abs(adjustedPosition.x) >= crosshairRadius;
@@ -242,9 +240,9 @@ public class PlayerController : Controller
                 float pitchInput = isInverted ? -inputVector.y : inputVector.y;
                 accumulatedPitch += pitchInput * pitchAcceleration * Time.fixedDeltaTime;
             }
-            accumulatedPitch = Mathf.Clamp(accumulatedPitch, -0.4f, 0.4f);
-            accumulatedRoll = Mathf.Clamp(accumulatedRoll, -0.4f, 0.4f);
-            accumulatedYaw = Mathf.Clamp(accumulatedYaw, -0.4f, 0.4f);
+            accumulatedPitch = Mathf.Clamp(accumulatedPitch, -0.25f, 0.25f);
+            accumulatedRoll = Mathf.Clamp(accumulatedRoll, -0.25f, 0.25f);
+            accumulatedYaw = Mathf.Clamp(accumulatedYaw, -0.25f, 0.25f);
         }
         GetCrosshairWorldPosition();
         crosshairUI.anchoredPosition = crosshairPosition;
@@ -273,58 +271,74 @@ public class PlayerController : Controller
         return ray.origin + ray.direction * maxAssistRange;
     }
 
-    private bool RunCrosshairAssistRaycast(Vector2 screenPos, out Vector2 targetScreenPos)
+    private bool RunCrosshairAssistRaycast(out Vector2 targetScreenPos, out float angularDistanceToCrosshair)
     {
-        Camera cam = Camera.main;
-        Ray ray = cam.ScreenPointToRay(screenPos);
-        int hitCount = Physics.SphereCastNonAlloc(ray, assistRadius, assistHits, maxAssistRange);
+        Camera cam = playerCamera.GetComponent<Camera>();
+        Ray targetRay = new(playerCamera.transform.position, (crosshairUI.position - playerCamera.transform.position).normalized);
+        // DEBUG: Draw start-to-end of the spherecast
+        Vector3 start = targetRay.origin;
+        Vector3 end = start + targetRay.direction.normalized * maxAssistRange;
+        Debug.DrawLine(start, end, Color.cyan); // Ray center line
+        DrawWireSphereRuntime(start, assistRadius, Color.green);
+        DrawWireSphereRuntime(end, assistRadius, Color.red);
+        int hitCount = Physics.SphereCastNonAlloc(targetRay, assistRadius, assistHits, maxAssistRange, destructibleLayerMask);
 
-        float closestAngle = float.MaxValue;
+        angularDistanceToCrosshair = sweepAngle;
         magnetTarget = null;
         magnetWorldHitPoint = Vector3.zero;
-        targetScreenPos = screenPos;
-
+        targetScreenPos = crosshairUI.position;
         for (int i = 0; i < hitCount; i++)
         {
             var hit = assistHits[i];
             if (!hit.collider.TryGetComponent(out HealthComponent health)) continue;
-
             Vector3 worldPos = hit.point;
-            Vector2 hitScreenPos = cam.WorldToScreenPoint(worldPos);
-            float distanceToCrosshair = Vector2.Distance(hitScreenPos, screenPos);
-            if (distanceToCrosshair > crosshairRadius) continue;
-
-            float angle = Vector3.Angle(ray.direction, (worldPos - ray.origin).normalized);
-            if (angle < closestAngle)
+            Vector3 hitScreenPos = RectTransformUtility.WorldToScreenPoint(cam, worldPos);
+            if (hitScreenPos.z < 0f) continue;
+            Debug.DrawLine(targetRay.origin, worldPos, Color.yellow);
+            DrawWireSphereRuntime(worldPos, 25f, Color.yellow);
+            // Debug hit point
+            float newHitAngle = Vector3.Angle(targetRay.direction, (worldPos - targetRay.origin).normalized);
+            Debug.Log(newHitAngle + " " + health.gameObject.name);
+            if (newHitAngle < angularDistanceToCrosshair)
             {
-                closestAngle = angle;
+                angularDistanceToCrosshair = newHitAngle;
                 magnetTarget = health;
                 magnetWorldHitPoint = worldPos;
                 targetScreenPos = hitScreenPos;
+                Debug.Log(angularDistanceToCrosshair);
             }
         }
 
         return magnetTarget != null;
     }
+    private void DrawWireSphereRuntime(Vector3 center, float radius, Color color)
+    {
+        Vector3 up = Vector3.up * radius;
+        Vector3 right = Vector3.right * radius;
+        Vector3 forward = Vector3.forward * radius;
 
-    private void UpdateCrosshairColor(bool isTargetingEnemy)
+        Debug.DrawLine(center - up, center + up, color);
+        Debug.DrawLine(center - right, center + right, color);
+        Debug.DrawLine(center - forward, center + forward, color);
+    }
+    private void UpdateCrosshairColor(float angularDistance)
     {
         if (crosshairUI.TryGetComponent(out Image crosshairImage))
         {
-            Color targetColor = isTargetingEnemy ? crosshairOnTargetColor : crosshairColor;
-            crosshairImage.color = Color.Lerp(crosshairImage.color, targetColor, Time.fixedDeltaTime * 10f);
+            float t = Mathf.InverseLerp(30f, 0f, angularDistance);
+            crosshairImage.color = Color.Lerp(crosshairColor, crosshairOnTargetColor, t);
         }
     }
 
     private Vector2 ApplyCrosshairMagnetism(Vector2 currentPosition)
     {
-        if (RunCrosshairAssistRaycast(currentPosition, out Vector2 magnetizedPos))
+        if (RunCrosshairAssistRaycast(out Vector2 magnetizedPos, out float dist))
         {
-            UpdateCrosshairColor(true);
+            UpdateCrosshairColor(dist);
             return Vector2.Lerp(currentPosition, magnetizedPos, Time.fixedDeltaTime * magnetStrength);
         }
 
-        UpdateCrosshairColor(false);
+        UpdateCrosshairColor(dist);
         return currentPosition;
     }
 
@@ -425,5 +439,5 @@ public class PlayerController : Controller
         }
         else
             Debug.LogError("No Main Camera found for Player " + OwnerClientId);
-    } 
+    }
 }

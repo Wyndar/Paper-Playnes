@@ -16,4 +16,6 @@ MonoBehaviour:
   destructionVFX: {fileID: 130346, guid: 061d98fffe21ebe44907c94636b572f2, type: 3}
   destructionSFX: {fileID: 8300000, guid: 4b8e51dd99d3ccd46b9f3a988f79c296, type: 3}
   isController: 1
-  respawnEvent: {fileID: 11400000, guid: f83c521e605d15a4c972fd502a7af6b7, type: 2}
+  destructibleMask:
+    serializedVersion: 2
+    m_Bits: 128
