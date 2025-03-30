@@ -225,13 +225,6 @@ public class PlayerController : Controller
         {
             Vector2 newCrosshairPosition = crosshairPosition + (crosshairSpeed * Time.fixedDeltaTime * inputVector);
             crosshairUI.anchoredPosition = newCrosshairPosition;
-            if (RunCrosshairAssistRaycast(out Vector2 targetScreenPos, out float angularDist))
-                if (InputManager.Instance.IsFiringPrimaryWeapon())
-                {
-                    crosshairUI.position = new(targetScreenPos.x, targetScreenPos.y);
-                    crosshairUI.localPosition = new Vector3(crosshairUI.localPosition.x, crosshairUI.localPosition.y, 0);
-                }
-            UpdateCrosshairColor(angularDist);
             bool atLimitX = Mathf.Abs(newCrosshairPosition.x) >= crosshairRadius;
             bool atLimitY = Mathf.Abs(newCrosshairPosition.y) >= crosshairRadius;
                 
@@ -239,6 +232,7 @@ public class PlayerController : Controller
             {
                 accumulatedRoll += -inputVector.x * rollAcceleration * Time.fixedDeltaTime;
                 accumulatedYaw += inputVector.x * yawAcceleration * Time.fixedDeltaTime;
+                crosshairPosition.x = Mathf.Sign(newCrosshairPosition.x) * crosshairRadius;
             }
             else
                 crosshairPosition.x = newCrosshairPosition.x;
@@ -246,6 +240,7 @@ public class PlayerController : Controller
             {
                 float pitchInput = isInverted ? -inputVector.y : inputVector.y;
                 accumulatedPitch += pitchInput * pitchAcceleration * Time.fixedDeltaTime;
+                crosshairPosition.y = Mathf.Sign(newCrosshairPosition.y) * crosshairRadius;
             }
             else
                 crosshairPosition.y = newCrosshairPosition.y;
@@ -253,8 +248,21 @@ public class PlayerController : Controller
             accumulatedRoll = Mathf.Clamp(accumulatedRoll, -0.25f, 0.25f);
             accumulatedYaw = Mathf.Clamp(accumulatedYaw, -0.25f, 0.25f);
         }
-        GetCrosshairWorldPosition();
         crosshairUI.anchoredPosition = crosshairPosition;
+        if (RunCrosshairAssistRaycast(out Vector2 targetScreenPos, out float angularDist))
+            if (InputManager.Instance.IsFiringPrimaryWeapon())
+            {
+                RectTransform canvasRect = crosshairUI.root as RectTransform;
+                Camera uiCam = playerCamera.GetComponent<Camera>();
+
+                if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, targetScreenPos, uiCam, out Vector2 localPos))
+                {
+                    crosshairUI.anchoredPosition = localPos;
+                    crosshairPosition = localPos;
+                }
+
+            }
+        UpdateCrosshairColor(angularDist);
     }
     private void ApplyAccelerationAccumulationDecay()
     {
