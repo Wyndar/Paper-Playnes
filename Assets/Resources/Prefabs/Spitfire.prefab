@@ -128,6 +128,7 @@ MonoBehaviour:
   weaponObject: {fileID: 4137244379339748582}
   VFXObject: {fileID: 5829954932819675323, guid: ec61ebf726bcb6d4087db0bbe61839a6, type: 3}
   weaponWeight: 50
+  ADSTime: 0.5
   fireRate: 0.2
   reloadRate: 2
   range: 500

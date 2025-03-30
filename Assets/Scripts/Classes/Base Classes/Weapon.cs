@@ -8,6 +8,7 @@ public class Weapon : MonoBehaviour
     public GameObject VFXObject;
 
     public int weaponWeight;
+    public float ADSTime;
     public float fireRate;
     public float reloadRate;
     public float range;

@@ -11,6 +11,9 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float followSpeed = 5f;
     [SerializeField] private float catchUpMultiplier = 1.5f;
 
+    [Header("FOV Settings")]
+    public float flightFOV = 120f, boostFOV = 90f, ADSFOV = 60f;
+
     //[Header("Screen Positioning")]
     //[SerializeField] private float verticalScreenOffset = 0.3f;
 

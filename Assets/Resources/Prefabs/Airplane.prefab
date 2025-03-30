@@ -5270,6 +5270,7 @@ MonoBehaviour:
   healthBar: {fileID: 0}
   pickUpHandler: {fileID: 0}
   rb: {fileID: 0}
+  planeState: 0
   currentSpeed: 0
   accumulatedPitch: 0
   accumulatedRoll: 0
@@ -5284,9 +5285,9 @@ MonoBehaviour:
   pitchAcceleration: 4
   rollAcceleration: 4
   yawAcceleration: 4
-  pitchDecayRate: 3
-  rollDecayRate: 3
-  yawDecayRate: 3
+  pitchInertia: 3
+  rollInertia: 3
+  yawInertia: 3
   isInverted: 0
   autoLevelMode: 1
   autoLevelSpeed: 0.35
@@ -5295,8 +5296,8 @@ MonoBehaviour:
   crosshairTarget: {fileID: 0}
   crosshairRadius: 15
   crosshairSpeed: 75
-  assistRadius: 100
-  magnetStrength: 5
+  assistRadius: 50
+  sweepAngle: 5
   maxAssistRange: 1500
   destructibleLayerMask:
     serializedVersion: 2

@@ -43,3 +43,11 @@ public enum GameEventType
     TeamStatUpdate,
     HealthModified
 }
+public enum AutoLevelMode { Off, On }
+
+public enum PlaneState
+{
+    Flight,
+    Boost,
+    ADS
+}
