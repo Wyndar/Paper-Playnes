@@ -248,20 +248,16 @@ public class PlayerController : Controller
             accumulatedRoll = Mathf.Clamp(accumulatedRoll, -0.25f, 0.25f);
             accumulatedYaw = Mathf.Clamp(accumulatedYaw, -0.25f, 0.25f);
         }
-        crosshairUI.anchoredPosition = crosshairPosition;
+       
         if (RunCrosshairAssistRaycast(out Vector2 targetScreenPos, out float angularDist))
             if (InputManager.Instance.IsFiringPrimaryWeapon())
             {
                 RectTransform canvasRect = crosshairUI.root as RectTransform;
                 Camera uiCam = playerCamera.GetComponent<Camera>();
-
                 if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, targetScreenPos, uiCam, out Vector2 localPos))
-                {
-                    crosshairUI.anchoredPosition = localPos;
                     crosshairPosition = localPos;
-                }
-
             }
+        crosshairUI.anchoredPosition = crosshairPosition;
         UpdateCrosshairColor(angularDist);
     }
     private void ApplyAccelerationAccumulationDecay()

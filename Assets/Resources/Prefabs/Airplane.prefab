@@ -5351,8 +5351,12 @@ MonoBehaviour:
   firingRange: 500
   avoidanceStrength: 5
   obstacleDetectionDistance: 100
-  maxSpeed: 0
+  maxSpeed: 20
   primaryWeapon: {fileID: 7890972265110820531}
+  maxAccuracy: 80
+  destructibleLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!135 &7042715206100132785
 SphereCollider:
   m_ObjectHideFlags: 0
