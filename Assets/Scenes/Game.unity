@@ -1602,43 +1602,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ControlPath: <Gamepad>/rightTrigger
---- !u!84 &299505214
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Weather Map
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 6
-  m_Width: 512
-  m_Height: 512
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 0
-  m_ColorFormat: 24
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 1
-  m_UseDynamicScale: 0
-  m_UseDynamicScaleExplicit: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 1
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 2
-  m_VolumeDepth: 512
-  m_ShadowSamplingMode: 2
 --- !u!1 &349827003
 GameObject:
   m_ObjectHideFlags: 0
@@ -1738,7 +1701,7 @@ GameObject:
   - component: {fileID: 361086828}
   - component: {fileID: 361086827}
   - component: {fileID: 361086831}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Bounding Cylinder Down Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2406,7 +2369,7 @@ GameObject:
   - component: {fileID: 531690302}
   - component: {fileID: 531690301}
   - component: {fileID: 531690305}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Bounding Cylinder Up Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2605,7 +2568,7 @@ GameObject:
   - component: {fileID: 561672159}
   - component: {fileID: 561672158}
   - component: {fileID: 561672161}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Bounding Cylinder Up Bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2728,7 +2691,7 @@ GameObject:
   - component: {fileID: 572893253}
   - component: {fileID: 572893252}
   - component: {fileID: 572893255}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Bounding Cylinder Right Bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3101,7 +3064,7 @@ GameObject:
   - component: {fileID: 616588815}
   - component: {fileID: 616588814}
   - component: {fileID: 616588817}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Bounding Cylinder Left Bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3341,8 +3304,8 @@ MonoBehaviour:
   viewerTileAmount: 1
   viewerSize: 0
   showSettingsEditor: 1
-  shapeTexture: {fileID: 910790091}
-  detailTexture: {fileID: 996874994}
+  shapeTexture: {fileID: 1857786220}
+  detailTexture: {fileID: 846725894}
 --- !u!4 &699597287
 Transform:
   m_ObjectHideFlags: 0
@@ -3675,7 +3638,7 @@ GameObject:
   - component: {fileID: 740683569}
   - component: {fileID: 740683571}
   - component: {fileID: 740683572}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Left Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3796,7 +3759,7 @@ GameObject:
   - component: {fileID: 753827657}
   - component: {fileID: 753827659}
   - component: {fileID: 753827660}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Up Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3917,7 +3880,7 @@ GameObject:
   - component: {fileID: 765061504}
   - component: {fileID: 765061503}
   - component: {fileID: 765061506}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Bounding Cylinder Down Bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4442,6 +4405,43 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -462981019419857548, guid: 9f4ed5646e6c5b54f92baf9b635955a2, type: 3}
+--- !u!84 &846725894
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Detail
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 6
+  m_Width: 64
+  m_Height: 64
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthStencilFormat: 0
+  m_ColorFormat: 24
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 1
+  m_UseDynamicScale: 0
+  m_UseDynamicScaleExplicit: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_EnableRandomWrite: 1
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_Dimension: 3
+  m_VolumeDepth: 64
+  m_ShadowSamplingMode: 2
 --- !u!1 &866536462
 GameObject:
   m_ObjectHideFlags: 0
@@ -4487,43 +4487,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 866536462}
   m_CullTransparentMesh: 1
---- !u!84 &910790091
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Shape
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 6
-  m_Width: 132
-  m_Height: 132
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 0
-  m_ColorFormat: 24
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 1
-  m_UseDynamicScale: 0
-  m_UseDynamicScaleExplicit: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 1
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_Dimension: 3
-  m_VolumeDepth: 132
-  m_ShadowSamplingMode: 2
 --- !u!1 &916335369
 GameObject:
   m_ObjectHideFlags: 0
@@ -4875,43 +4838,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 986336426}
   m_CullTransparentMesh: 1
---- !u!84 &996874994
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Detail
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 6
-  m_Width: 64
-  m_Height: 64
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 0
-  m_ColorFormat: 24
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 1
-  m_UseDynamicScale: 0
-  m_UseDynamicScaleExplicit: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 1
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_Dimension: 3
-  m_VolumeDepth: 64
-  m_ShadowSamplingMode: 2
 --- !u!1 &997971694
 GameObject:
   m_ObjectHideFlags: 0
@@ -5344,7 +5270,7 @@ GameObject:
   - component: {fileID: 1121161039}
   - component: {fileID: 1121161041}
   - component: {fileID: 1121161042}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Down Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5590,7 +5516,7 @@ MonoBehaviour:
   noiseCompute: {fileID: 7200000, guid: 610906fb135f245baaa76a04f34d7c24, type: 3}
   noiseSettings: {fileID: 11400000, guid: 80b75510024a247d5bf11f3f18c4cec1, type: 2}
   resolution: 512
-  weatherMap: {fileID: 299505214}
+  weatherMap: {fileID: 1542476779}
   testParams: {x: 0, y: 1, z: 1, w: 0}
   container: {fileID: 1319860153}
   viewerEnabled: 0
@@ -5904,7 +5830,7 @@ GameObject:
   - component: {fileID: 1233332218}
   - component: {fileID: 1233332217}
   - component: {fileID: 1233332221}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Bounding Cylinder Up Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7014,6 +6940,43 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!84 &1542476779
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Weather Map
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 6
+  m_Width: 512
+  m_Height: 512
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthStencilFormat: 0
+  m_ColorFormat: 24
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 1
+  m_UseDynamicScale: 0
+  m_UseDynamicScaleExplicit: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_EnableRandomWrite: 1
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 2
+  m_VolumeDepth: 512
+  m_ShadowSamplingMode: 2
 --- !u!1 &1603576565
 GameObject:
   m_ObjectHideFlags: 0
@@ -7589,7 +7552,7 @@ GameObject:
   - component: {fileID: 1745656961}
   - component: {fileID: 1745656963}
   - component: {fileID: 1745656964}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Right Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7856,6 +7819,11 @@ MonoBehaviour:
   - {fileID: 526201331}
   - {fileID: 2002292426}
   - {fileID: 1642299728}
+  redColor: {r: 1, g: 0, b: 0, a: 1}
+  blueColor: {r: 0, g: 0, b: 1, a: 1}
+  yellowColor: {r: 1, g: 1, b: 0, a: 1}
+  greenColor: {r: 0, g: 1, b: 0, a: 1}
+  defaultColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1845556552
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7964,11 +7932,6 @@ MonoBehaviour:
   audioSource: {fileID: 230116304}
   defaultClip: {fileID: 8300000, guid: 4829fb456fd3d344eaa512fced9591ac, type: 3}
   killStreakClips: []
-  redColor: {r: 1, g: 0, b: 0, a: 1}
-  blueColor: {r: 0, g: 0, b: 1, a: 1}
-  yellowColor: {r: 1, g: 1, b: 0, a: 1}
-  greenColor: {r: 0, g: 1, b: 0, a: 1}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
   killIcons: []
 --- !u!1 &1847223593
 GameObject:
@@ -8045,6 +8008,43 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1847223593}
   m_CullTransparentMesh: 1
+--- !u!84 &1857786220
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Shape
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 6
+  m_Width: 132
+  m_Height: 132
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthStencilFormat: 0
+  m_ColorFormat: 24
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 1
+  m_UseDynamicScale: 0
+  m_UseDynamicScaleExplicit: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_EnableRandomWrite: 1
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_Dimension: 3
+  m_VolumeDepth: 132
+  m_ShadowSamplingMode: 2
 --- !u!1 &1861801112
 GameObject:
   m_ObjectHideFlags: 0
@@ -8310,7 +8310,7 @@ GameObject:
   - component: {fileID: 1945022886}
   - component: {fileID: 1945022888}
   - component: {fileID: 1945022889}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Top Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9323,7 +9323,7 @@ GameObject:
   - component: {fileID: 2143998993}
   - component: {fileID: 2143998992}
   - component: {fileID: 2143998996}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Bounding Cylinder Down Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}

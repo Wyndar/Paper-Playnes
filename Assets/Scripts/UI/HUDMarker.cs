@@ -44,8 +44,10 @@ public class HUDMarker : MonoBehaviour
         targetObject = target;
         targetRigidbody = target.GetComponent<Rigidbody>();
         nameText.text = target.name;
-        if (!target.TryGetComponent(out HealthComponent targetHealth))
+        if (!target.TryGetComponent(out HealthComponent component))
             return;
+        nameText.color = TeamManager.Instance.GetTeamColor(targetObject.GetComponent<Controller>().Team);
+        targetHealth = component;
         UpdateHP(targetHealth.CurrentHP, targetHealth.MaxHP);
         targetHealth.OnHealthChanged += UpdateHP;
         targetHealth.OnDeath += Cleanup;
@@ -96,6 +98,9 @@ public class HUDMarker : MonoBehaviour
     {
         foreach (var image in markerTransform.GetComponentsInChildren<Image>())
         {
+            //ik what you're thinking
+            //don't even bother, you can't modify the alpha value of an image's colour directly so we have to do this
+            //bloody muricans btw, have half a mind to force rename this shit
             Color color = image.color;
             color.a = alpha;
             image.color = color;

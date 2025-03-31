@@ -5345,10 +5345,10 @@ MonoBehaviour:
   healthBar: {fileID: 0}
   pickUpHandler: {fileID: 0}
   rb: {fileID: 0}
-  decisionCooldown: 1
+  decisionCooldown: 0.5
   spawnerCooldown: 10
   detectionRadius: 1200
-  firingRange: 500
+  rotationSpeed: 5
   avoidanceStrength: 5
   obstacleDetectionDistance: 100
   maxSpeed: 20

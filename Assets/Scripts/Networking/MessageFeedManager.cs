@@ -26,13 +26,6 @@ public class MessageFeedManger : NetworkBehaviour
     public AudioClip defaultClip;
     public AudioClip[] killStreakClips; 
 
-    [Header("Team Colors")]
-    public Color redColor;
-    public Color blueColor;
-    public Color yellowColor;
-    public Color greenColor;
-    public Color defaultColor = Color.white;
-
     [Header("Kill Icon Assets")]
     public Sprite[] killIcons;
     private readonly Dictionary<string, Sprite> killIconMap = new();
@@ -41,7 +34,7 @@ public class MessageFeedManger : NetworkBehaviour
     private readonly List<GameObject> pooledMessages = new();
     private readonly Dictionary<string, int> killStreaks = new();
     private readonly Dictionary<string, float> lastKillTime = new();
-    private readonly Queue<System.Action<FeedMessage>> pendingMessages = new();
+    private readonly Queue<Action<FeedMessage>> pendingMessages = new();
 
     private bool isProcessingQueue = false;
 
@@ -65,7 +58,8 @@ public class MessageFeedManger : NetworkBehaviour
     {
         Sprite icon = GetKillIcon(iconName);
         PlaySound(defaultClip);
-        EnqueueMessage(msg => msg.DisplayKillMessage(killer, GetTeamColor(killerTeam), victim, GetTeamColor(victimTeam), icon, baseLifetime));
+        EnqueueMessage(msg => msg.DisplayKillMessage(killer, TeamManager.Instance.GetTeamColor(killerTeam), victim, 
+            TeamManager.Instance.GetTeamColor(victimTeam), icon, baseLifetime));
 
         float currentTime = Time.time;
 
@@ -92,27 +86,27 @@ public class MessageFeedManger : NetworkBehaviour
                 _ => $"{killer} is on a {streak}-kill streak!"
             };
 
-            EnqueueMessage(msg => msg.DisplayStyledEventMessage(streakMessage, GetTeamColor(killerTeam), baseLifetime, 15));
+            EnqueueMessage(msg => msg.DisplayStyledEventMessage(streakMessage, TeamManager.Instance.GetTeamColor(killerTeam), baseLifetime, 15));
         }
     }
 
     public void AddJoinMessage(string playerName, Team team)
     {
         PlaySound(defaultClip);
-        EnqueueMessage(msg => msg.DisplayEventMessage(playerName + " joined the match", GetTeamColor(team), baseLifetime));
+        EnqueueMessage(msg => msg.DisplayEventMessage(playerName + " joined the match", TeamManager.Instance.GetTeamColor(team), baseLifetime));
     }
 
     public void AddLeaveMessage(string playerName, Team team)
     {
         PlaySound(defaultClip);
-        EnqueueMessage(msg => msg.DisplayEventMessage(playerName + " left the match", GetTeamColor(team), baseLifetime));
+        EnqueueMessage(msg => msg.DisplayEventMessage(playerName + " left the match", TeamManager.Instance.GetTeamColor(team), baseLifetime));
     }
 
     public void AddEnvironmentDeathMessage(string victim, Team victimTeam, string cause, string iconName)
     {
         Sprite icon = GetKillIcon(iconName);
         PlaySound(defaultClip);
-        EnqueueMessage(msg => msg.DisplayEnvironmentDeathMessage(victim, GetTeamColor(victimTeam), cause, icon, baseLifetime));
+        EnqueueMessage(msg => msg.DisplayEnvironmentDeathMessage(victim, TeamManager.Instance.GetTeamColor(victimTeam), cause, icon, baseLifetime));
     }
 
     private void PlaySound(AudioClip clip)
@@ -185,14 +179,6 @@ public class MessageFeedManger : NetworkBehaviour
         return null;
     }
 
-    private Color GetTeamColor(Team team) => team switch
-    {
-        Team.RedTeam => redColor,
-        Team.BlueTeam => blueColor,
-        Team.YellowTeam => yellowColor,
-        Team.GreenTeam => greenColor,
-        _ => defaultColor
-    };
     [ServerRpc(RequireOwnership = false)]
     public void RequestKillFeedBroadcastAtServerRpc(string killer, Team killerTeam, string victim, Team victimTeam, string iconName)
     => ReceiveKillFeedBroadcastAtClientRpc(killer, killerTeam, victim, victimTeam, iconName);

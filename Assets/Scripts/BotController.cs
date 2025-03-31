@@ -7,9 +7,9 @@ public class BotController : Controller
     [SerializeField] private float decisionCooldown = 1f;
     [SerializeField] private float spawnerCooldown = 2f;
     [SerializeField] private float detectionRadius = 500f;
-    [SerializeField] private float firingRange = 200f;
+    [SerializeField] private float rotationSpeed = 5f;
     [SerializeField] private float avoidanceStrength = 5f;
-    [SerializeField] private float obstacleDetectionDistance = 50f;
+    [SerializeField] private float obstacleDetectionDistance = 100f;
     [SerializeField] private float maxSpeed = 20f;
     [SerializeField] private Weapon primaryWeapon;
     [SerializeField] private float maxAccuracy = 80f;
@@ -62,7 +62,8 @@ public class BotController : Controller
         for (int i = 0; i < numTargets; i++)
         {
             Collider closestCollider = detectedColliders[i];
-            if (closestCollider.TryGetComponent(out HealthComponent enemyHealth) && enemyHealth != healthComponent && !enemyHealth.IsDead && closestCollider.TryGetComponent(out Controller otherController) && TeamManager.Instance.GetTeam(otherController) != Team)
+            if (closestCollider.TryGetComponent(out HealthComponent enemyHealth) && !enemyHealth.IsDead
+                && closestCollider.TryGetComponent(out Controller otherController) && TeamManager.Instance.GetTeam(otherController) != Team)
             {
                 float distance = Vector3.Distance(transform.position, closestCollider.transform.position);
                 if (distance < closestDistance)
@@ -80,7 +81,7 @@ public class BotController : Controller
         if (target == null) return;
 
         Vector3 direction = (target.position - transform.position).normalized;
-        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * 2f);
+        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * rotationSpeed);
         rb.linearVelocity = transform.forward * maxSpeed;
     }
 

@@ -153,7 +153,7 @@ public class PlayerController : Controller
         InputManager.Instance.OnBoost += StartBoost;
         InputManager.Instance.OnStartFirePrimaryWeapon += OnStartFiringPrimary;
         InputManager.Instance.OnEndFirePrimaryWeapon += OnStopFiringPrimary;
-
+        playerCamera.GetComponent<Camera>().fieldOfView = playerCamera.flightFOV;
     }
     private void OnEnable() => InitializeEvents();
     private void OnDisable() => CleanupEventsAndRoutines();
@@ -216,7 +216,6 @@ public class PlayerController : Controller
 
         rb.angularVelocity = transform.TransformDirection(localAngularVelocity);
     }
-
 
     private void HandleCrosshairMovement()
     {
@@ -362,6 +361,7 @@ public class PlayerController : Controller
         {
             var hit = assistHits[i];
             if (!hit.collider.TryGetComponent(out HealthComponent health)) continue;
+            if (!health.TryGetComponent(out Controller controller) || TeamManager.Instance.GetTeam(controller) == Team) continue;
             Vector3 worldPos = hit.point;
             Vector3 hitScreenPos = RectTransformUtility.WorldToScreenPoint(cam, worldPos);
             if (hitScreenPos.z < 0f) continue;

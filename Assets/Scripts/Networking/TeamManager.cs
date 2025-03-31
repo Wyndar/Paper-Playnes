@@ -1,13 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
+using UnityEngine;
 
 public class TeamManager : NetworkBehaviour
 {
     public GameEvent UpdateTeamScoreEvent;
     public static TeamManager Instance { get; private set; }
     public List<TeamData> teamDataList = new();
-
+    [Header("Team Colors")]
+    public Color redColor;
+    public Color blueColor;
+    public Color yellowColor;
+    public Color greenColor;
+    public Color defaultColor = Color.white;
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -34,7 +40,14 @@ public class TeamManager : NetworkBehaviour
                 return teamData.team;
         return Team.Undefined;
     }
-
+    public Color GetTeamColor(Team team) => team switch
+    {
+        Team.RedTeam => redColor,
+        Team.BlueTeam => blueColor,
+        Team.YellowTeam => yellowColor,
+        Team.GreenTeam => greenColor,
+        _ => defaultColor
+    };
     [ServerRpc(RequireOwnership = false)]
     public void RequestTeamAssignmentServerRpc(NetworkObjectReference entityRef)
     {
