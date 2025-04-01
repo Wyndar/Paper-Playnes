@@ -147,6 +147,7 @@ public class PlayerController : Controller
         InputManager.Instance.OnEndBoost += EndBoost;
         InputManager.Instance.OnStartFirePrimaryWeapon += OnStartFiringPrimary;
         InputManager.Instance.OnEndFirePrimaryWeapon += OnStopFiringPrimary;
+        primaryWeapon.Initialize();
         playerCamera.GetComponent<Camera>().fieldOfView = playerCamera.flightFOV;
         boostCharge = maxBoostCharge/4;
         boostBar.value = boostCharge;

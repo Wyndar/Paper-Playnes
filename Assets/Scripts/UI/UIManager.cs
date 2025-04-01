@@ -72,10 +72,10 @@ public class UIManager : MonoBehaviour
         StartCoroutine(RespawnCoroutine(5f, go));
     }
 
-    private void UpdateMagText(int currentMagCount, int maxMagCount)
+    private void UpdateMagText(int currentMagCount, int magCount)
     {
         primaryWeaponAmmoCountText.text = currentMagCount.ToString();
-        primaryWeaponMaxAmmoCountText.text = maxMagCount.ToString();
+        primaryWeaponMaxAmmoCountText.text = magCount.ToString();
     }
     private void UpdateTeamScoreText(Team team, int currentTeamScore, int previousTeamScore)
     {

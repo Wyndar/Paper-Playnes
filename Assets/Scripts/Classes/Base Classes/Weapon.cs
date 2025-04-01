@@ -43,14 +43,21 @@ public class Weapon : MonoBehaviour
     public float timeSinceReloadStarted;
     private Coroutine cooldownRoutine;
     private Coroutine reloadRoutine;
-    public void Start()
+    private bool hasInitialized;
+    public void Initialize()
     {
+        if (hasInitialized)
+            return;
         CapMagazine();
         playerAmmoUpdateEvent.RaiseEvent(magazineAmmoCount, magazineHoldCount);
         timeSinceLastShot = fireRate;
         timeSinceReloadStarted = 0;
+        hasInitialized = true;
         if (isPairedWeapon)
+        {
+            pairedWeapon.Initialize();
             VerifyPair();
+        }
     }
 
     private void OnEnable() => ammoPickUpEvent.OnEventRaised += PickedUpAmmo;
@@ -72,7 +79,7 @@ public class Weapon : MonoBehaviour
         // Perform a raycast instead of instantiating a projectile
         Vector3 shootDirection = (targetPosition - spawnTransform.position).normalized;
 
-        if (Physics.Raycast(spawnTransform.position, shootDirection, out RaycastHit hit, 1000f))
+        if (Physics.Raycast(spawnTransform.position, shootDirection, out RaycastHit hit, range))
         {
             if (hit.collider.TryGetComponent(out HealthComponent health))
                 health.ModifyHealth(HealthModificationType.Damage, damage, player);
@@ -83,19 +90,21 @@ public class Weapon : MonoBehaviour
         magazineAmmoCount--;
         timeSinceLastShot = 0;
         firedLastShot = true;
-        playerAmmoUpdateEvent.RaiseEvent(magazineAmmoCount, magazineHoldCount);
+        if (!player.IsBot)
+            playerAmmoUpdateEvent.RaiseEvent(magazineAmmoCount, magazineHoldCount);
         if (magazineAmmoCount <= 0)
         {
-            Reload();
+            Reload(player);
             return;
         }
         cooldownRoutine ??= StartCoroutine(Cooldown());
     }
-    private void Reload()
+    private void Reload(Controller player)
     {
         magazineHoldCount--;
         magazineAmmoCount = maxMagazineAmmoCount;
-        playerAmmoUpdateEvent.RaiseEvent(magazineAmmoCount, magazineHoldCount);
+        if (!player.IsBot)
+            playerAmmoUpdateEvent.RaiseEvent(magazineAmmoCount, magazineHoldCount);
         reloadRoutine ??= StartCoroutine(ReloadCooldown());
     }
 
