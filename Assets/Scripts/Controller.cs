@@ -10,7 +10,7 @@ public class Controller : NetworkBehaviour
     public HealthComponent healthComponent;
     public HealthBar healthBar;
     public PickUpHandler pickUpHandler;
-    public Rigidbody rb;
+    public Rigidbody planeRigidbody;
 
     public virtual void Initialize(Team team) => Debug.LogError("Failed virtual override");
     public void InitializeEntity(bool isBot, ulong? ownerId, Team team)
@@ -18,7 +18,7 @@ public class Controller : NetworkBehaviour
         IsBot = isBot;
         OwnerId = ownerId;
         Team = team;
-        rb = GetComponent<Rigidbody>();
+        planeRigidbody = GetComponent<Rigidbody>();
         healthBar = GetComponent<HealthBar>();
         pickUpHandler = GetComponent<PickUpHandler>();
         healthComponent = GetComponent<HealthComponent>();

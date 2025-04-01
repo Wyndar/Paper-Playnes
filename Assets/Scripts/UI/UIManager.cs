@@ -21,6 +21,8 @@ public class UIManager : MonoBehaviour
     public Camera playerCamera;
     public HealthComponent playerHealth;
     public Slider playerHealthBar;
+    public RectTransform crosshairUI;
+    public Slider boostSlider;
 
     [Header("Ammunition UI")]
     public TMP_Text primaryWeaponAmmoCountText;

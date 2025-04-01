@@ -63,7 +63,7 @@ public class BotController : Controller
         {
             Collider closestCollider = detectedColliders[i];
             if (closestCollider.TryGetComponent(out HealthComponent enemyHealth) && !enemyHealth.IsDead
-                && closestCollider.TryGetComponent(out Controller otherController) && TeamManager.Instance.GetTeam(otherController) != Team)
+                && closestCollider.TryGetComponent(out Controller otherController) && otherController.Team != Team)
             {
                 float distance = Vector3.Distance(transform.position, closestCollider.transform.position);
                 if (distance < closestDistance)
@@ -82,7 +82,7 @@ public class BotController : Controller
 
         Vector3 direction = (target.position - transform.position).normalized;
         transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * rotationSpeed);
-        rb.linearVelocity = transform.forward * maxSpeed;
+        planeRigidbody.linearVelocity = transform.forward * maxSpeed;
     }
 
     private void AvoidObstacles()

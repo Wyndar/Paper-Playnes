@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -12,22 +12,12 @@ public class PlayerController : Controller
 
     [Header("Movement Settings")]
     [SerializeField] private float currentSpeed;
-    [SerializeField] private float accumulatedPitch = 0f;
-    [SerializeField] private float accumulatedRoll = 0f;
-    [SerializeField] private float accumulatedYaw = 0f;
-    [SerializeField] private float minimumSpeed = 20f;
-    [SerializeField] private float rotationSpeed = 100f;
-    [SerializeField] private float maxRollAngle = 45f;
-    [SerializeField] private float maxYawAngle = 45f;
-    [SerializeField] private float acceleration = 5f;
-    [SerializeField] private float deceleration = 3f;
-    [SerializeField] private float maxSpeed = 100f;
-    [SerializeField] private float pitchAcceleration = 20f;
-    [SerializeField] private float rollAcceleration = 20f;
-    [SerializeField] private float yawAcceleration = 20f;
-    [SerializeField] private float pitchInertia = 2f;
-    [SerializeField] private float rollInertia = 2f;
-    [SerializeField] private float yawInertia = 2f;
+    [SerializeField] private float accumulatedPitch = 0f, accumulatedRoll = 0f, accumulatedYaw = 0f;
+    [SerializeField] private float minimumSpeed = 20f, rotationSpeed = 100f, maxSpeed = 100f;
+    [SerializeField] private float maxRollAngle = 45f, maxYawAngle = 45f;
+    [SerializeField] private float acceleration = 5f, deceleration = 3f;
+    [SerializeField] private float pitchAcceleration = 20f, rollAcceleration = 20f, yawAcceleration = 20f;
+    [SerializeField] private float pitchInertia = 2f, rollInertia = 2f, yawInertia = 2f;
     [SerializeField] private bool isInverted = false;
     [SerializeField] private AutoLevelMode autoLevelMode = AutoLevelMode.Off;
     [SerializeField] private float autoLevelSpeed = 2f;
@@ -49,8 +39,11 @@ public class PlayerController : Controller
 
     [Header("Boost Settings")]
     [SerializeField] private float boostMultiplier = 2f;
-    [SerializeField] private float boostDuration = 2f;
+    [SerializeField] private float boostDrainRate = 25f, boostRechargeRate = 0.5f, boostRechargeDelay = 1f, boostRechargeDelayTimer = 0f;
     [SerializeField] private GameObject boostVFX;
+    [SerializeField] private Slider boostBar;
+    [SerializeField] private float boostTransitionDuration = 5f;   
+    [SerializeField] private float maxBoostCharge = 100, boostCharge = 0;
 
     [Header("Altitude Settings")]
     [SerializeField] private float maxAltitude = 100f;
@@ -78,12 +71,9 @@ public class PlayerController : Controller
     [SerializeField] private AudioClip rollSound;
     [SerializeField] private AudioSource warningSpeakers;
 
-    private float boostTimer;
-
     private Vector2 crosshairPosition = Vector2.zero;
     private Vector3 magnetWorldHitPoint;
     private HealthComponent magnetTarget;
-    public bool isBoosting;
     private const int MAX_TARGETS = 50;
 #pragma warning disable IDE0044 // Add readonly modifier
     private RaycastHit[] assistHits = new RaycastHit[MAX_TARGETS];
@@ -94,6 +84,7 @@ public class PlayerController : Controller
     private bool hasInitialized;
     private Coroutine firingCoroutine;
     private Coroutine fovTransitionCoroutine;
+    private Coroutine boostCoroutine;
 
     public override void Initialize(Team team)
     {
@@ -108,7 +99,6 @@ public class PlayerController : Controller
         gameObject.name = MultiplayerManager.PlayerName;
         InitializeEntity(false, ownerId, team);
         FindLocalCamera();
-        crosshairUI = GameObject.Find("Crosshair").GetComponent<RectTransform>();
         hasInitialized = true;
         InitializeLocalGameManager();
         InitializeEvents();
@@ -134,6 +124,9 @@ public class PlayerController : Controller
         uiManager.playerHealth = healthComponent;
         uiManager.enabled = true;
         healthBar.InitializeHealthBar(uiManager.playerHealthBar);
+        crosshairUI = uiManager.crosshairUI;
+        boostBar = uiManager.boostSlider;
+        boostBar.maxValue = maxBoostCharge;
 
         radarSystem = LGM.GetComponent<RadarSystem>();
         radarSystem.player = transform;
@@ -150,10 +143,13 @@ public class PlayerController : Controller
     private void InitializeEvents()
     {
         if (!hasInitialized) return;
-        InputManager.Instance.OnBoost += StartBoost;
+        InputManager.Instance.OnStartBoost += StartBoost;
+        InputManager.Instance.OnEndBoost += EndBoost;
         InputManager.Instance.OnStartFirePrimaryWeapon += OnStartFiringPrimary;
         InputManager.Instance.OnEndFirePrimaryWeapon += OnStopFiringPrimary;
         playerCamera.GetComponent<Camera>().fieldOfView = playerCamera.flightFOV;
+        boostCharge = maxBoostCharge/4;
+        boostBar.value = boostCharge;
     }
     private void OnEnable() => InitializeEvents();
     private void OnDisable() => CleanupEventsAndRoutines();
@@ -161,7 +157,8 @@ public class PlayerController : Controller
     private void CleanupEventsAndRoutines()
     {
         if (!hasInitialized) return;
-        InputManager.Instance.OnBoost -= StartBoost;
+        InputManager.Instance.OnStartBoost -= StartBoost;
+        InputManager.Instance.OnStartBoost -= EndBoost;
         InputManager.Instance.OnStartFirePrimaryWeapon -= OnStartFiringPrimary;
         InputManager.Instance.OnEndFirePrimaryWeapon -= OnStopFiringPrimary;
         StopAllCoroutines();
@@ -177,13 +174,14 @@ public class PlayerController : Controller
         if (autoLevelMode == AutoLevelMode.On)
             AutoLevel();
         HandleWingTrails();
+        ApplyBoostCharge();
     }
 
     private void ApplyPhysicsMovement()
     {
-        float targetSpeed = isBoosting ? maxSpeed : minimumSpeed;
-        currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, (isBoosting ? acceleration : deceleration) * Time.fixedDeltaTime);
-        rb.linearVelocity = transform.forward * currentSpeed;
+        float targetSpeed = planeState == PlaneState.Boost ? maxSpeed : minimumSpeed;
+        currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, (planeState == PlaneState.Boost ? acceleration : deceleration) * Time.fixedDeltaTime);
+        planeRigidbody.linearVelocity = transform.forward * currentSpeed;
     }
 
     private void ApplyPhysicsRotation()
@@ -205,16 +203,16 @@ public class PlayerController : Controller
         else
             accumulatedRoll = 0;
 
-        rb.AddTorque(torque, ForceMode.Acceleration);
+        planeRigidbody.AddTorque(torque, ForceMode.Acceleration);
 
-        Vector3 localAngularVelocity = transform.InverseTransformDirection(rb.angularVelocity);
+        Vector3 localAngularVelocity = transform.InverseTransformDirection(planeRigidbody.angularVelocity);
 
         if (Mathf.Abs(accumulatedYaw) < 0.01f)
             localAngularVelocity.y = 0f;
         if (Mathf.Abs(accumulatedRoll) < 0.01f)
             localAngularVelocity.z = 0f;
 
-        rb.angularVelocity = transform.TransformDirection(localAngularVelocity);
+        planeRigidbody.angularVelocity = transform.TransformDirection(localAngularVelocity);
     }
 
     private void HandleCrosshairMovement()
@@ -268,12 +266,14 @@ public class PlayerController : Controller
         if (Mathf.Abs(accumulatedYaw) > 0.01f)
             accumulatedYaw = Mathf.MoveTowards(accumulatedYaw, 0, yawInertia * Time.fixedDeltaTime);
     }
-
-    private void StartBoost() => StartCoroutine(HandleBoost());
     private void OnStartFiringPrimary()
     {
+        if (planeState != PlaneState.Flight)
+            return;
         planeState = PlaneState.ADS;
-        StartCoroutine(EnterADSAndStartFiring());
+        if (fovTransitionCoroutine != null)
+            StopCoroutine(fovTransitionCoroutine);
+        fovTransitionCoroutine = StartCoroutine(FOVTransition(playerCamera.ADSFOV, primaryWeapon.ADSTime, TriggerPrimaryFiring));
     }
 
     private void OnStopFiringPrimary()
@@ -282,58 +282,33 @@ public class PlayerController : Controller
             StopCoroutine(firingCoroutine);
         if (fovTransitionCoroutine != null)
             StopCoroutine(fovTransitionCoroutine);
-        StartCoroutine(ExitADSAfterDelay());
+        fovTransitionCoroutine = StartCoroutine(FOVTransition(playerCamera.flightFOV, primaryWeapon.ADSTime, FinishPrimaryFiring));
     }
 
-
-    private IEnumerator EnterADSAndStartFiring()
+    private void TriggerPrimaryFiring()
     {
         if (fovTransitionCoroutine != null)
             StopCoroutine(fovTransitionCoroutine);
-        fovTransitionCoroutine = StartCoroutine(FOVTransition(playerCamera.ADSFOV, primaryWeapon.ADSTime));
-        yield return new WaitForSeconds(primaryWeapon.ADSTime);
-        yield return new WaitForEndOfFrame();
-        if (fovTransitionCoroutine != null)
-            StopCoroutine(fovTransitionCoroutine);
+        if(firingCoroutine != null)
+            StopCoroutine(firingCoroutine);
         firingCoroutine = StartCoroutine(HandlePrimaryFiring());
     }
 
-
+    private void FinishPrimaryFiring()
+    {
+        if (fovTransitionCoroutine != null)
+            StopCoroutine(fovTransitionCoroutine);
+        planeState = PlaneState.Flight;
+    }
     private IEnumerator HandlePrimaryFiring()
     {
+        yield return new WaitForSeconds(primaryWeapon.ADSTime);
         while (InputManager.Instance.IsFiringPrimaryWeapon())
         {
             primaryWeapon.Fire(GetCrosshairWorldPosition(), this);
             yield return new WaitForSeconds (primaryWeapon.fireRate);
         }
     }
-
-    private IEnumerator ExitADSAfterDelay()
-    {
-        if (fovTransitionCoroutine != null)
-            StopCoroutine(fovTransitionCoroutine);
-        fovTransitionCoroutine = StartCoroutine(FOVTransition(playerCamera.flightFOV, primaryWeapon.ADSTime));
-        yield return new WaitForSeconds(primaryWeapon.ADSTime);
-        yield return new WaitForEndOfFrame();
-        if (fovTransitionCoroutine != null)
-            StopCoroutine(fovTransitionCoroutine);  
-        planeState = PlaneState.Flight;
-    }
-    private IEnumerator FOVTransition(float toFOV, float duration)
-    {
-        Camera cam = playerCamera.GetComponent<Camera>();
-        float fromFOV = cam.fieldOfView;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            cam.fieldOfView = Mathf.Lerp(fromFOV, toFOV, elapsed / duration);
-            yield return null;
-        }
-        cam.fieldOfView = toFOV;
-    }
-
 
     private Vector3 GetCrosshairWorldPosition()
     {
@@ -361,7 +336,7 @@ public class PlayerController : Controller
         {
             var hit = assistHits[i];
             if (!hit.collider.TryGetComponent(out HealthComponent health)) continue;
-            if (!health.TryGetComponent(out Controller controller) || TeamManager.Instance.GetTeam(controller) == Team) continue;
+            if (!health.TryGetComponent(out Controller controller) || controller.Team == Team) continue;
             Vector3 worldPos = hit.point;
             Vector3 hitScreenPos = RectTransformUtility.WorldToScreenPoint(cam, worldPos);
             if (hitScreenPos.z < 0f) continue;
@@ -387,26 +362,77 @@ public class PlayerController : Controller
         }
     }
 
-
-    private IEnumerator HandleBoost()
+    private void ApplyBoostCharge()
     {
-        if (!isBoosting)
+        if (boostCharge >= maxBoostCharge || planeState == PlaneState.Boost) return;
+        if(boostRechargeDelayTimer > 0)
         {
-            isBoosting = true;
-            boostTimer = boostDuration;
-            boostVFX.SetActive(true);
+            boostRechargeDelayTimer -= Time.deltaTime;
+            return;
         }
-        while (isBoosting)
+        boostCharge += boostRechargeRate * Time.deltaTime;
+        boostCharge = Mathf.Min(maxBoostCharge, boostCharge);
+        boostBar.value = boostCharge;
+    }
+    private void StartBoost()
+    {
+        if (boostCharge <= 10f || planeState != PlaneState.Flight) return;
+        planeState = PlaneState.Boost;
+        boostVFX.SetActive(true);
+        if (fovTransitionCoroutine != null)
+            StopCoroutine(fovTransitionCoroutine);
+        fovTransitionCoroutine = StartCoroutine(FOVTransition(playerCamera.boostFOV, boostTransitionDuration, OnBoostFOVComplete));
+    }
+
+    private void OnBoostFOVComplete()
+    {
+        if (boostCoroutine != null)
+            StopCoroutine(boostCoroutine);
+        boostCoroutine = StartCoroutine(BoostRoutine());
+    }
+
+    private IEnumerator BoostRoutine()
+    {
+        while (boostCharge > 2.5f && InputManager.Instance.IsBoosting())
         {
-            boostTimer -= Time.deltaTime;
-            if (boostTimer <= 0)
-            {
-                isBoosting = false;
-                boostVFX.SetActive(false);
-            }
+            boostCharge -= boostDrainRate * Time.deltaTime;
+            boostCharge = Mathf.Max(0f, boostCharge);
+            boostBar.value = boostCharge;
             yield return null;
         }
+        EndBoost();
         yield break;
+    }
+
+    private void EndBoost()
+    {
+        if (boostCoroutine != null)
+            StopCoroutine(boostCoroutine);
+        if (fovTransitionCoroutine != null)
+            StopCoroutine(fovTransitionCoroutine);
+        fovTransitionCoroutine = StartCoroutine(FOVTransition(playerCamera.flightFOV, boostTransitionDuration, OnEndBoostFOVOver));
+    }
+    private void OnEndBoostFOVOver()
+    {
+        boostVFX.SetActive(false);
+        planeState = PlaneState.Flight;
+        boostRechargeDelayTimer = boostRechargeDelay;
+    }
+    private IEnumerator FOVTransition(float toFOV, float duration, Action onComplete = null)
+    {
+        Camera cam = playerCamera.GetComponent<Camera>();
+        float fromFOV = cam.fieldOfView;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            cam.fieldOfView = Mathf.Lerp(fromFOV, toFOV, elapsed / duration);
+            yield return null;
+        }
+
+        cam.fieldOfView = toFOV;
+        onComplete?.Invoke();
     }
 
     private IEnumerator PerformBarrelRoll()
@@ -422,7 +448,7 @@ public class PlayerController : Controller
     }
     private void HandleWingTrails()
     {
-        if (isBoosting)
+        if (planeState==PlaneState.Boost)
         {
             leftWingTrail.emitting = true;
             rightWingTrail.emitting = true;

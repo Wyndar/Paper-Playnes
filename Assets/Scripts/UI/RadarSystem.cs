@@ -78,7 +78,7 @@ public class RadarSystem : MonoBehaviour
         if (SpawnManager.Instance == null || !player.TryGetComponent(out PlayerController localPlayer))
             return;
 
-        Team team = TeamManager.Instance.GetTeam(localPlayer);
+        Team team = localPlayer.Team;
         localPlayerConfig = radarConfigs.Find(cfg => cfg.team == team);
 
         if (localPlayerConfig == null)
@@ -115,7 +115,7 @@ public class RadarSystem : MonoBehaviour
             Vector3 relativePosition = otherPlayer.transform.position - player.position;
             float distance = relativePosition.magnitude;
 
-            Team team = TeamManager.Instance.GetTeam(otherPlayer);
+            Team team = otherPlayer.Team;
             RadarVisualConfig config = radarConfigs.Find(cfg => cfg.team == team);
             if (config == null) 
                 throw new MissingReferenceException("player doesn't have config");

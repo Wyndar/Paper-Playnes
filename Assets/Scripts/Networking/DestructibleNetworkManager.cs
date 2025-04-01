@@ -64,16 +64,16 @@ public class DestructibleNetworkManager : NetworkBehaviour
         Controller killer = damageSources.Count > 0 ? damageSources[^1] : null;
         if (killer != null)
         {
-            Team killTeam = TeamManager.Instance.GetTeam(killer);
+            Team killTeam = killer.Team;
             if (killTeam != Team.Undefined)
             {
                 TeamData killTeamData = TeamManager.Instance.teamDataList.Find(t => t.team == killTeam);
                 TeamManager.Instance.RequestScoreChangeServerRpc(killTeam, 1, killTeamData.teamScore);
-                MessageFeedManger.Instance.RequestKillFeedBroadcastAtServerRpc(killer.name, killTeam, entity.name, TeamManager.Instance.GetTeam(entity), "spitfire");
+                MessageFeedManger.Instance.RequestKillFeedBroadcastAtServerRpc(killer.name, killTeam, entity.name, entity.Team, "spitfire");
             }
         }
         else
-            MessageFeedManger.Instance.RequestEnvironmentKillFeedBroadcastAtServerRpc(entity.name, TeamManager.Instance.GetTeam(entity), "wall", "wall");
+            MessageFeedManger.Instance.RequestEnvironmentKillFeedBroadcastAtServerRpc(entity.name, entity.Team, "wall", "wall");
     }
 
     [ServerRpc(RequireOwnership = false)]

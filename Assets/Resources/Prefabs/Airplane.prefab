@@ -5269,7 +5269,7 @@ MonoBehaviour:
   healthComponent: {fileID: 0}
   healthBar: {fileID: 0}
   pickUpHandler: {fileID: 0}
-  rb: {fileID: 0}
+  planeRigidbody: {fileID: 0}
   planeState: 0
   currentSpeed: 0
   accumulatedPitch: 0
@@ -5277,11 +5277,11 @@ MonoBehaviour:
   accumulatedYaw: 0
   minimumSpeed: 20
   rotationSpeed: 5
+  maxSpeed: 100
   maxRollAngle: 30
   maxYawAngle: 180
   acceleration: 5
   deceleration: 3
-  maxSpeed: 100
   pitchAcceleration: 4
   rollAcceleration: 4
   yawAcceleration: 4
@@ -5305,8 +5305,15 @@ MonoBehaviour:
   crosshairColor: {r: 0.07058824, g: 0, b: 0.3372549, a: 1}
   crosshairOnTargetColor: {r: 1, g: 0, b: 0, a: 1}
   boostMultiplier: 2
-  boostDuration: 2
+  boostDrainRate: 5
+  boostRechargeRate: 1.25
+  boostRechargeDelay: 1
+  boostRechargeDelayTimer: 0
   boostVFX: {fileID: 269295487771220670}
+  boostBar: {fileID: 0}
+  boostTransitionDuration: 0.5
+  maxBoostCharge: 100
+  boostCharge: 0
   maxAltitude: 1500
   minAltitude: 0
   maxWeight: 0
@@ -5325,7 +5332,6 @@ MonoBehaviour:
   trailActivationThreshold: 30
   rollSound: {fileID: 8300000, guid: 2f02a5f010ee2c344ae1dbbcd75035e9, type: 3}
   warningSpeakers: {fileID: 5924087388764067661}
-  isBoosting: 0
 --- !u!114 &5331881747387328446
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5344,7 +5350,7 @@ MonoBehaviour:
   healthComponent: {fileID: 0}
   healthBar: {fileID: 0}
   pickUpHandler: {fileID: 0}
-  rb: {fileID: 0}
+  planeRigidbody: {fileID: 0}
   decisionCooldown: 0.5
   spawnerCooldown: 10
   detectionRadius: 1200

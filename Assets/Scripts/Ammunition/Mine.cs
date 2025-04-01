@@ -35,11 +35,11 @@ public class Mine : DamageDealerComponent
         int hitCount = Physics.OverlapSphereNonAlloc(transform.position, mineData.explosionRadius, hitObjects);
         for (int i = 0; i < hitCount; i++)
         {
-            //Rigidbody rb = hitObjects[i].attachedRigidbody;
-            //if (rb)
+            //Rigidbody planeRigidbody = hitObjects[i].attachedRigidbody;
+            //if (planeRigidbody)
             //{
-            //    Vector3 forceDirection = (rb.transform.position - transform.position).normalized;
-            //    rb.AddForce(forceDirection * mineData.knockbackForce, ForceMode.Impulse);
+            //    Vector3 forceDirection = (planeRigidbody.transform.position - transform.position).normalized;
+            //    planeRigidbody.AddForce(forceDirection * mineData.knockbackForce, ForceMode.Impulse);
             //}
             if (hitObjects[i].TryGetComponent(out HealthComponent health))
                 health.ModifyHealth(HealthModificationType.Damage,mineData.damage, controller);
