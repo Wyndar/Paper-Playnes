@@ -10,6 +10,7 @@ public class HealthComponent : NetworkBehaviour
 
     public Destructible destructible;
     public GameEvent healthEvent;
+    public GameEvent damageSourceLocationEvent;
     public event Action<int, int> OnHealthChanged;
     public event Action<bool> OnDeath;
     public List<Controller> damageSources;
@@ -38,6 +39,8 @@ public class HealthComponent : NetworkBehaviour
         if (currentHP <= 0) Die();
         if (currentHP == maxHP) damageSources.Clear();
         if (currentHP < maxHP) damageSources.Add(modificationSource);
+        if (TryGetComponent(out PlayerController playerController) && playerController.IsOwner)
+            damageSourceLocationEvent.RaiseEvent(modificationSource.transform.position);
     }
     private void Die()
     {

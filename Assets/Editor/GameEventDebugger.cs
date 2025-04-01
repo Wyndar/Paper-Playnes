@@ -10,6 +10,7 @@ public class GameEventDebugger : Editor
     private bool toggle;
     private int intParam1;
     private int intParam2;
+    private Vector3 vector3Param;
     private Team teamParam;
     private HealthComponent healthComponent;
     private Controller controller;
@@ -28,11 +29,7 @@ public class GameEventDebugger : Editor
             EditorGUILayout.HelpBox("GameEvent reference is missing!", MessageType.Error);
             return;
         }
-
-        // Dropdown for selecting event type
         GameEventType selectedEventType = gameEvent.selectedEventType;
-
-        // Show relevant input fields based on selection
         switch (selectedEventType)
         {
             case GameEventType.NoParams:
@@ -44,6 +41,11 @@ public class GameEventDebugger : Editor
                 if (gameEvent.HasToggleSubscribers() && GUILayout.Button("Raise Event (Toggle)"))
                         gameEvent.RaiseEvent(gameObjectParam);
                 break;
+            case GameEventType.Location:
+                vector3Param = EditorGUILayout.Vector3Field("Location Param", vector3Param);
+                if (gameEvent.HasLocationSubscribers() && GUILayout.Button("Raise Event (Location)"))
+                    gameEvent.RaiseEvent(vector3Param);
+                break;
             case GameEventType.GameObject:
                 gameObjectParam = (GameObject)EditorGUILayout.ObjectField("GameObject Param", gameObjectParam, typeof(GameObject), true);
                 if (gameEvent.HasGameObjectSubscribers() && GUILayout.Button("Raise Event (GameObject)"))
@@ -52,14 +54,12 @@ public class GameEventDebugger : Editor
                     else
                         gameEvent.RaiseEvent(gameObjectParam);
                 break;
-
             case GameEventType.StatUpdate:
                 intParam1 = EditorGUILayout.IntField("Stat Value 1", intParam1);
                 intParam2 = EditorGUILayout.IntField("Stat Value 2", intParam2);
                 if (gameEvent.HasStatSubscribers() && GUILayout.Button("Raise Event (Stat Update)"))
                     gameEvent.RaiseEvent(intParam1, intParam2);
                 break;
-
             case GameEventType.TeamStatUpdate:
                 teamParam = (Team)EditorGUILayout.EnumPopup("Team Param", teamParam);
                 intParam1 = EditorGUILayout.IntField("Current Stat", intParam1);
@@ -70,7 +70,6 @@ public class GameEventDebugger : Editor
                     else
                         gameEvent.RaiseEvent(teamParam, intParam1, intParam2);
                 break;
-
             case GameEventType.HealthModified:
                 healthComponent = (HealthComponent)EditorGUILayout.ObjectField("healthComponent Component", healthComponent, typeof(HealthComponent), true);
                 healthModificationType = (HealthModificationType)EditorGUILayout.EnumPopup("healthComponent Mod Type", healthModificationType);

@@ -55,8 +55,8 @@ public class PlayerController : Controller
     public float weightToSpeedReductionRatio;
 
     [Header("Weapon Positions")]
-    [SerializeField]
-    private Transform leftPrimaryWeaponObject, rightPrimaryWeaponObject, leftSecondaryWeaponObject,
+    [SerializeField] private Transform leftPrimaryWeaponObject;
+    [SerializeField] private Transform rightPrimaryWeaponObject, leftSecondaryWeaponObject,
         rightSecondaryWeaponObject, undersideWeaponObject, cockpitWeaponObject;
 
     [Header("Equipped Weapon Settings")]
@@ -138,6 +138,8 @@ public class PlayerController : Controller
         altimeterSystem.maxAltitude = maxAltitude;
         altimeterSystem.minAltitude = minAltitude;
         altimeterSystem.enabled = true;
+
+        LGM.GetComponent<DamageDirectionUIManager>().Initialize(transform);
     }
 
     private void InitializeEvents()

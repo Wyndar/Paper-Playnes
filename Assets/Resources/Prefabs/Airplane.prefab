@@ -5523,6 +5523,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   destructible: {fileID: 11400000, guid: c662e6e89f43d8d418ee2e4f77a54abe, type: 2}
   healthEvent: {fileID: 11400000, guid: 56b0c326c286aba46aab70eac92e24a9, type: 2}
+  damageSourceLocationEvent: {fileID: 11400000, guid: b2fae5e7576afde498f3d1501d236a31, type: 2}
   damageSources: []
 --- !u!114 &7090727553298456833
 MonoBehaviour:
