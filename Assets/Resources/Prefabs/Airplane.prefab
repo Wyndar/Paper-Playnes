@@ -5291,9 +5291,9 @@ MonoBehaviour:
   isInverted: 0
   autoLevelMode: 1
   autoLevelSpeed: 0.35
-  barrelRollSpeed: 360
+  barrelRollSpeed: 90
+  lateralForceMultiplier: 0.1
   crosshairUI: {fileID: 0}
-  crosshairTarget: {fileID: 0}
   crosshairRadius: 15
   crosshairSpeed: 75
   assistRadius: 50

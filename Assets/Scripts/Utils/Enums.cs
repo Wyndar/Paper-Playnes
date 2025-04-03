@@ -50,5 +50,6 @@ public enum PlaneState
 {
     Flight,
     Boost,
-    ADS
+    ADS,
+    BarrelRoll
 }

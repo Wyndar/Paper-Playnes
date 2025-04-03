@@ -99,7 +99,7 @@ public class Weapon : MonoBehaviour
         }
         cooldownRoutine ??= StartCoroutine(Cooldown());
     }
-    private void Reload(Controller player)
+    public void Reload(Controller player)
     {
         magazineHoldCount--;
         magazineAmmoCount = maxMagazineAmmoCount;

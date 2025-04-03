@@ -9,6 +9,7 @@ public class InputManager : MonoBehaviour
     public event PressEvent OnStartFirePrimaryWeapon;
     public event PressEvent OnEndFirePrimaryWeapon;
     public event PressEvent OnReload;
+    public event PressEvent OnBarrelRoll;
     public event PressEvent OnStartBoost;
     public event PressEvent OnEndBoost;
     public event PressEvent OnTouch;
@@ -39,6 +40,7 @@ public class InputManager : MonoBehaviour
         playerInputs.Player.FirePrimary.started += context => StartedFiringPrimaryWeapon();
         playerInputs.Player.FirePrimary.canceled += context => EndedFiringPrimaryWeapon();
         playerInputs.Player.Reload.started += context => TriggerReload();
+        playerInputs.Player.Roll.started += context => TriggerBarrelRoll();
         playerInputs.Player.Boost.started += context => StartedBoost();
         playerInputs.Player.Boost.canceled += context => EndedBoost();
         playerInputs.Player.Tap.started += context => TouchedScreen();
@@ -53,6 +55,7 @@ public class InputManager : MonoBehaviour
 
     public bool IsFiringPrimaryWeapon() => playerInputs.Player.FirePrimary.IsInProgress();
     private void TriggerReload() => OnReload?.Invoke();
+    private void TriggerBarrelRoll() => OnBarrelRoll?.Invoke();
     private void StartedBoost() => OnStartBoost?.Invoke();
     private void EndedBoost() => OnEndBoost?.Invoke();
     public bool IsBoosting() => playerInputs.Player.Boost.IsInProgress();

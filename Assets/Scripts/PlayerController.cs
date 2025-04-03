@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,6 +24,7 @@ public class PlayerController : Controller
     [SerializeField] private float autoLevelSpeed = 2f;
     //[SerializeField] private float brakeMultiplier = 0.5f;
     [SerializeField] private float barrelRollSpeed = 360f;
+    [SerializeField] private float lateralForceMultiplier = 0.1f;
     //[SerializeField] private float quickTurnMultiplier = 1.5f;
 
     [Header("Crosshair Settings")]
@@ -86,6 +88,7 @@ public class PlayerController : Controller
     private Coroutine firingCoroutine;
     private Coroutine fovTransitionCoroutine;
     private Coroutine boostCoroutine;
+    private Coroutine barrelRollCoroutine;
     public override void Initialize(Team team)
     {
         if (!IsOwner)
@@ -149,6 +152,8 @@ public class PlayerController : Controller
         InputManager.Instance.OnEndBoost += EndBoost;
         InputManager.Instance.OnStartFirePrimaryWeapon += OnStartFiringPrimary;
         InputManager.Instance.OnEndFirePrimaryWeapon += OnStopFiringPrimary;
+        InputManager.Instance.OnReload += ReloadPrimaryWeapon;
+        InputManager.Instance.OnBarrelRoll += StartBarrelRoll;  
         primaryWeapon.Initialize();
         playerCamera.GetComponent<Camera>().fieldOfView = playerCamera.flightFOV;
         boostCharge = maxBoostCharge/4;
@@ -165,13 +170,15 @@ public class PlayerController : Controller
         InputManager.Instance.OnStartBoost -= EndBoost;
         InputManager.Instance.OnStartFirePrimaryWeapon -= OnStartFiringPrimary;
         InputManager.Instance.OnEndFirePrimaryWeapon -= OnStopFiringPrimary;
+        InputManager.Instance.OnReload -= ReloadPrimaryWeapon;
+        InputManager.Instance.OnBarrelRoll -= StartBarrelRoll;
         StopAllCoroutines();
         CancelInvoke();
     }
 
     private void FixedUpdate()
     {
-        if (!hasInitialized) return;
+        if (!hasInitialized || planeState == PlaneState.BarrelRoll) return;
         HandleCrosshairMovement();
         ApplyPhysicsMovement();
         ApplyPhysicsRotation();
@@ -214,7 +221,7 @@ public class PlayerController : Controller
 
         if (Mathf.Abs(accumulatedYaw) < 0.01f)
             localAngularVelocity.y = 0f;
-        if (Mathf.Abs(accumulatedRoll) < 0.01f)
+        if (Mathf.Abs(accumulatedRoll) < 0.01f || planeState != PlaneState.BarrelRoll)
             localAngularVelocity.z = 0f;
 
         planeRigidbody.angularVelocity = transform.TransformDirection(localAngularVelocity);
@@ -275,6 +282,8 @@ public class PlayerController : Controller
         if (Mathf.Abs(accumulatedYaw) > 0.01f)
             accumulatedYaw = Mathf.MoveTowards(accumulatedYaw, 0, yawInertia * Time.fixedDeltaTime);
     }
+
+    private void ReloadPrimaryWeapon() => primaryWeapon.Reload(this);
     private void OnStartFiringPrimary()
     {
         if (planeState != PlaneState.Flight)
@@ -324,10 +333,8 @@ public class PlayerController : Controller
         if (magnetTarget != null)
             return magnetWorldHitPoint;
         Ray ray = new(playerCamera.transform.position, (crosshairUI.position - playerCamera.transform.position).normalized);
-
         if (Physics.Raycast(ray, out RaycastHit hit, maxAssistRange))
             return hit.point;
-
         return ray.origin + ray.direction * primaryWeapon.range;
     }
 
@@ -378,7 +385,7 @@ public class PlayerController : Controller
 
     private void ApplyBoostCharge()
     {
-        if (boostCharge >= maxBoostCharge || planeState == PlaneState.Boost) return;
+        if (boostCharge >= maxBoostCharge || planeState != PlaneState.Flight) return;
         if(boostRechargeDelayTimer > 0)
         {
             boostRechargeDelayTimer -= Time.deltaTime;
@@ -450,17 +457,43 @@ public class PlayerController : Controller
         onComplete?.Invoke();
     }
 
+    private void StartBarrelRoll()
+    {
+        if (barrelRollCoroutine != null || boostCharge < 25 || planeState != PlaneState.Flight)
+            return;
+        barrelRollCoroutine = StartCoroutine(PerformBarrelRoll());
+    }
     private IEnumerator PerformBarrelRoll()
     {
-        float rolled = 0f;
-        while (rolled < 360f)
+        planeState = PlaneState.BarrelRoll;
+        boostCharge -= 25f;
+        boostBar.value = boostCharge;
+
+        float totalRoll = 0f;
+        float desiredRotation = 360f;
+        float inputX = InputManager.Instance.CurrentMoveVector.x;
+        float rollDirection = inputX == 0f ? 1f : Mathf.Sign(inputX);
+
+        while (totalRoll < desiredRotation)
         {
-            float rollStep = barrelRollSpeed * Time.deltaTime;
-            transform.Rotate(0, 0, rollStep);
-            rolled += rollStep;
-            yield return null;
+            float rollStep = barrelRollSpeed * Time.fixedDeltaTime;
+            float remainingRoll = desiredRotation - totalRoll;
+            float step = Mathf.Min(rollStep, remainingRoll);
+
+            Vector3 rollTorque = rollDirection * step * transform.forward;
+            planeRigidbody.AddTorque(rollTorque, ForceMode.VelocityChange);
+            Vector3 lateralForce = lateralForceMultiplier * rollDirection * step * transform.right;
+            planeRigidbody.AddForce(lateralForce, ForceMode.VelocityChange);
+
+            totalRoll += step;
+            yield return new WaitForFixedUpdate();
         }
+        boostRechargeDelayTimer = boostRechargeDelay;
+        planeState = PlaneState.Flight;
+        barrelRollCoroutine = null;
     }
+
+
     private void HandleWingTrails()
     {
         if (planeState==PlaneState.Boost)
@@ -478,12 +511,12 @@ public class PlayerController : Controller
 
     private void AutoLevel()
     {
+        if(planeState== PlaneState.BarrelRoll)
+            return;
         Quaternion currentRotation = transform.rotation;
         Quaternion targetRotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
         transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, autoLevelSpeed * Time.fixedDeltaTime);
     }
-
-
     public void ToggleInversion() => isInverted = !isInverted;
 
     private void FindLocalCamera()
