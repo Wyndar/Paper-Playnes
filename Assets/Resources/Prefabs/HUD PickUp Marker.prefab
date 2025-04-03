@@ -550,3 +550,19 @@ MonoBehaviour:
   fadeOutThreshold: 1000
   maxDistance: 1200
   midFontScale: 40
+  lockOnRects: []
+  lockOnDuration: 1.5
+  scaleCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  alphaCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  lockOnStartColor: {r: 1, g: 0.44939947, b: 0, a: 1}
+  lockOnFinalColor: {r: 0, g: 1, b: 0, a: 1}

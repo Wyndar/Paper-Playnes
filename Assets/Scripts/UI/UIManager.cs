@@ -40,7 +40,7 @@ public class UIManager : MonoBehaviour
     public float detectionRadius = 200f;
 
 #pragma warning disable IDE0044
-    private Dictionary<HealthComponent, HUDMarker> activeDamageableMarkers = new();
+    public Dictionary<HealthComponent, HUDMarker> activeDamageableMarkers = new();
     private List<HUDMarker> damageableMarkerPool = new();
     private List<HealthComponent> damageableTargets = new();
     private Dictionary<PickUp, HUDMarker> activePickUpMarkers = new();
