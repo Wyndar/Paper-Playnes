@@ -25,15 +25,16 @@ public class Weapon : MonoBehaviour
     public Weapon pairedWeapon;
 
     [Header("Magazine Stats")]
-    public int magazineAmmoCount;
-    public int maxMagazineAmmoCount;
-    public int magazineHoldCount;
-    public int maxMagazineHoldCount;
-    public int magazineInAmmoPacks;
+    public int ammoInCurrentMagCount;
+    public int maxAmmoInMag;
+    public int magInHoldCount;
+    public int maxMagInHold;
+    public int magCountInAmmoPacks;
 
     [Header("OverHeat Stats")]
     //more work needs to be done here
-    public bool overHeat;
+    public bool canOverHeat;
+    public bool isOverHeated;
     public int maxOverHeatCount;
     public float currentOverHeatCount;
     public float overHeatDecayRate;
@@ -43,28 +44,32 @@ public class Weapon : MonoBehaviour
     public float timeSinceReloadStarted;
     private Coroutine cooldownRoutine;
     private Coroutine reloadRoutine;
-    private bool hasInitialized;
     public void Initialize()
     {
-        if (hasInitialized)
-            return;
         CapMagazine();
-        playerAmmoUpdateEvent.RaiseEvent(magazineAmmoCount, magazineHoldCount);
+        playerAmmoUpdateEvent.RaiseEvent(ammoInCurrentMagCount, magInHoldCount);
         timeSinceLastShot = fireRate;
         timeSinceReloadStarted = 0;
-        hasInitialized = true;
-        if (isPairedWeapon)
+        if (isPairedWeapon && isLeftWeapon)
         {
+            pairedWeapon.gameObject.SetActive(true);
             pairedWeapon.Initialize();
             VerifyPair();
         }
     }
 
-    private void OnEnable() => ammoPickUpEvent.OnEventRaised += PickedUpAmmo;
-    private void OnDisable() => ammoPickUpEvent.OnEventRaised -= PickedUpAmmo;
+   // private void OnEnable() => ammoPickUpEvent.OnEventRaised += PickedUpAmmo;
+
+    private void OnDisable()
+    {
+     //   ammoPickUpEvent.OnEventRaised -= PickedUpAmmo;
+        if (isPairedWeapon && isLeftWeapon)
+            pairedWeapon.gameObject.SetActive(false);
+    }
+
     public void Fire(Vector3 targetPosition, Controller player)
     {
-        if (cooldownRoutine != null || reloadRoutine != null || (magazineAmmoCount <= 0 && magazineHoldCount <= 0))
+        if (cooldownRoutine != null || reloadRoutine != null || (ammoInCurrentMagCount <= 0 && magInHoldCount <= 0))
             return;
         if (firedLastShot && isPairedWeapon)
         {
@@ -87,12 +92,12 @@ public class Weapon : MonoBehaviour
                 Instantiate(VFXObject, hit.point, Quaternion.LookRotation(hit.normal));
         }
         Instantiate(VFXObject, spawnTransform.position, spawnTransform.rotation);
-        magazineAmmoCount--;
+        ammoInCurrentMagCount--;
         timeSinceLastShot = 0;
         firedLastShot = true;
         if (!player.IsBot)
-            playerAmmoUpdateEvent.RaiseEvent(magazineAmmoCount, magazineHoldCount);
-        if (magazineAmmoCount <= 0)
+            playerAmmoUpdateEvent.RaiseEvent(ammoInCurrentMagCount, magInHoldCount);
+        if (ammoInCurrentMagCount <= 0)
         {
             Reload(player);
             return;
@@ -101,10 +106,10 @@ public class Weapon : MonoBehaviour
     }
     public void Reload(Controller player)
     {
-        magazineHoldCount--;
-        magazineAmmoCount = maxMagazineAmmoCount;
+        magInHoldCount--;
+        ammoInCurrentMagCount = maxAmmoInMag;
         if (!player.IsBot)
-            playerAmmoUpdateEvent.RaiseEvent(magazineAmmoCount, magazineHoldCount);
+            playerAmmoUpdateEvent.RaiseEvent(ammoInCurrentMagCount, magInHoldCount);
         reloadRoutine ??= StartCoroutine(ReloadCooldown());
     }
 
@@ -138,10 +143,10 @@ public class Weapon : MonoBehaviour
     }
     private void PickedUpAmmo()
     {
-        magazineHoldCount += magazineInAmmoPacks;
+        magInHoldCount += magCountInAmmoPacks;
         CapMagazine();
     }
-    private void CapMagazine() => magazineHoldCount = magazineHoldCount > maxMagazineHoldCount ? maxMagazineHoldCount : magazineHoldCount;
+    private void CapMagazine() => magInHoldCount = magInHoldCount > maxMagInHold ? maxMagInHold : magInHoldCount;
     private void VerifyPair()
     {
         if (!isPairedWeapon)
@@ -152,11 +157,12 @@ public class Weapon : MonoBehaviour
         Debug.Assert(pairedWeapon.firedLastShot == !firedLastShot);
         Debug.Assert(pairedWeapon.weaponWeight == weaponWeight);
         Debug.Assert(pairedWeapon.projectilePrefab ==  projectilePrefab);
-        Debug.Assert(pairedWeapon.overHeat == overHeat);
+        Debug.Assert(pairedWeapon.canOverHeat == canOverHeat);
+        Debug.Assert(pairedWeapon.isOverHeated == isOverHeated);
         Debug.Assert(pairedWeapon.overHeatDecayRate == overHeatDecayRate);
         Debug.Assert(pairedWeapon.maxOverHeatCount == maxOverHeatCount);
-        Debug.Assert(pairedWeapon.magazineHoldCount == magazineHoldCount);
-        Debug.Assert(pairedWeapon.maxMagazineHoldCount == magazineHoldCount);
+        Debug.Assert(pairedWeapon.magInHoldCount == magInHoldCount);
+        Debug.Assert(pairedWeapon.maxMagInHold == magInHoldCount);
     }
     private void SyncPair()
     {
@@ -169,8 +175,8 @@ public class Weapon : MonoBehaviour
         cooldownRoutine = null;
         reloadRoutine = null;
         pairedWeapon.timeSinceLastShot = timeSinceLastShot;
-        pairedWeapon.magazineAmmoCount = magazineAmmoCount;
-        pairedWeapon.magazineHoldCount = magazineHoldCount;
+        pairedWeapon.ammoInCurrentMagCount = ammoInCurrentMagCount;
+        pairedWeapon.magInHoldCount = magInHoldCount;
     }
   
     //    private void HandleMachineGun()

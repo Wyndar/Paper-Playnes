@@ -10,6 +10,7 @@ public class GameEventDebugger : Editor
     private bool toggle;
     private int intParam1;
     private int intParam2;
+    private Weapon weaponParam;
     private Vector3 vector3Param;
     private Team teamParam;
     private HealthComponent healthComponent;
@@ -40,6 +41,14 @@ public class GameEventDebugger : Editor
                 toggle = EditorGUILayout.Toggle("Is On", toggle);
                 if (gameEvent.HasToggleSubscribers() && GUILayout.Button("Raise Event (Toggle)"))
                         gameEvent.RaiseEvent(gameObjectParam);
+                break;
+            case GameEventType.Weapon:
+                weaponParam = (Weapon)EditorGUILayout.ObjectField("Weapon Param", weaponParam, typeof(Weapon), true);
+                if (gameEvent.HasWeaponSubscribers() && GUILayout.Button("Raise Event (Weapon)"))
+                    if (weaponParam == null)
+                        Debug.LogWarning("Cannot raise event: Weapon parameter is null.");
+                    else
+                        gameEvent.RaiseEvent(weaponParam);
                 break;
             case GameEventType.Location:
                 vector3Param = EditorGUILayout.Vector3Field("Location Param", vector3Param);

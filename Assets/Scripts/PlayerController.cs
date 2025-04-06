@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -62,7 +61,9 @@ public class PlayerController : Controller
 
     [Header("Equipped Weapon Settings")]
     [SerializeField] private Weapon primaryWeapon;
+    [SerializeField] private Weapon selectedSecondaryWeapon;
     [SerializeField] private List<Weapon> secondaryWeapons;
+    [SerializeField] private GameEvent secondaryWeaponChangedEvent;
 
     [Header("Wing Trails")]
     [SerializeField] private TrailRenderer leftWingTrail, rightWingTrail;
@@ -126,6 +127,7 @@ public class PlayerController : Controller
         uiManager = LGM.GetComponent<UIManager>();
         uiManager.playerHealth = healthComponent;
         uiManager.enabled = true;
+        uiManager.InitializeResources();
         healthBar.InitializeHealthBar(uiManager.playerHealthBar);
         crosshairUI = uiManager.crosshairUI;
         boostBar = uiManager.boostSlider;
@@ -154,11 +156,19 @@ public class PlayerController : Controller
         InputManager.Instance.OnEndFirePrimaryWeapon += OnStopFiringPrimary;
         InputManager.Instance.OnReload += ReloadPrimaryWeapon;
         InputManager.Instance.OnBarrelRoll += StartBarrelRoll;  
+        InputManager.Instance.OnCycleSecondaryLeft += CycleWeaponL;
+        InputManager.Instance.OnCycleSecondaryRight += CycleWeaponR;
         primaryWeapon.Initialize();
         playerCamera.GetComponent<Camera>().fieldOfView = playerCamera.flightFOV;
-        boostCharge = maxBoostCharge/4;
+        boostCharge = maxBoostCharge / 4;
         boostBar.value = boostCharge;
         magnetTarget = null;
+        if (secondaryWeapons.Count < 0)
+            return;
+        selectedSecondaryWeapon = secondaryWeapons[0];
+        selectedSecondaryWeapon.gameObject.SetActive(true);
+        selectedSecondaryWeapon.Initialize();
+        secondaryWeaponChangedEvent.RaiseEvent(secondaryWeapons[0]);
     }
     private void OnEnable() => InitializeEvents();
     private void OnDisable() => CleanupEventsAndRoutines();
@@ -172,6 +182,8 @@ public class PlayerController : Controller
         InputManager.Instance.OnEndFirePrimaryWeapon -= OnStopFiringPrimary;
         InputManager.Instance.OnReload -= ReloadPrimaryWeapon;
         InputManager.Instance.OnBarrelRoll -= StartBarrelRoll;
+        InputManager.Instance.OnCycleSecondaryLeft -= CycleWeaponL;
+        InputManager.Instance.OnCycleSecondaryRight -= CycleWeaponR;
         StopAllCoroutines();
         CancelInvoke();
     }
@@ -328,6 +340,24 @@ public class PlayerController : Controller
         }
     }
 
+    private void CycleWeaponL()
+    {
+        if (secondaryWeapons.Count == 0) return;
+        int currentIndex = secondaryWeapons.IndexOf(selectedSecondaryWeapon);
+        currentIndex--;
+        if (currentIndex < 0)
+            currentIndex = secondaryWeapons.Count - 1;
+        selectedSecondaryWeapon = secondaryWeapons[currentIndex];
+        secondaryWeaponChangedEvent.RaiseEvent(selectedSecondaryWeapon);
+    }
+    private void CycleWeaponR()
+    {
+        if (secondaryWeapons.Count == 0) return;
+        int currentIndex = secondaryWeapons.IndexOf(selectedSecondaryWeapon);
+        currentIndex = (currentIndex + 1) % secondaryWeapons.Count;
+        selectedSecondaryWeapon = secondaryWeapons[currentIndex];
+        secondaryWeaponChangedEvent.RaiseEvent(selectedSecondaryWeapon);
+    }
     private Vector3 GetCrosshairWorldPosition()
     {
         if (magnetTarget != null)

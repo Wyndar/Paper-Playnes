@@ -11,7 +11,7 @@ public class Controller : NetworkBehaviour
     public HealthBar healthBar;
     public PickUpHandler pickUpHandler;
     public Rigidbody planeRigidbody;
-
+    public Transform explosiveSpawnPoint;
     public virtual void Initialize(Team team) => Debug.LogError("Failed virtual override");
     public void InitializeEntity(bool isBot, ulong? ownerId, Team team)
     {

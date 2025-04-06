@@ -42,7 +42,8 @@ public enum GameEventType
     StatUpdate,
     TeamStatUpdate,
     HealthModified,
-    Location
+    Location,
+    Weapon
 }
 public enum AutoLevelMode { Off, On }
 

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b2e6d0abdd6ffaf41876ac6bf19d1f82, type: 3}
-  m_Name: Player Ammo Update Event
+  m_Name: Secondary Weapon Selection Event
   m_EditorClassIdentifier: 
-  selectedEventType: 4
+  selectedEventType: 8
   pickupType: 0

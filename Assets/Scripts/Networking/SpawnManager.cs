@@ -11,6 +11,8 @@ public class SpawnManager : NetworkBehaviour
     public GameObject puBoxPrefab;
     public GameObject birdsPrefab;
     public GameObject minesPrefab;
+    public GameObject bigExplosionPrefab;
+    public GameObject missilePrefab;
     public int spawnBoxCount;
     public Renderer spawnRenderer;
 
@@ -151,5 +153,28 @@ public class SpawnManager : NetworkBehaviour
         string returnString = botNames[botNamesTaken];
         botNamesTaken++;
         return returnString;
+    }
+    [ServerRpc(RequireOwnership = false)]
+    public void SpawnExplosionVFXServerRpc(Vector3 position) => Instantiate(bigExplosionPrefab, position, Quaternion.identity);
+    [ServerRpc(RequireOwnership = false)]
+    public void SpawnMissileServerRpc(ulong ownerClientId, Vector3 spawnPos, Quaternion rotation, NetworkObjectReference targetRef,
+        Vector3 fallbackTarget, Vector3 fallbackVelocity, NetworkObjectReference shooterRef)
+    {
+        if (!IsServer || missilePrefab == null) return;
+        GameObject missileObj = Instantiate(missilePrefab, spawnPos, rotation);
+        NetworkObject netObj = missileObj.GetComponent<NetworkObject>();
+        netObj.SpawnWithOwnership(ownerClientId);
+
+        if (!missileObj.TryGetComponent(out Missile missile)) return;
+
+        Transform targetTransform = null;
+        if (targetRef.TryGet(out NetworkObject targetNetObj))
+            targetTransform = targetNetObj.transform;
+
+        Controller shooter = null;
+        if (shooterRef.TryGet(out NetworkObject shooterNetObj))
+            shooter = shooterNetObj.GetComponent<Controller>();
+
+        missile.Initialize(targetTransform, fallbackTarget, fallbackVelocity, shooter);
     }
 }

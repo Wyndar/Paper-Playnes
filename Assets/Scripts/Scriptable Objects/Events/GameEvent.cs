@@ -11,6 +11,7 @@ public class GameEvent : ScriptableObject
 
     public event Action OnEventRaised;
     public event Action<bool> OnToggleEventRaised;
+    public event Action<Weapon> OnWeaponEventRaised;
     public event Action<Vector3> OnLocationEventRaised;
     public event Action<GameObject> OnGameObjectEventRaised;
     public event Action<int, int> OnStatEventRaised;
@@ -39,6 +40,7 @@ public class GameEvent : ScriptableObject
     }
     public void RaiseEvent() => OnEventRaised?.Invoke();
     public void RaiseEvent(bool isOn) => OnToggleEventRaised?.Invoke(isOn);
+    public void RaiseEvent(Weapon weapon) => OnWeaponEventRaised?.Invoke(weapon);
     public void RaiseEvent(Vector3 location) => OnLocationEventRaised?.Invoke(location);
     public void RaiseEvent(GameObject obj) => OnGameObjectEventRaised?.Invoke(obj);
     public void RaiseEvent(int currentStat, int maxStat) => OnStatEventRaised?.Invoke(currentStat, maxStat);
@@ -73,6 +75,7 @@ public class GameEvent : ScriptableObject
     }
     public bool HasSubscribers() => OnEventRaised != null;
     public bool HasToggleSubscribers() => OnToggleEventRaised != null;
+    public bool HasWeaponSubscribers() => OnWeaponEventRaised != null;
     public bool HasLocationSubscribers() => OnLocationEventRaised != null;
     public bool HasGameObjectSubscribers() => OnGameObjectEventRaised != null;
     public bool HasStatSubscribers() => OnStatEventRaised != null;
