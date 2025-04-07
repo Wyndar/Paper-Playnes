@@ -127,6 +127,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 5443375534008935886, guid: 761fde2734f81584398871a36f375038, type: 3}
   weaponObject: {fileID: 3647261221072627209}
   VFXObject: {fileID: 0}
+  ammoClass: 6
   weaponWeight: 100
   ADSTime: 0
   fireRate: 10
@@ -134,17 +135,14 @@ MonoBehaviour:
   range: 1000
   damage: 100
   playerAmmoUpdateEvent: {fileID: 11400000, guid: f41366f29b873e545b380cc67ee8026b, type: 2}
-  ammoPickUpEvent: {fileID: 0}
   isPairedWeapon: 1
   isLeftWeapon: 1
   firedLastShot: 0
   pairedWeapon: {fileID: 0}
   ammoInCurrentMagCount: 2
   maxAmmoInMag: 2
-  magInHoldCount: 1
-  maxMagInHold: 1
-  magCountInAmmoPacks: 1
-  overHeat: 0
+  canOverHeat: 0
+  isOverHeated: 0
   maxOverHeatCount: 0
   currentOverHeatCount: 0
   overHeatDecayRate: 0

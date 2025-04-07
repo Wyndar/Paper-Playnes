@@ -43,7 +43,7 @@ public class GameEvent : ScriptableObject
     public void RaiseEvent(Weapon weapon) => OnWeaponEventRaised?.Invoke(weapon);
     public void RaiseEvent(Vector3 location) => OnLocationEventRaised?.Invoke(location);
     public void RaiseEvent(GameObject obj) => OnGameObjectEventRaised?.Invoke(obj);
-    public void RaiseEvent(int currentStat, int maxStat) => OnStatEventRaised?.Invoke(currentStat, maxStat);
+    public void RaiseEvent(int currentStatOrChangeAmount, int maxStat) => OnStatEventRaised?.Invoke(currentStatOrChangeAmount, maxStat);
     public void RaiseEvent(Team updateTeam, int currentStat, int maxOrPreviousStat) 
         => OnTeamEventRaised?.Invoke(updateTeam, currentStat, maxOrPreviousStat);
     public void RaiseEvent(HealthComponent component, HealthModificationType modificationType, int amount, int previousHP, Controller modificationSource)

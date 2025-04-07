@@ -55,15 +55,12 @@ public class PlayerController : Controller
     public float weightToSpeedReductionRatio;
 
     [Header("Weapon Positions")]
-    [SerializeField] private Transform leftPrimaryWeaponObject;
-    [SerializeField] private Transform rightPrimaryWeaponObject, leftSecondaryWeaponObject,
-        rightSecondaryWeaponObject, undersideWeaponObject, cockpitWeaponObject;
-
+    [SerializeField] private Transform leftWeaponSlot;
+    [SerializeField] private Transform rightWeaponSlot;
     [Header("Equipped Weapon Settings")]
-    [SerializeField] private Weapon primaryWeapon;
-    [SerializeField] private Weapon selectedSecondaryWeapon;
-    [SerializeField] private List<Weapon> secondaryWeapons;
-    [SerializeField] private GameEvent secondaryWeaponChangedEvent;
+    [SerializeField] private Weapon selectedWeapon;
+    [SerializeField] private List<Weapon> weaponList;
+    [SerializeField] private GameEvent weaponChangedEvent;
 
     [Header("Wing Trails")]
     [SerializeField] private TrailRenderer leftWingTrail, rightWingTrail;
@@ -85,6 +82,7 @@ public class PlayerController : Controller
     private AltimeterSystem altimeterSystem;
     private RadarSystem radarSystem;
     private UIManager uiManager;
+    private PlaneStorageHandler planeStorageHandler;
     private bool hasInitialized;
     private Coroutine firingCoroutine;
     private Coroutine fovTransitionCoroutine;
@@ -144,6 +142,9 @@ public class PlayerController : Controller
         altimeterSystem.minAltitude = minAltitude;
         altimeterSystem.enabled = true;
 
+        planeStorageHandler = LGM.GetComponent<PlaneStorageHandler>();
+        planeStorageHandler.enabled = true;
+        planeStorageHandler.Initialize();
         LGM.GetComponent<DamageDirectionUIManager>().Initialize(transform);
     }
 
@@ -152,23 +153,23 @@ public class PlayerController : Controller
         if (!hasInitialized) return;
         InputManager.Instance.OnStartBoost += StartBoost;
         InputManager.Instance.OnEndBoost += EndBoost;
-        InputManager.Instance.OnStartFirePrimaryWeapon += OnStartFiringPrimary;
-        InputManager.Instance.OnEndFirePrimaryWeapon += OnStopFiringPrimary;
-        InputManager.Instance.OnReload += ReloadPrimaryWeapon;
+        InputManager.Instance.OnStartFireWeapon += OnStartFiringWeapon;
+        InputManager.Instance.OnEndFireWeapon += OnStopFiringWeapon;
+        InputManager.Instance.OnReload += ReloadWeapon;
         InputManager.Instance.OnBarrelRoll += StartBarrelRoll;  
-        InputManager.Instance.OnCycleSecondaryLeft += CycleWeaponL;
-        InputManager.Instance.OnCycleSecondaryRight += CycleWeaponR;
-        primaryWeapon.Initialize();
+        InputManager.Instance.OnCycleWeaponUp += CycleWeaponUp;
+        InputManager.Instance.OnCycleWeaponDown += CycleWeaponDown;
         playerCamera.GetComponent<Camera>().fieldOfView = playerCamera.flightFOV;
         boostCharge = maxBoostCharge / 4;
         boostBar.value = boostCharge;
         magnetTarget = null;
-        if (secondaryWeapons.Count < 0)
+        if (weaponList.Count < 0)
             return;
-        selectedSecondaryWeapon = secondaryWeapons[0];
-        selectedSecondaryWeapon.gameObject.SetActive(true);
-        selectedSecondaryWeapon.Initialize();
-        secondaryWeaponChangedEvent.RaiseEvent(secondaryWeapons[0]);
+        selectedWeapon = weaponList[0];
+        selectedWeapon.gameObject.SetActive(true);
+        weaponChangedEvent.RaiseEvent(selectedWeapon);
+        selectedWeapon.Initialize(planeStorageHandler);
+        planeStorageHandler.UpdateWeaponAmmo(planeStorageHandler.GetAmmoPackData(selectedWeapon.ammoClass).ammoAmountInPack, 0);
     }
     private void OnEnable() => InitializeEvents();
     private void OnDisable() => CleanupEventsAndRoutines();
@@ -178,12 +179,12 @@ public class PlayerController : Controller
         if (!hasInitialized) return;
         InputManager.Instance.OnStartBoost -= StartBoost;
         InputManager.Instance.OnStartBoost -= EndBoost;
-        InputManager.Instance.OnStartFirePrimaryWeapon -= OnStartFiringPrimary;
-        InputManager.Instance.OnEndFirePrimaryWeapon -= OnStopFiringPrimary;
-        InputManager.Instance.OnReload -= ReloadPrimaryWeapon;
+        InputManager.Instance.OnStartFireWeapon -= OnStartFiringWeapon;
+        InputManager.Instance.OnEndFireWeapon -= OnStopFiringWeapon;
+        InputManager.Instance.OnReload -= ReloadWeapon;
         InputManager.Instance.OnBarrelRoll -= StartBarrelRoll;
-        InputManager.Instance.OnCycleSecondaryLeft -= CycleWeaponL;
-        InputManager.Instance.OnCycleSecondaryRight -= CycleWeaponR;
+        InputManager.Instance.OnCycleWeaponUp -= CycleWeaponUp;
+        InputManager.Instance.OnCycleWeaponDown -= CycleWeaponDown;
         StopAllCoroutines();
         CancelInvoke();
     }
@@ -295,24 +296,24 @@ public class PlayerController : Controller
             accumulatedYaw = Mathf.MoveTowards(accumulatedYaw, 0, yawInertia * Time.fixedDeltaTime);
     }
 
-    private void ReloadPrimaryWeapon() => primaryWeapon.Reload(this);
-    private void OnStartFiringPrimary()
+    private void ReloadWeapon() => selectedWeapon.Reload(this);
+    private void OnStartFiringWeapon()
     {
         if (planeState != PlaneState.Flight)
             return;
         planeState = PlaneState.ADS;
         if (fovTransitionCoroutine != null)
             StopCoroutine(fovTransitionCoroutine);
-        fovTransitionCoroutine = StartCoroutine(FOVTransition(playerCamera.ADSFOV, primaryWeapon.ADSTime, TriggerPrimaryFiring));
+        fovTransitionCoroutine = StartCoroutine(FOVTransition(playerCamera.ADSFOV, selectedWeapon.ADSTime, TriggerPrimaryFiring));
     }
 
-    private void OnStopFiringPrimary()
+    private void OnStopFiringWeapon()
     {
         if (firingCoroutine != null)
             StopCoroutine(firingCoroutine);
         if (fovTransitionCoroutine != null)
             StopCoroutine(fovTransitionCoroutine);
-        fovTransitionCoroutine = StartCoroutine(FOVTransition(playerCamera.flightFOV, primaryWeapon.ADSTime, FinishPrimaryFiring));
+        fovTransitionCoroutine = StartCoroutine(FOVTransition(playerCamera.flightFOV, selectedWeapon.ADSTime, FinishPrimaryFiring));
     }
 
     private void TriggerPrimaryFiring()
@@ -332,31 +333,31 @@ public class PlayerController : Controller
     }
     private IEnumerator HandlePrimaryFiring()
     {
-        yield return new WaitForSeconds(primaryWeapon.ADSTime);
+        yield return new WaitForSeconds(selectedWeapon.ADSTime);
         while (InputManager.Instance.IsFiringPrimaryWeapon())
         {
-            primaryWeapon.Fire(GetCrosshairWorldPosition(), this);
-            yield return new WaitForSeconds (primaryWeapon.fireRate);
+            selectedWeapon.Fire(GetCrosshairWorldPosition(), this);
+            yield return new WaitForSeconds (selectedWeapon.fireRate);
         }
     }
 
-    private void CycleWeaponL()
+    private void CycleWeaponDown()
     {
-        if (secondaryWeapons.Count == 0) return;
-        int currentIndex = secondaryWeapons.IndexOf(selectedSecondaryWeapon);
+        if (weaponList.Count == 0) return;
+        int currentIndex = weaponList.IndexOf(selectedWeapon);
         currentIndex--;
         if (currentIndex < 0)
-            currentIndex = secondaryWeapons.Count - 1;
-        selectedSecondaryWeapon = secondaryWeapons[currentIndex];
-        secondaryWeaponChangedEvent.RaiseEvent(selectedSecondaryWeapon);
+            currentIndex = weaponList.Count - 1;
+        selectedWeapon = weaponList[currentIndex];
+        weaponChangedEvent.RaiseEvent(selectedWeapon);
     }
-    private void CycleWeaponR()
+    private void CycleWeaponUp()
     {
-        if (secondaryWeapons.Count == 0) return;
-        int currentIndex = secondaryWeapons.IndexOf(selectedSecondaryWeapon);
-        currentIndex = (currentIndex + 1) % secondaryWeapons.Count;
-        selectedSecondaryWeapon = secondaryWeapons[currentIndex];
-        secondaryWeaponChangedEvent.RaiseEvent(selectedSecondaryWeapon);
+        if (weaponList.Count == 0) return;
+        int currentIndex = weaponList.IndexOf(selectedWeapon);
+        currentIndex = (currentIndex + 1) % weaponList.Count;
+        selectedWeapon = weaponList[currentIndex];
+        weaponChangedEvent.RaiseEvent(selectedWeapon);
     }
     private Vector3 GetCrosshairWorldPosition()
     {
@@ -365,7 +366,7 @@ public class PlayerController : Controller
         Ray ray = new(playerCamera.transform.position, (crosshairUI.position - playerCamera.transform.position).normalized);
         if (Physics.Raycast(ray, out RaycastHit hit, maxAssistRange))
             return hit.point;
-        return ray.origin + ray.direction * primaryWeapon.range;
+        return ray.origin + ray.direction * selectedWeapon.range;
     }
 
     private bool RunCrosshairAssistRaycast(out Vector2 targetScreenPos, out float angularDistanceToCrosshair)

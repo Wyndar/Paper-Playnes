@@ -54,3 +54,14 @@ public enum PlaneState
     ADS,
     BarrelRoll
 }
+
+public enum AmmoClass
+{
+    Undefined,
+    LowCaliber,
+    MediumCaliber,
+    HighCaliber,
+    Shotgun,
+    PureEnergy,
+    Rocket
+}

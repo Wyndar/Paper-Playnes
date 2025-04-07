@@ -10,9 +10,6 @@ public class UIManager : MonoBehaviour
 {
     [Header("Game Events")]
     public GameEvent respawnEvent;
-    public GameEvent primaryWepaonAmmoUpdateEvent;
-    public GameEvent secondaryWeaponAmmoUpdateEvent;
-    public GameEvent updateSelectedSecondaryWeapon;
     public GameEvent updateTeamScoreEvent;
 
     [Header("Prefabs")]
@@ -25,13 +22,6 @@ public class UIManager : MonoBehaviour
     public Slider playerHealthBar;
     public RectTransform crosshairUI;
     public Slider boostSlider;
-
-    [Header("Ammunition UI")]
-    public TMP_Text primaryWeaponAmmoCountText;
-    public TMP_Text primaryWeaponMaxAmmoCountText;
-    public TMP_Text secondaryWeaponAmmoCountText;
-    public TMP_Text secondaryWeaponMaxAmmoCountText;
-    public Image selectedSecondaryWeaponImage;
 
     [Header("Score UI")]
     public TMP_Text redTeamScore;
@@ -51,7 +41,6 @@ public class UIManager : MonoBehaviour
     private Dictionary<PickUp, HUDMarker> activePickUpMarkers = new();
     private List<HUDMarker> pickUpMarkerPool = new();
     private List<PickUp> pickUpTargets = new();
-    private List<Sprite> secondaryWeaponImages = new();
 #pragma warning restore IDE0044
 
     [HideInInspector] public Collider[] detectedColliders = new Collider[100];
@@ -63,22 +52,15 @@ public class UIManager : MonoBehaviour
             CreateNewMarker(damageableMarkerPool, damageableMarkerPrefab);
             CreateNewMarker(pickUpMarkerPool, pickUpMarkerPrefab);
         }
-        secondaryWeaponImages = new(Resources.LoadAll<Sprite>("Sprites/Secondary Weapons").ToList());
     }
     private void OnEnable()
     {
         respawnEvent.OnGameObjectEventRaised += EnableRespawnPanel;
-        primaryWepaonAmmoUpdateEvent.OnStatEventRaised += UpdatePrimaryMagText;
-        secondaryWeaponAmmoUpdateEvent.OnStatEventRaised += UpdateSecondaryMagText;
-        updateSelectedSecondaryWeapon.OnWeaponEventRaised += UpdateSelectedSecondaryWeapon;
         updateTeamScoreEvent.OnTeamEventRaised += UpdateTeamScoreText;
     }
     private void OnDisable()
     {
         respawnEvent.OnGameObjectEventRaised -= EnableRespawnPanel;
-        primaryWepaonAmmoUpdateEvent.OnStatEventRaised -= UpdatePrimaryMagText;
-        secondaryWeaponAmmoUpdateEvent.OnStatEventRaised -= UpdateSecondaryMagText;
-        updateSelectedSecondaryWeapon.OnWeaponEventRaised -= UpdateSelectedSecondaryWeapon;
         updateTeamScoreEvent.OnTeamEventRaised -= UpdateTeamScoreText;
     }
 
@@ -87,26 +69,6 @@ public class UIManager : MonoBehaviour
         if (go == playerHealth.gameObject)
             respawningPanel.SetActive(true);
         StartCoroutine(RespawnCoroutine(5f, go));
-    }
-
-    private void UpdatePrimaryMagText(int currentMagCount, int magCount)
-    {
-        primaryWeaponAmmoCountText.text = currentMagCount.ToString();
-        primaryWeaponMaxAmmoCountText.text = magCount.ToString();
-    }
-    private void UpdateSecondaryMagText(int currentMagCount, int magCount)
-    {
-        secondaryWeaponAmmoCountText.text = currentMagCount.ToString();
-        secondaryWeaponMaxAmmoCountText.text = magCount.ToString();
-    }
-    private void UpdateSelectedSecondaryWeapon(Weapon weapon)
-    {
-        if (weapon == null) return;
-        selectedSecondaryWeaponImage.sprite = secondaryWeaponImages.Find(s => weapon.name.Contains(s.name));
-        selectedSecondaryWeaponImage.gameObject.SetActive(selectedSecondaryWeaponImage.sprite != null);
-        secondaryWeaponAmmoCountText.gameObject.SetActive(selectedSecondaryWeaponImage.sprite != null);
-        secondaryWeaponMaxAmmoCountText.gameObject.SetActive(selectedSecondaryWeaponImage.sprite != null);
-        UpdateSecondaryMagText(weapon.ammoInCurrentMagCount, weapon.magInHoldCount);
     }
     private void UpdateTeamScoreText(Team team, int currentTeamScore, int previousTeamScore)
     {

@@ -33,7 +33,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Fire Primary",
+                    "name": "Fire Weapon",
                     "type": "Button",
                     "id": "11fff090-8b00-4906-aa59-47252a73af73",
                     "expectedControlType": "",
@@ -42,7 +42,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Fire Secondary",
+                    "name": "Use Item",
                     "type": "Button",
                     "id": "6716b3b4-9f44-412a-8ce4-c28ea1a138e3",
                     "expectedControlType": "",
@@ -87,7 +87,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Cycle Secondary L",
+                    "name": "Cycle Item Left",
                     "type": "Button",
                     "id": "cb0a2de3-8527-4ba2-9ed1-49269c7cf566",
                     "expectedControlType": "",
@@ -96,9 +96,27 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Cycle Secondary R",
+                    "name": "Cycle Item Right",
                     "type": "Button",
                     "id": "873b99db-9add-4ae9-8a09-a2bf206a321c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Cycle Weapon Up",
+                    "type": "Button",
+                    "id": "29e97bd2-e1ab-49f1-b1e1-647a79325896",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Cycle Weapon Down",
+                    "type": "Button",
+                    "id": "82e674c1-2b43-403a-a8c5-991a57a93921",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -201,7 +219,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Touch;Gamepad",
-                    "action": "Fire Primary",
+                    "action": "Fire Weapon",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -212,7 +230,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Fire Primary",
+                    "action": "Fire Weapon",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -223,7 +241,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Touch;Gamepad",
-                    "action": "Fire Secondary",
+                    "action": "Use Item",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -234,7 +252,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Fire Secondary",
+                    "action": "Use Item",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -333,7 +351,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Touch;Gamepad",
-                    "action": "Cycle Secondary L",
+                    "action": "Cycle Item Left",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -344,7 +362,29 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Cycle Secondary L",
+                    "action": "Cycle Item Left",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c60bb7d8-d1b6-4f56-86f4-8b9c153323c9",
+                    "path": "<Gamepad>/dpad/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Touch;Gamepad",
+                    "action": "Cycle Weapon Up",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3a79026c-ace6-4b14-9ad5-26d2d4bb407a",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Cycle Weapon Up",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -355,7 +395,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Touch;Gamepad",
-                    "action": "Cycle Secondary R",
+                    "action": "Cycle Item Right",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -366,7 +406,29 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Cycle Secondary R",
+                    "action": "Cycle Item Right",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cc6c2693-0738-4530-9b35-ace0d3f1169b",
+                    "path": "<Gamepad>/dpad/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Touch;Gamepad",
+                    "action": "Cycle Weapon Down",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "792d80cf-1ed8-4122-9c3d-5ba35b65b3bf",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Cycle Weapon Down",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

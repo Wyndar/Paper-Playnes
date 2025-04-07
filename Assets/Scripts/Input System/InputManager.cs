@@ -6,13 +6,13 @@ public class InputManager : MonoBehaviour
 
     public event PressEvent OnStartMove;
     public event PressEvent OnEndMove;
-    public event PressEvent OnStartFirePrimaryWeapon;
-    public event PressEvent OnEndFirePrimaryWeapon;
+    public event PressEvent OnStartFireWeapon;
+    public event PressEvent OnEndFireWeapon;
     public event PressEvent OnReload;
     public event PressEvent OnBarrelRoll;
-    public event PressEvent OnCycleSecondaryLeft;
-    public event PressEvent OnCycleSecondaryRight;
-    public event PressEvent OnFireSecondary;
+    public event PressEvent OnCycleWeaponUp;
+    public event PressEvent OnCycleWeaponDown;
+    public event PressEvent OnUseItem;
     public event PressEvent OnStartBoost;
     public event PressEvent OnEndBoost;
     public event PressEvent OnTouch;
@@ -40,40 +40,32 @@ public class InputManager : MonoBehaviour
     {
         playerInputs.Player.Movement.started += context => StartedMoveVectorInput();
         playerInputs.Player.Movement.canceled += context => EndedMoveVectorInput();
-        playerInputs.Player.FirePrimary.started += context => StartedFiringPrimaryWeapon();
-        playerInputs.Player.FirePrimary.canceled += context => EndedFiringPrimaryWeapon();
+        playerInputs.Player.FireWeapon.started += context => StartedFiringPrimaryWeapon();
+        playerInputs.Player.FireWeapon.canceled += context => EndedFiringPrimaryWeapon();
         playerInputs.Player.Reload.started += context => TriggerReload();
         playerInputs.Player.Roll.started += context => TriggerBarrelRoll();
-        playerInputs.Player.CycleSecondaryL.started += context => CycleSecondaryLeft();
-        playerInputs.Player.CycleSecondaryR.started += context => CycleSecondaryRight();
-        playerInputs.Player.FireSecondary.started += context => FireSecondary();
+        playerInputs.Player.CycleWeaponUp.started += context => CycleWeaponUp();
+        playerInputs.Player.CycleWeaponDown.started += context => CycleWeaponDown();
+        playerInputs.Player.UseItem.started += context => TriggerItemUse();
         playerInputs.Player.Boost.started += context => StartedBoost();
         playerInputs.Player.Boost.canceled += context => EndedBoost();
         playerInputs.Player.Tap.started += context => TouchedScreen();
     }
 
     private void StartedMoveVectorInput() => OnStartMove?.Invoke();
-
     private void EndedMoveVectorInput() => OnEndMove?.Invoke();
-
-    private void StartedFiringPrimaryWeapon() => OnStartFirePrimaryWeapon?.Invoke();
-    private void EndedFiringPrimaryWeapon() => OnEndFirePrimaryWeapon?.Invoke();
-
-    public bool IsFiringPrimaryWeapon() => playerInputs.Player.FirePrimary.IsInProgress();
+    private void StartedFiringPrimaryWeapon() => OnStartFireWeapon?.Invoke();
+    private void EndedFiringPrimaryWeapon() => OnEndFireWeapon?.Invoke();
+    public bool IsFiringPrimaryWeapon() => playerInputs.Player.FireWeapon.IsInProgress();
     private void TriggerReload() => OnReload?.Invoke();
     private void TriggerBarrelRoll() => OnBarrelRoll?.Invoke();
-    private void CycleSecondaryLeft() => OnCycleSecondaryLeft?.Invoke();
-    private void CycleSecondaryRight() => OnCycleSecondaryRight?.Invoke();
-    private void FireSecondary() => OnFireSecondary?.Invoke();
+    private void CycleWeaponUp() => OnCycleWeaponUp?.Invoke();
+    private void CycleWeaponDown() => OnCycleWeaponDown?.Invoke();
+    private void TriggerItemUse() => OnUseItem?.Invoke();
     private void StartedBoost() => OnStartBoost?.Invoke();
     private void EndedBoost() => OnEndBoost?.Invoke();
     public bool IsBoosting() => playerInputs.Player.Boost.IsInProgress();
     private void TouchedScreen() => OnTouch?.Invoke();
-
     public Vector2 GetCurrentTouchPosition => playerInputs.Player.Position.ReadValue<Vector2>();
     public Vector2 CurrentMoveVector => playerInputs.Player.Movement.ReadValue<Vector2>();  
-
 }
-
-
-
