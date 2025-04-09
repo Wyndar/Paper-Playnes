@@ -42,7 +42,7 @@ public class PlayerController : Controller
     [SerializeField] private float boostDrainRate = 25f, boostRechargeRate = 0.5f, boostRechargeDelay = 1f, boostRechargeDelayTimer = 0f;
     [SerializeField] private GameObject boostVFX;
     [SerializeField] private Slider boostBar;
-    [SerializeField] private float boostTransitionDuration = 5f;   
+    [SerializeField] private float boostTransitionDuration = 5f;
     [SerializeField] private float maxBoostCharge = 100, boostCharge = 0;
 
     [Header("Altitude Settings")]
@@ -100,7 +100,6 @@ public class PlayerController : Controller
         //we need to broadcast names over network too
         gameObject.name = MultiplayerManager.PlayerName;
         InitializeEntity(false, ownerId, team);
-        FindLocalCamera();
         hasInitialized = true;
         InitializeLocalGameManager();
         InitializeEvents();
@@ -134,7 +133,7 @@ public class PlayerController : Controller
         radarSystem = LGM.GetComponent<RadarSystem>();
         radarSystem.player = transform;
         radarSystem.enabled = true;
-        
+
         altimeterSystem = LGM.GetComponent<AltimeterSystem>();
         altimeterSystem.player = transform;
         altimeterSystem.warningSound = warningSpeakers;
@@ -156,20 +155,23 @@ public class PlayerController : Controller
         InputManager.Instance.OnStartFireWeapon += OnStartFiringWeapon;
         InputManager.Instance.OnEndFireWeapon += OnStopFiringWeapon;
         InputManager.Instance.OnReload += ReloadWeapon;
-        InputManager.Instance.OnBarrelRoll += StartBarrelRoll;  
+        InputManager.Instance.OnBarrelRoll += StartBarrelRoll;
         InputManager.Instance.OnCycleWeaponUp += CycleWeaponUp;
         InputManager.Instance.OnCycleWeaponDown += CycleWeaponDown;
+        FindLocalCamera();
+        GetComponent<HealthComponent>().OnDeath += playerCamera.RemoveCameraFromPlayer;
+        planeState = PlaneState.Flight;
         playerCamera.GetComponent<Camera>().fieldOfView = playerCamera.flightFOV;
         boostCharge = maxBoostCharge / 4;
         boostBar.value = boostCharge;
         magnetTarget = null;
         if (weaponList.Count < 0)
             return;
-        selectedWeapon = weaponList[0];
+        selectedWeapon = weaponList[2];
         selectedWeapon.gameObject.SetActive(true);
         weaponChangedEvent.RaiseEvent(selectedWeapon);
-        selectedWeapon.Initialize(planeStorageHandler);
-        planeStorageHandler.UpdateWeaponAmmo(planeStorageHandler.GetAmmoPackData(selectedWeapon.ammoClass).ammoAmountInPack, 0);
+        selectedWeapon.Initialize(planeStorageHandler, this);
+        planeStorageHandler.UpdateWeaponAmmo(100, 0);
     }
     private void OnEnable() => InitializeEvents();
     private void OnDisable() => CleanupEventsAndRoutines();
@@ -185,6 +187,7 @@ public class PlayerController : Controller
         InputManager.Instance.OnBarrelRoll -= StartBarrelRoll;
         InputManager.Instance.OnCycleWeaponUp -= CycleWeaponUp;
         InputManager.Instance.OnCycleWeaponDown -= CycleWeaponDown;
+        GetComponent<HealthComponent>().OnDeath -= playerCamera.RemoveCameraFromPlayer;
         StopAllCoroutines();
         CancelInvoke();
     }
@@ -251,7 +254,7 @@ public class PlayerController : Controller
             accumulatedRoll = Mathf.Clamp(accumulatedRoll, -accelerationAccumulationLimit, accelerationAccumulationLimit);
             accumulatedYaw = Mathf.Clamp(accumulatedYaw, -accelerationAccumulationLimit, accelerationAccumulationLimit);
         }
-        if (RunCrosshairAssistRaycast(out Vector2 targetScreenPos, out float angularDist) && InputManager.Instance.IsFiringPrimaryWeapon())
+        if (RunCrosshairAssistRaycast(out Vector2 targetScreenPos, out float angularDist) && InputManager.Instance.IsFiringWeapon())
         {
             RectTransform canvasRect = crosshairUI.root as RectTransform;
             Camera uiCam = playerCamera.GetComponent<Camera>();
@@ -320,7 +323,7 @@ public class PlayerController : Controller
     {
         if (fovTransitionCoroutine != null)
             StopCoroutine(fovTransitionCoroutine);
-        if(firingCoroutine != null)
+        if (firingCoroutine != null)
             StopCoroutine(firingCoroutine);
         firingCoroutine = StartCoroutine(HandlePrimaryFiring());
     }
@@ -334,10 +337,10 @@ public class PlayerController : Controller
     private IEnumerator HandlePrimaryFiring()
     {
         yield return new WaitForSeconds(selectedWeapon.ADSTime);
-        while (InputManager.Instance.IsFiringPrimaryWeapon())
+        while (InputManager.Instance.IsFiringWeapon())
         {
             selectedWeapon.Fire(GetCrosshairWorldPosition(), this);
-            yield return new WaitForSeconds (selectedWeapon.fireRate);
+            yield return new WaitForSeconds(selectedWeapon.fireRate);
         }
     }
 
@@ -345,19 +348,27 @@ public class PlayerController : Controller
     {
         if (weaponList.Count == 0) return;
         int currentIndex = weaponList.IndexOf(selectedWeapon);
+        selectedWeapon.gameObject.SetActive(false);
         currentIndex--;
         if (currentIndex < 0)
             currentIndex = weaponList.Count - 1;
         selectedWeapon = weaponList[currentIndex];
+        selectedWeapon.gameObject.SetActive(true);
         weaponChangedEvent.RaiseEvent(selectedWeapon);
+        selectedWeapon.Initialize(planeStorageHandler, this);
+        planeStorageHandler.UpdateWeaponAmmo(100, 0);
     }
     private void CycleWeaponUp()
     {
         if (weaponList.Count == 0) return;
         int currentIndex = weaponList.IndexOf(selectedWeapon);
+        selectedWeapon.gameObject.SetActive(false);
         currentIndex = (currentIndex + 1) % weaponList.Count;
         selectedWeapon = weaponList[currentIndex];
+        selectedWeapon.gameObject.SetActive(true);
         weaponChangedEvent.RaiseEvent(selectedWeapon);
+        selectedWeapon.Initialize(planeStorageHandler, this);
+        planeStorageHandler.UpdateWeaponAmmo(100, 0);
     }
     private Vector3 GetCrosshairWorldPosition()
     {
@@ -417,7 +428,7 @@ public class PlayerController : Controller
     private void ApplyBoostCharge()
     {
         if (boostCharge >= maxBoostCharge || planeState != PlaneState.Flight) return;
-        if(boostRechargeDelayTimer > 0)
+        if (boostRechargeDelayTimer > 0)
         {
             boostRechargeDelayTimer -= Time.deltaTime;
             return;
@@ -527,7 +538,7 @@ public class PlayerController : Controller
 
     private void HandleWingTrails()
     {
-        if (planeState==PlaneState.Boost)
+        if (planeState == PlaneState.Boost)
         {
             leftWingTrail.emitting = true;
             rightWingTrail.emitting = true;
@@ -542,7 +553,7 @@ public class PlayerController : Controller
 
     private void AutoLevel()
     {
-        if(planeState== PlaneState.BarrelRoll)
+        if (planeState == PlaneState.BarrelRoll)
             return;
         Quaternion currentRotation = transform.rotation;
         Quaternion targetRotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
@@ -552,7 +563,8 @@ public class PlayerController : Controller
 
     private void FindLocalCamera()
     {
-        playerCamera = Camera.main.GetComponent<CameraController>();
+        if (playerCamera == null)
+            playerCamera = Camera.main.GetComponent<CameraController>();
         if (playerCamera != null)
         {
             Debug.Log("Local Camera Found: " + playerCamera.gameObject.name);

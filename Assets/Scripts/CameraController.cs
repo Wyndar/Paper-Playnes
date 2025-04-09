@@ -54,6 +54,6 @@ public class CameraController : MonoBehaviour
     {
         transform.SetParent(null);
         player = null;
-        Debug.Log("Camera removed the player.");
+        Debug.Log("Camera removed from the player.");
     }
 }

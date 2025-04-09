@@ -30,11 +30,12 @@ public class BotController : Controller
 
     public override void Initialize(Team team)
     {
-        if (!IsServer) return;
+        if (!IsServer && !isActiveAndEnabled) return;
         ulong ownerId = NetworkManager.ServerClientId;
         gameObject.name = SpawnManager.Instance.GetBotName();
         InitializeEntity(true, ownerId, team);
         StartCoroutine(BotBehaviorLoop());
+        primaryWeapon.gameObject.SetActive(true);
     }
 
     private IEnumerator BotBehaviorLoop()

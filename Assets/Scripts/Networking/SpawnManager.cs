@@ -12,12 +12,15 @@ public class SpawnManager : NetworkBehaviour
     public GameObject birdsPrefab;
     public GameObject minesPrefab;
     public GameObject bigExplosionPrefab;
-    public GameObject missilePrefab;
+    public List<GameObject> projectilePrefabs = new();
     public int spawnBoxCount;
     public Renderer spawnRenderer;
 
     public string[] botNames = new string[20];
     public List<Controller> activeControllers = new();
+#pragma warning disable IDE0044 // Add readonly modifier
+    private Dictionary<string, Queue<GameObject>> missilePools = new();
+#pragma warning restore IDE0044 // Add readonly modifier
     private int botNamesTaken = 0;
     private void Awake()
     {
@@ -29,12 +32,31 @@ public class SpawnManager : NetworkBehaviour
         Instance = this;
     }
 
-    //private void Start()
-    //{
-    //    if (!IsServer) return;
-    //    InstantiateBoxes();
-    //    RearrangeBoxes();
-    //}
+    private void Start()
+    {
+        if (!IsServer) return;
+        PreloadMissiles();
+        //    InstantiateBoxes();
+        //    RearrangeBoxes();
+    }
+    private void PreloadMissiles()
+    {
+        foreach (GameObject prefab in projectilePrefabs)
+        {
+            if (prefab == null) continue;
+            string name = prefab.name;
+            Queue<GameObject> pool = new();
+            missilePools[name] = pool;
+
+            for (int i = 0; i < 5; i++)
+            {
+                GameObject missile = Instantiate(prefab);
+                missile.GetComponent<NetworkObject>().SpawnWithOwnership(NetworkManager.ServerClientId);
+                missile.SetActive(false);
+                pool.Enqueue(missile);
+            }
+        }
+    }
 
     private void InstantiateBoxes()
     {
@@ -157,15 +179,21 @@ public class SpawnManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void SpawnExplosionVFXServerRpc(Vector3 position) => Instantiate(bigExplosionPrefab, position, Quaternion.identity);
     [ServerRpc(RequireOwnership = false)]
-    public void SpawnMissileServerRpc(ulong ownerClientId, Vector3 spawnPos, Quaternion rotation, NetworkObjectReference targetRef,
-        Vector3 fallbackTarget, Vector3 fallbackVelocity, NetworkObjectReference shooterRef)
+    public void SpawnMissileServerRpc(string projectileName, Vector3 spawnPos, Quaternion rotation, NetworkObjectReference targetRef,
+        Vector3 fallbackTarget, NetworkObjectReference shooterRef)
     {
-        if (!IsServer || missilePrefab == null) return;
-        GameObject missileObj = Instantiate(missilePrefab, spawnPos, rotation);
-        NetworkObject netObj = missileObj.GetComponent<NetworkObject>();
-        netObj.SpawnWithOwnership(ownerClientId);
+        if (!IsServer || projectileName == null) return;
+        GameObject projectilePrefab = projectilePrefabs.Find(projectile=>projectile.name == projectileName);
+        GameObject missileObj = GetMissileFromPool(projectileName);
+        if (missileObj == null) return;
+        missileObj.transform.SetPositionAndRotation(spawnPos, rotation);
 
-        if (!missileObj.TryGetComponent(out Missile missile)) return;
+        NetworkObject netObj = missileObj.GetComponent<NetworkObject>();
+        if (!netObj.IsSpawned)
+            netObj.SpawnWithOwnership(NetworkManager.ServerClientId);
+
+        if (!missileObj.TryGetComponent(out Missile missile))
+            return;
 
         Transform targetTransform = null;
         if (targetRef.TryGet(out NetworkObject targetNetObj))
@@ -175,6 +203,39 @@ public class SpawnManager : NetworkBehaviour
         if (shooterRef.TryGet(out NetworkObject shooterNetObj))
             shooter = shooterNetObj.GetComponent<Controller>();
 
-        missile.Initialize(targetTransform, fallbackTarget, fallbackVelocity, shooter);
+        missile.Initialize(targetTransform, fallbackTarget, shooter);
     }
+    private GameObject GetMissileFromPool(string projectileName)
+    {
+        if (!missilePools.TryGetValue(projectileName, out var pool))
+        {
+            GameObject fallback = projectilePrefabs.Find(p => p.name == projectileName);
+            return fallback != null ? Instantiate(fallback) : null;
+        }
+
+        while (pool.Count > 0)
+        {
+            GameObject missile = pool.Dequeue();
+            if (missile != null)
+            {
+                missile.SetActive(true);
+                return missile;
+            }
+        }
+
+        GameObject fallbackInstance = projectilePrefabs.Find(p => p.name == projectileName);
+        return fallbackInstance != null ? Instantiate(fallbackInstance) : null;
+    }
+
+    public void ReturnMissileToPool(GameObject missile)
+    {
+        missile.SetActive(false);
+        string key = missile.name.Replace("(Clone)", "").Trim();
+
+        if (missilePools.TryGetValue(key, out var pool))
+            pool.Enqueue(missile);
+        else
+            Destroy(missile); // Fallback cleanup if unknown type
+    }
+
 }

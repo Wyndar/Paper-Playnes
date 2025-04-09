@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
 public class Weapon : MonoBehaviour
@@ -40,11 +41,13 @@ public class Weapon : MonoBehaviour
     private Coroutine cooldownRoutine;
     private Coroutine reloadRoutine;
     private PlaneStorageHandler planeStorage;
-    public void Initialize(PlaneStorageHandler planeStorageHandler)
+    public void Initialize(PlaneStorageHandler planeStorageHandler, Controller player)
     {
         planeStorage = planeStorageHandler;
         timeSinceLastShot = fireRate;
         timeSinceReloadStarted = 0;
+        int ammoLeftInHold = player.IsBot ? 999 : planeStorage.GetAmmoInStorageCount(ammoClass);
+        ammoInCurrentMagCount = ammoLeftInHold >= maxAmmoInMag ? maxAmmoInMag : ammoLeftInHold;
     }
 
     private void OnEnable()
@@ -56,37 +59,44 @@ public class Weapon : MonoBehaviour
     {
         if (isPairedWeapon)
             pairedWeaponObject.SetActive(false);
+        StopAllCoroutines();
+        cooldownRoutine = null;
+        reloadRoutine = null;
     }
 
     public void Fire(Vector3 targetPosition, Controller player)
     {
         if (cooldownRoutine != null || reloadRoutine != null)
         {
-            Debug.LogWarning("A coroutine wasn't cleaned up properly");
+            if (timeSinceLastShot < fireRate || timeSinceReloadStarted < reloadRate) return;
+            Debug.LogWarning("A coroutine wasn't cleaned up properly or you're on cooldown");
             return;
         }
-        int ammoCount = planeStorage.GetAmmoInStorageCount(ammoClass);
+        int ammoCount = player.IsBot ? 999 : planeStorage.GetAmmoInStorageCount(ammoClass);
         if (ammoCount <= 0 || ammoInCurrentMagCount <= 0)
         {
-            Debug.LogWarning("Ammo logic is faulty");
+            Reload(player);
             return;
         }
         Vector3 shootPosition = firedLastShot && isPairedWeapon ? pairedWeaponSpawnTransform.position : spawnTransform.position;
         firedLastShot = !firedLastShot;
-        //we need to work on projectiles later
-        //GameObject proj = Instantiate(projectilePrefab, spawnTransform.position, spawnTransform.rotation);
-        //Projectile projectile = proj.GetComponent<Projectile>();
-        //projectile.InitializeDisplay(targetPosition);
-        // Perform a raycast instead of instantiating a projectile
         Vector3 shootDirection = (targetPosition - shootPosition).normalized;
-
+        NetworkObjectReference target = player.NetworkObject;
         if (Physics.Raycast(shootPosition, shootDirection, out RaycastHit hit, range))
         {
             if (hit.collider.TryGetComponent(out HealthComponent health))
-                health.ModifyHealth(HealthModificationType.Damage, damage, player);
-            if (VFXObject != null)
-                Instantiate(VFXObject, hit.point, Quaternion.LookRotation(hit.normal));
+                if (projectilePrefab == null)
+                {
+                    health.ModifyHealth(HealthModificationType.Damage, damage, player);
+                    if (VFXObject != null)
+                        Instantiate(VFXObject, hit.point, Quaternion.LookRotation(hit.normal));
+                }
+                else
+                    target = health.NetworkObject;
         }
+        if (projectilePrefab != null)
+            SpawnManager.Instance.SpawnMissileServerRpc(projectilePrefab.name, shootPosition,
+                Quaternion.Euler(shootDirection), target, targetPosition, player.NetworkObject);
         if (VFXObject != null)
             Instantiate(VFXObject, spawnTransform.position, spawnTransform.rotation);
         ammoInCurrentMagCount--;
@@ -100,6 +110,7 @@ public class Weapon : MonoBehaviour
         }
         cooldownRoutine ??= StartCoroutine(Cooldown());
     }
+
     public void Reload(Controller player) => reloadRoutine ??= StartCoroutine(ReloadCooldown(player));
 
     private IEnumerator Cooldown()
@@ -121,7 +132,7 @@ public class Weapon : MonoBehaviour
             yield return null;
         }
         timeSinceReloadStarted = 0;
-        int ammoLeftInHold = planeStorage.GetAmmoInStorageCount(ammoClass);
+        int ammoLeftInHold = player.IsBot ? 999 : planeStorage.GetAmmoInStorageCount(ammoClass);
         ammoInCurrentMagCount = ammoLeftInHold >= maxAmmoInMag ? maxAmmoInMag : ammoLeftInHold;
         if (!player.IsBot)
             planeStorage.UpdateWeaponAmmo(0, ammoInCurrentMagCount);

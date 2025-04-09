@@ -19,7 +19,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4058565287750214523
 Transform:
   m_ObjectHideFlags: 0
@@ -124,7 +124,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9721b63e79ace44b8c37c626de4e82c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projectilePrefab: {fileID: 8905281686287481193, guid: e051363dd3a37a24fac40c823afd0261, type: 3}
+  projectilePrefab: {fileID: 0}
   weaponObject: {fileID: 4137244379339748582}
   VFXObject: {fileID: 5829954932819675323, guid: ec61ebf726bcb6d4087db0bbe61839a6, type: 3}
   ammoClass: 1
@@ -134,19 +134,18 @@ MonoBehaviour:
   reloadRate: 2
   range: 500
   damage: 10
-  playerAmmoUpdateEvent: {fileID: 11400000, guid: 5c696146c0dfbe34da66c8cd0e36294a, type: 2}
+  spawnTransform: {fileID: 8326991310249369582}
   isPairedWeapon: 1
-  isLeftWeapon: 0
+  pairedWeaponObject: {fileID: 0}
   firedLastShot: 0
-  pairedWeapon: {fileID: 0}
-  ammoInCurrentMagCount: 30
+  pairedWeaponSpawnTransform: {fileID: 0}
+  ammoInCurrentMagCount: 0
   maxAmmoInMag: 30
   canOverHeat: 0
   isOverHeated: 0
   maxOverHeatCount: 0
   currentOverHeatCount: 0
   overHeatDecayRate: 0
-  spawnTransform: {fileID: 8326991310249369582}
   timeSinceLastShot: 0
   timeSinceReloadStarted: 0
 --- !u!1 &8885761385879085771

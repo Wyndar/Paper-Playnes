@@ -56,7 +56,7 @@ public class InputManager : MonoBehaviour
     private void EndedMoveVectorInput() => OnEndMove?.Invoke();
     private void StartedFiringPrimaryWeapon() => OnStartFireWeapon?.Invoke();
     private void EndedFiringPrimaryWeapon() => OnEndFireWeapon?.Invoke();
-    public bool IsFiringPrimaryWeapon() => playerInputs.Player.FireWeapon.IsInProgress();
+    public bool IsFiringWeapon() => playerInputs.Player.FireWeapon.IsInProgress();
     private void TriggerReload() => OnReload?.Invoke();
     private void TriggerBarrelRoll() => OnBarrelRoll?.Invoke();
     private void CycleWeaponUp() => OnCycleWeaponUp?.Invoke();

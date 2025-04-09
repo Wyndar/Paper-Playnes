@@ -144,7 +144,7 @@ public class HUDMarker : MonoBehaviour
         }
     }
 
-    public void Cleanup(bool isDead)
+    public void Cleanup()
     {
         if (targetHealth != null)
         {

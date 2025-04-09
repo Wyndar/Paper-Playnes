@@ -180,7 +180,7 @@ public class UIManager : MonoBehaviour
     {
         if (!dictionary.ContainsKey(target)) return;
 
-        dictionary[target].Cleanup(false);
+        dictionary[target].Cleanup();
         dictionary.Remove(target);
     }
 }
