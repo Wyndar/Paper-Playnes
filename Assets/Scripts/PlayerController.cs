@@ -307,7 +307,7 @@ public class PlayerController : Controller
         planeState = PlaneState.ADS;
         if (fovTransitionCoroutine != null)
             StopCoroutine(fovTransitionCoroutine);
-        fovTransitionCoroutine = StartCoroutine(FOVTransition(playerCamera.ADSFOV, selectedWeapon.ADSTime, TriggerPrimaryFiring));
+        fovTransitionCoroutine = StartCoroutine(FOVTransition(playerCamera.smallADSFOV, selectedWeapon.ADSTime, TriggerPrimaryFiring));
     }
 
     private void OnStopFiringWeapon()

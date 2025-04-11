@@ -13,7 +13,6 @@ public class ProfileManager : MonoBehaviour
     public Image profileEditScreenImage;
     public GameObject profilePanel, profilePictureContainer;
     public Button saveProfileButton;
-    public Button closeProfileButton;
 
     private string selectedProfilePicture;
     private void Awake()
@@ -31,7 +30,6 @@ public class ProfileManager : MonoBehaviour
     {
         LoadPlayerProfile();
         saveProfileButton.onClick.AddListener(SavePlayerProfile);
-        closeProfileButton.onClick.AddListener(CloseProfilePanel);
     }
 
     private void LoadPlayerProfile()
@@ -67,6 +65,4 @@ public class ProfileManager : MonoBehaviour
             profilePictureContainer.SetActive(false);
         }
     }
-
-    private void CloseProfilePanel() => profilePanel.SetActive(false);
 }
